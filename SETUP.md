@@ -11,7 +11,7 @@ Before starting, ensure you have the following installed:
 
 ## 🟢 Supabase Setup
 
-### 🟢 1. Create Supabase Project
+### 🟢 1. Create Supabase Project 
 
 1. Go to [Supabase Dashboard](https://app.supabase.com/)
 2. Click "New Project"
