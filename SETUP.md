@@ -18,8 +18,8 @@ Before starting, ensure you have the following installed:
 3. Fill in project details:
    - **Name**: kindora
    - **Database Password**: (save this securely)
-   - **Region**: Choose closest to your users
-4. Wait for project initialization (~2 minutes)
+   - **Region**: Choose the closest to your users
+4. Wait for project initialisation (~2 minutes)
 
 ### 🟢 2. Get Supabase Credentials
 
@@ -98,7 +98,7 @@ psql "postgresql://postgres:[YOUR-PASSWORD]@db.xxxxx.supabase.co:5432/postgres" 
 
 In Supabase Dashboard > Authentication > Policies, enable RLS for tables:
 ```sql
--- Example: Enable RLS on campaigns table
+-- Example: Enable RLS on the campaigns table
 ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 
 -- Allow authenticated users to read campaigns
