@@ -46,14 +46,11 @@ dependencies:
   smooth_page_indicator: ^1.0.0
   
   # Localization
-  intl: ^0.18.0
+  intl: ^0.20.0
   easy_localization: ^3.0.0
   
   # Notifications
-  awesome_notifications: ^0.8.0
-  
-  # Date & Time
-  intl: ^0.18.0
+  awesome_notifications: ^0.10.1
   
   # Utilities
   uuid: ^3.0.0
@@ -91,12 +88,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
-    
-  fonts:
-    - family: Poppins
-      fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Poppins-SemiBold.ttf
-          weight: 600

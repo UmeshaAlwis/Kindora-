@@ -14,7 +14,6 @@ class KindoraApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4CAF50),
           brightness: Brightness.light,
@@ -22,7 +21,6 @@ class KindoraApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4CAF50),
           brightness: Brightness.dark,
