@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/features/payment/presentation/pages/charity_list_page.dart';
 
 void main() {
   runApp(const KindoraApp());
@@ -65,7 +66,12 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to login
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CharityListPage(),
+                  ),
+                );
               },
               child: const Text('Get Started'),
             ),
