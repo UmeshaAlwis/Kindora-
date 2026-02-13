@@ -1,6 +1,7 @@
 import { getDatabase } from './database.service';
 import { Campaign } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import type { Knex } from 'knex';
 
 export class CampaignService {
   /**
@@ -16,7 +17,7 @@ export class CampaignService {
       searchQuery?: string;
     } = {}
   ) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
     let query = db('campaigns')
       .join('charities', 'campaigns.charity_id', 'charities.charity_id')
       .select('campaigns.*', 'charities.name as charity_name', 'charities.logo_url');
@@ -41,12 +42,13 @@ export class CampaignService {
       .limit(limit)
       .orderBy('campaigns.created_at', 'desc');
 
+    const totalCount = typeof total?.count === 'number' ? total.count : 0;
     return {
       campaigns: campaigns.map(this.formatCampaign),
-      total: total?.count || 0,
+      total: totalCount,
       page,
       limit,
-      pages: Math.ceil((total?.count || 0) / limit),
+      pages: Math.ceil(totalCount / limit),
     };
   }
 
@@ -54,7 +56,7 @@ export class CampaignService {
    * Get campaign by ID
    */
   static async getCampaignById(campaignId: string) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
     const campaign = await db('campaigns')
       .join('charities', 'campaigns.charity_id', 'charities.charity_id')
       .where('campaigns.campaign_id', campaignId)
@@ -87,7 +89,7 @@ export class CampaignService {
    * Create campaign
    */
   static async createCampaign(charityId: string, data: any) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
 
     const campaign = await db('campaigns')
       .insert({
@@ -115,7 +117,7 @@ export class CampaignService {
    * Update campaign
    */
   static async updateCampaign(campaignId: string, data: any) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
 
     const campaign = await db('campaigns')
       .where('campaign_id', campaignId)
@@ -132,7 +134,7 @@ export class CampaignService {
    * Get campaign progress
    */
   static async getCampaignProgress(campaignId: string) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
 
     const campaign = await db('campaigns')
       .where('campaign_id', campaignId)
@@ -158,7 +160,7 @@ export class CampaignService {
    * Get days left for campaign
    */
   private static async getDaysLeft(campaignId: string): Promise<number> {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
 
     const campaign = await db('campaigns')
       .where('campaign_id', campaignId)
@@ -180,7 +182,7 @@ export class CampaignService {
    * Get recommended campaigns for user
    */
   static async getRecommendedCampaigns(userId: string, limit: number = 10) {
-    const db = getDatabase();
+    const db = getDatabase() as Knex;
 
     // Get user's donation history to understand preferences
     const userDonations = await db('donations')
