@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  
+  supabase_flutter: ^2.5.0 
   # State Management
   provider: ^6.0.0
   riverpod: ^2.3.0
@@ -46,14 +46,12 @@ dependencies:
   smooth_page_indicator: ^1.0.0
   
   # Localization
-  intl: ^0.18.0
+  intl: ^0.20.2
   easy_localization: ^3.0.0
   
   # Notifications
-  awesome_notifications: ^0.8.0
-  
+  awesome_notifications: ^0.10.1
   # Date & Time
-  intl: ^0.18.0
   
   # Utilities
   uuid: ^3.0.0

@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dashboard_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://ucxqakixdpqqmbbpeptm.supabase.co',
+    anonKey: 'sb_publishable_frgCObr7FwO2W_Egb6EH-Q_slJAljVE',
+  );
+
   runApp(const KindoraApp());
 }
 
@@ -11,8 +20,8 @@ class KindoraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Kindora - Charity Platform',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
         useMaterial3: true,
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
@@ -43,7 +52,6 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Kindora'),
         centerTitle: true,
-        elevation: 0,
       ),
       body: Center(
         child: Column(
@@ -65,9 +73,42 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
+
+            /// ✅ UPDATED Get Started button (A3.1 + Navigation)
             ElevatedButton(
-              onPressed: () {
-                // TODO: Navigate to login
+              onPressed: () async {
+                final supabase = Supabase.instance.client;
+
+                try {
+                  final response = await supabase.auth.signUp(
+                    email:
+                        'testuser${DateTime.now().millisecondsSinceEpoch}@gmail.com',
+                    password: 'password123',
+                  );
+
+                  if (response.user != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('✅ Signup successful'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+
+                    // Navigate to Dashboard
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardScreen(),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('❌ Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               child: const Text('Get Started'),
             ),
