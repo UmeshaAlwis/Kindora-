@@ -1,12 +1,12 @@
-# Kindora 🌍
+#Kindora 
 
 Kindora is a transparent digital charity donation platform designed to connect donors directly with verified causes while ensuring trust, accountability, and real-world impact.
 
 The platform combines mobile, web, and AI-driven features to provide a secure, engaging, and transparent donation experience.
 
----
 
-## 🎯 Project Vision
+
+## Project Vision
 
 To build a trusted digital ecosystem where donations are:
 - Transparent
@@ -14,18 +14,18 @@ To build a trusted digital ecosystem where donations are:
 - Enhanced through AI-driven insights
 - Focused on genuine social impact
 
----
 
-## 🧱 Platform Components
+
+## Platform Components
 
 - 📱 **Mobile Application** – Built with Flutter
 - 🌐 **Web Admin Panel** – Built with React
 - 🔐 **Backend Services** – Authentication, database, and APIs
 - 🤖 **AI Layer** – Recommendations, assistant, and analytics
 
----
 
-## 🚀 Core Features
+
+ # Core Features
 
 ### Donation & Campaign Management
 - Campaign system
@@ -64,7 +64,7 @@ To build a trusted digital ecosystem where donations are:
 
 ---
 
-## 🧠 AI Capabilities
+##AI Capabilities
 
 - Intelligent conversation flow
 - Intent detection & response logic
@@ -74,9 +74,8 @@ To build a trusted digital ecosystem where donations are:
 
 ---
 
-## 🗂️ Project Structure
+##  Project Structure
 
-```text
 Kindora/
 ├── backend/           # Backend services & APIs
 ├── flutter_app/       # Mobile application (Flutter)
