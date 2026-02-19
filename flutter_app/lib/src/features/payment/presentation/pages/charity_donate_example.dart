@@ -16,7 +16,10 @@ class CharityDonateExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () => _showDonationModal(context),
-      child: const Text('Donate Now'),
+      child: const Text(
+        'Donate Now',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 
@@ -45,6 +48,7 @@ class CharityDonateExample extends StatelessWidget {
           SnackBar(
             content: Text(
               'Processing donation of ${donationData['currency']}${donationData['amount']}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         );
