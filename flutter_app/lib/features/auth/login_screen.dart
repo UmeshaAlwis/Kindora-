@@ -27,8 +27,18 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final user = response.user;
+      final session = Supabase.instance.client.auth.currentSession;
 
-      if (user != null && user.emailConfirmedAt == null) {
+      // 🔎 DEBUG
+      print("USER: $user");
+      print("SESSION AFTER LOGIN: $session");
+
+      if (user == null) {
+        throw Exception("Login failed. No user returned.");
+      }
+
+      // ✅ Check email verification
+      if (user.emailConfirmedAt == null) {
         await Supabase.instance.client.auth.signOut();
 
         if (mounted) {
@@ -41,8 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else {
-        // ✅ DO NOT manually navigate
-        // AuthGate will rebuild automatically
+        // ✅ SUCCESS
+        // Do NOT navigate manually.
+        // AuthGate will rebuild automatically.
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login successful!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -52,6 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
+
+        Navigator.of(context).pop();
       }
     }
 
@@ -60,14 +81,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // 🔵 GOOGLE LOGIN (FIXED)
+  // 🔵 GOOGLE LOGIN
   Future<void> signInWithGoogle() async {
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
       );
-      // ❌ No redirectTo
-      // ❌ No navigation
+
+      // ❌ No manual navigation
+      // AuthGate will detect session automatically
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
