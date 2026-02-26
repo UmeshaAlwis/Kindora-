@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/Screen/chat/chat_list_screen.dart';
 
 void main() {
   runApp(const KindoraApp());
@@ -27,7 +28,7 @@ class KindoraApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const HomeScreen(),
+      home: const ChatListScreen(),
     );
   }
 }
