@@ -21,6 +21,7 @@
         "firebase_core",
         "firebase_messaging",
         "firebase_storage",
+        "fl_chart",
         "flutter",
         "flutter_staggered_grid_view",
         "get",
@@ -259,6 +260,14 @@
         "clock",
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "fl_chart",
+      "version": "0.65.0",
+      "dependencies": [
+        "equatable",
+        "flutter"
       ]
     },
     {
