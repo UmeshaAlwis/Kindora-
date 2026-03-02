@@ -89,7 +89,15 @@ class ChatListScreen extends StatelessWidget {
       "Animals",
       "Children",
       "Education",
-      "Health"
+      "Health",
+      "Disaster relief",
+      "Environment",
+      "Food",
+      "Medical",
+      "Community",
+      "Women",
+      "Elderly",
+      "Disability"
     ];
 
     return Padding(
@@ -186,12 +194,16 @@ class _ChatTile extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 0.8)),
+        ),
         child: Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 26,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.favorite, color: Colors.red),
+              backgroundColor: Colors.indigo.shade100,
+              child: Icon(Icons.volunteer_activism, color: Colors.indigo),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -203,8 +215,11 @@ class _ChatTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color:
+                                Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -220,7 +235,7 @@ class _ChatTile extends StatelessWidget {
                         child: Text(
                           message,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.black87,),
                         ),
                       ),
                       if (unread > 0)
