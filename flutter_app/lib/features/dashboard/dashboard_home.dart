@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../campaign/widgets/campaign_card.dart';
+import '../../../models/campaign.dart';
 
 class DashboardHome extends StatelessWidget {
   const DashboardHome({super.key});
@@ -7,6 +9,31 @@ class DashboardHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+
+    /// Mock campaigns (later will come from database)
+    final List<Campaign> campaigns = [
+      const Campaign(
+        id: "1",
+        title: "School Supplies for Children",
+        description: "Help provide books and materials for students.",
+        goalAmount: 1000,
+        raisedAmount: 420,
+      ),
+      const Campaign(
+        id: "2",
+        title: "Medical Support Fund",
+        description: "Support urgent medical treatments.",
+        goalAmount: 5000,
+        raisedAmount: 2300,
+      ),
+      const Campaign(
+        id: "3",
+        title: "Flood Relief Sri Lanka",
+        description: "Provide food and shelter to flood victims.",
+        goalAmount: 3000,
+        raisedAmount: 900,
+      ),
+    ];
 
     return SafeArea(
       child: Padding(
@@ -21,6 +48,7 @@ class DashboardHome extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 20),
 
             Text(
@@ -46,6 +74,29 @@ class DashboardHome extends StatelessWidget {
                 SizedBox(width: 12),
                 Expanded(child: _StatCard(title: "Campaigns", value: "5")),
               ],
+            ),
+
+            const SizedBox(height: 30),
+
+            const Text(
+              "Active Campaigns",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: campaigns.length,
+                itemBuilder: (context, index) {
+                  return CampaignCard(
+                    campaign: campaigns[index],
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -85,5 +136,5 @@ class _StatCard extends StatelessWidget {
         ],
       ),
     );
-  }
+  } 
 }
