@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -41,7 +42,7 @@ class AppBottomNavBar extends StatelessWidget {
         ),
 
         BottomNavigationBarItem(
-          icon: Icon(Icons.monitor_heart_outlined),
+          icon: Icon(FeatherIcons.heart),
           activeIcon: Icon(Icons.favorite),
           label: "Merch",
         ),
