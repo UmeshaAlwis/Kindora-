@@ -36,7 +36,7 @@ class DashboardHome extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color(0xFF1A1A8F),
+                color: Color(0xFF0C0C79),
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(30),
                 ),
@@ -46,7 +46,7 @@ class DashboardHome extends StatelessWidget {
                 children: [
                   Text(
                     "Your Balance",
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: Colors.white),
                   ),
 
                   SizedBox(height: 6),
@@ -66,8 +66,8 @@ class DashboardHome extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _HeaderAction(icon: Icons.add, label: "Top up"),
-                      _HeaderAction(icon: Icons.send, label: "Transfer"),
+                      _HeaderAction(icon: Icons.add_circle_outline, label: "Top up"),
+                      _HeaderAction(icon: Icons.send_outlined, label: "Transfer"),
                       _HeaderAction(icon: Icons.download, label: "Withdraw"),
                       _HeaderAction(icon: Icons.history, label: "History"),
                     ],
@@ -101,8 +101,9 @@ class DashboardHome extends StatelessWidget {
                       icon: const Icon(Icons.add),
                       label: const Text("Start a Campaign"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.all(14),
+                        backgroundColor: const Color(0xFFFF751F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () {},
                     ),
@@ -114,11 +115,12 @@ class DashboardHome extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.favorite),
+                      icon: const Icon(Icons.favorite_border),
                       label: const Text("Support a Campaign"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1A1A8F),
-                        padding: const EdgeInsets.all(14),
+                        backgroundColor: const Color(0xFF0C0C79),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () {},
                     ),
@@ -191,10 +193,11 @@ class _HeaderAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          backgroundColor: Colors.white24,
-          child: Icon(icon, color: Colors.white),
-        ),
+        Icon(
+          icon,
+          color: Colors.white,
+          size: 28,
+          ),
         const SizedBox(height: 6),
         Text(
           label,
