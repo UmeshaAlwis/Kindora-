@@ -16,16 +16,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     DashboardHome(),   // Home
-    Placeholder(),     // Feed
-    Placeholder(),     // Messages
-    Placeholder(),     // Merch
+    Center(child: Text("Feed coming soon")),     // Feed
+    Center(child: Text("Messages coming soon")), // Messages
+    Center(child: Text("Merch coming soon")),    // Merch
     ProfilePage(),     // Profile
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+
+      body: SafeArea(
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+      ),
 
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
@@ -35,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           });
         },
       ),
+
     );
   }
 }

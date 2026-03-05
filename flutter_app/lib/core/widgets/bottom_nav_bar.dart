@@ -43,7 +43,7 @@ class AppBottomNavBar extends StatelessWidget {
 
         BottomNavigationBarItem(
           icon: Icon(FeatherIcons.heart),
-          activeIcon: Icon(Icons.favorite),
+          activeIcon: Icon(FeatherIcons.heart),
           label: "Merch",
         ),
 
