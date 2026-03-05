@@ -14,9 +14,11 @@ class _SignupScreenState extends State<SignupScreen> {
   final confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
-  bool isGoogleLoading = false;
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+
+  final Color primaryColor = const Color(0xFF0C0C79);
+  final Color accentColor = const Color(0xFFFF751F);
 
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
@@ -69,7 +71,6 @@ class _SignupScreenState extends State<SignupScreen> {
         await user.sendEmailVerification();
       }
 
-      // Sign out so AuthGate returns to login
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
@@ -94,30 +95,26 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // GOOGLE SIGNUP
   Future<void> signUpWithGoogle() async {
-    if (isGoogleLoading) return;
-
-    setState(() => isGoogleLoading = true);
-
     try {
       final googleProvider = GoogleAuthProvider();
 
-      // 🔥 Force Google account chooser
       googleProvider.setCustomParameters({
         'prompt': 'select_account',
       });
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
-      // AuthGate will redirect automatically
-
     } on FirebaseAuthException catch (e) {
+
+      if (e.code == 'popup-closed-by-user' ||
+          e.code == 'cancelled-popup-request') {
+        return;
+      }
+
       _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
+
     } catch (_) {
       _showSnackBar("Something went wrong.", Colors.red);
-    }
-
-    if (mounted) {
-      setState(() => isGoogleLoading = false);
     }
   }
 
@@ -147,35 +144,48 @@ class _SignupScreenState extends State<SignupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: const Text(
+          'Create Account',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
+        backgroundColor: const Color(0xFF0C0C79),
+        foregroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(24),
+
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const Text(
+
+              Text(
                 'Join Kindora',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
+                  color: primaryColor,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
+              // EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Email',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
+              // PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -186,7 +196,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 },
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscurePassword
@@ -218,13 +230,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
+              // CONFIRM PASSWORD
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       obscureConfirmPassword
@@ -259,11 +274,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 24),
 
+              // SIGNUP BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+
                   onPressed: isLoading ? null : signup,
+
                   child: isLoading
                       ? const SizedBox(
                           height: 20,
@@ -273,28 +298,40 @@ class _SignupScreenState extends State<SignupScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Sign Up'),
+                      : const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
+              // GOOGLE SIGNUP
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.login),
-                  label: isGoogleLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text("Sign up with Google"),
-                  onPressed:
-                      isGoogleLoading ? null : signUpWithGoogle,
+
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: primaryColor),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+
+                  icon: Icon(Icons.login, color: primaryColor),
+
+                  label: Text(
+                    "Sign up with Google",
+                    style: TextStyle(color: primaryColor),
+                  ),
+
+                  onPressed: signUpWithGoogle,
                 ),
               ),
             ],
