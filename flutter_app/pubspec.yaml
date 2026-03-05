@@ -16,6 +16,7 @@ dependencies:
   # State Management
   provider: ^6.0.0
   riverpod: ^2.3.0
+
   
   # Networking
   dio: ^5.1.0
@@ -47,7 +48,7 @@ dependencies:
   smooth_page_indicator: ^1.0.0
   
   # Localization
-  intl: ^0.19.0
+  intl: ^0.20.2
   easy_localization: ^3.0.0
   
   # Notifications
@@ -67,7 +68,7 @@ dependencies:
   image_picker: ^1.0.0
   
   # Camera
-  camera: ^0.10.5+5
+  camera: ^0.10.0
   
   # Maps
   google_maps_flutter: ^2.2.0
