@@ -68,7 +68,7 @@ class DashboardHome extends StatelessWidget {
                     children: [
                       _HeaderAction(icon: Icons.add_circle_outline, label: "Top up"),
                       _HeaderAction(icon: Icons.send_outlined, label: "Transfer"),
-                      _HeaderAction(icon: Icons.download, label: "Withdraw"),
+                      _HeaderAction(icon: Icons.download_outlined, label: "Withdraw"),
                       _HeaderAction(icon: Icons.history, label: "History"),
                     ],
                   ),
