@@ -141,7 +141,7 @@ class DashboardHome extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Urgent donations",
+                        "Urgent Donations",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
