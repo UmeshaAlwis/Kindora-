@@ -67,8 +67,8 @@ class DashboardHome extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _HeaderAction(icon: Icons.add_circle_outline, label: "Top up"),
-                       _HeaderAction(icon: Icons.swap_horiz, label: "Transfer"),
-                      _HeaderAction(icon: Icons.download_outlined, label: "Withdraw"),
+                      _HeaderAction(icon: Icons.swap_horiz, label: "Transfer"),
+                      _HeaderAction(icon: Icons.favorite_border, label: "Donate"),
                       _HeaderAction(icon: Icons.history, label: "History"),
                     ],
                   ),
