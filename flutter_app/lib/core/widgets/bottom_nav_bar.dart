@@ -41,7 +41,7 @@ class AppBottomNavBar extends StatelessWidget {
         ),
 
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
+          icon: Icon(Icons.monitor_heart_outlined),
           activeIcon: Icon(Icons.favorite),
           label: "Merch",
         ),
