@@ -53,12 +53,13 @@ class CampaignDetailsScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton(
-                child: const Text("Donate"),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.favorite),
+                label: const Text("Donate Now"),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text("Donation feature coming soon"),
+                      content: Text("Donation feature coming soon ❤️"),
                     ),
                   );
                 },
