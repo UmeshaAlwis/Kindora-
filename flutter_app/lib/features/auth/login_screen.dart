@@ -16,10 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isLoading = false;
   bool obscurePassword = true;
-  bool isGoogleLoading = false;
 
   final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFF27A2F);
+  final Color accentColor = const Color(0xFFFF751F);
 
   // EMAIL LOGIN
   Future<void> login() async {
@@ -77,10 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // GOOGLE LOGIN
   Future<void> signInWithGoogle() async {
 
-    if (isGoogleLoading) return;
-
-    setState(() => isGoogleLoading = true);
-
     try {
 
       final GoogleAuthProvider googleProvider = GoogleAuthProvider();
@@ -93,17 +88,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     } on FirebaseAuthException catch (e) {
 
-      if (e.code == 'popup-closed-by-user') {
-        // user cancelled login
-      } else {
-        _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
+      if (e.code == 'popup-closed-by-user' ||
+          e.code == 'cancelled-popup-request') {
+        return;
       }
 
-    } finally {
+      _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
 
-      if (mounted) {
-        setState(() => isGoogleLoading = false);
-      }
+    } catch (_) {
+
+      _showSnackBar("Google sign-in failed.", Colors.red);
 
     }
   }
@@ -165,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF0C0C79),
+        backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
       ),
 
@@ -296,20 +290,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   icon: Icon(Icons.login, color: primaryColor),
 
-                  label: isGoogleLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          "Sign in with Google",
-                          style: TextStyle(color: primaryColor),
-                        ),
+                  label: Text(
+                    "Sign in with Google",
+                    style: TextStyle(color: primaryColor),
+                  ),
 
-                  onPressed: isGoogleLoading ? null : signInWithGoogle,
+                  onPressed: signInWithGoogle,
                 ),
               ),
 
