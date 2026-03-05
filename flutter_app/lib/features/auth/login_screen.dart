@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      // AuthGate will automatically navigate
+      // AuthGate handles navigation
 
     } on FirebaseAuthException catch (e) {
       String message;
@@ -61,10 +61,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _showSnackBar(message, Colors.red);
     } catch (_) {
       _showSnackBar("Something went wrong. Try again.", Colors.red);
-    }
-
-    if (mounted) {
-      setState(() => isLoading = false);
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -77,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-      // 🔥 Force Google account chooser
       googleProvider.setCustomParameters({
         'prompt': 'select_account',
       });
@@ -90,10 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
     } catch (_) {
       _showSnackBar("Something went wrong.", Colors.red);
-    }
-
-    if (mounted) {
-      setState(() => isGoogleLoading = false);
+    } finally {
+      if (mounted) {
+        setState(() => isGoogleLoading = false);
+      }
     }
   }
 
