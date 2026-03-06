@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/campaign.dart';
+import '../../../src/features/payment/presentation/pages/charity_list_page.dart';
 
 class CampaignDetailsScreen extends StatelessWidget {
   final Campaign campaign;
@@ -57,9 +58,10 @@ class CampaignDetailsScreen extends StatelessWidget {
                 icon: const Icon(Icons.favorite),
                 label: const Text("Donate Now"),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Donation feature coming soon ❤️"),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CharityListPage(),
                     ),
                   );
                 },

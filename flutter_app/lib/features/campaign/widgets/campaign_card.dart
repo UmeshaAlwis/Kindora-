@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/campaign.dart';
-import '../screens/campaign_details_screen.dart';
+import '../../../src/features/payment/presentation/pages/charity_list_page.dart';
 
 class CampaignCard extends StatelessWidget {
   final Campaign campaign;
@@ -78,9 +78,7 @@ class CampaignCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CampaignDetailsScreen(
-                        campaign: campaign,
-                      ),
+                      builder: (_) => const CharityListPage(),
                     ),
                   );
                 },
