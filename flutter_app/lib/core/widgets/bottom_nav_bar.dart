@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -35,37 +34,21 @@ class AppBottomNavBar extends StatelessWidget {
           ),
 
           const BottomNavigationBarItem(
-            icon: Icon(Icons.rss_feed_outlined),
-            activeIcon: Icon(Icons.rss_feed),
-            label: "Feed",
+            icon: Icon(Icons.campaign_outlined),
+            activeIcon: Icon(Icons.campaign),
+            label: "Campaigns",
           ),
 
           const BottomNavigationBarItem(
-            icon: Icon(Icons.send_outlined),
-            activeIcon: Icon(Icons.send),
-            label: "Messages",
+            icon: Icon(Icons.favorite_outline),
+            activeIcon: Icon(Icons.favorite),
+            label: "Donate",
           ),
 
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              "assets/icons/heart.svg",
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.grey,
-                BlendMode.srcIn,
-              ),
-            ),
-            activeIcon: SvgPicture.asset(
-              "assets/icons/heart.svg",
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF0C0C79),
-                BlendMode.srcIn,
-              ),
-            ),
-            label: "Merch",
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.message_outlined),
+            activeIcon: Icon(Icons.message),
+            label: "Messages",
           ),
 
           const BottomNavigationBarItem(

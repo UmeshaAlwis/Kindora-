@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../campaign/widgets/campaign_card.dart';
 import '../../models/campaign.dart';
 
@@ -8,8 +7,6 @@ class DashboardHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     final campaigns = [
       const Campaign(
         id: "1",

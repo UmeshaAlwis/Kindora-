@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 
 class StartCampaignPage extends StatefulWidget {
@@ -45,7 +44,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
       appBar: AppBar(
         title: const Text("Start a Campaign"),
         centerTitle: true,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -173,7 +172,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
               /// Category Dropdown
               DropdownButtonFormField<String>(
-                value: category,
+                initialValue: category,
                 decoration: const InputDecoration(
                   labelText: "Main Category",
                   border: OutlineInputBorder(),
@@ -195,7 +194,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
               /// Campaign Category Dropdown
               DropdownButtonFormField<String>(
-                value: campaignCategory,
+                initialValue: campaignCategory,
                 decoration: const InputDecoration(
                   labelText: "Campaign Type",
                   border: OutlineInputBorder(),
@@ -221,7 +220,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<String>(
-                      value: "LKR",
+                      initialValue: "LKR",
                       items: ["LKR", "USD"]
                           .map((e) => DropdownMenuItem(
                                 value: e,

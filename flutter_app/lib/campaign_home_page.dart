@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'start_campaign_page.dart';
 
 class CampaignHomePage extends StatelessWidget {
@@ -12,21 +10,21 @@ class CampaignHomePage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Campaigns",
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 20,
               color: Colors.white,
             ),
           ),
-          bottom: TabBar(
-            indicatorColor: const Color(0xFFFF751F),
-            labelStyle: GoogleFonts.poppins(
+          bottom: const TabBar(
+            indicatorColor: Color(0xFFFF751F),
+            labelStyle: TextStyle(
               fontWeight: FontWeight.w500,
-              color: const Color.fromARGB(255, 255, 255, 255),
+              color: Color.fromARGB(255, 255, 255, 255),
             ),
-            tabs: const [
+            tabs: [
               Tab(text: "All"),
               Tab(text: "Ongoing"),
               Tab(text: "Success"),
@@ -66,14 +64,14 @@ class CampaignList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Color.fromARGB(26, 0, 0, 0),
                 blurRadius: 8,
-                offset: const Offset(0, 4),
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -96,23 +94,23 @@ class CampaignList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       /// Title
-                      Text(
+                      const Text(
                         "Help Flood Victims",
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF0C0C79),
+                          color: Color(0xFF0C0C79),
                         ),
                       ),
 
                       const SizedBox(height: 6),
 
                       /// Raised Amount
-                      Text(
+                      const Text(
                         "Raised LKR 240,000",
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey[600],
+                          color: Color.fromARGB(255, 128, 128, 128),
                         ),
                       ),
 
@@ -162,9 +160,9 @@ class CampaignList extends StatelessWidget {
                               color: Color(0xFF0C0C79),
                             ),
                             hoverColor:
-                                const Color(0xFFFF751F).withOpacity(0.15),
+                                const Color(0xFFFF751F).withValues(alpha: 0.15),
                             splashColor:
-                                const Color(0xFFFF751F).withOpacity(0.25),
+                                const Color(0xFFFF751F).withValues(alpha: 0.25),
                             highlightColor:
                                 const Color.fromARGB(0, 0, 0, 0),
                             onPressed: () {
@@ -184,14 +182,18 @@ class CampaignList extends StatelessWidget {
                               color: Color(0xFF0C0C79),
                             ),
                             hoverColor:
-                                const Color(0xFFFF751F).withOpacity(0.15),
+                                const Color(0xFFFF751F).withValues(alpha: 0.15),
                             splashColor:
-                                const Color(0xFFFF751F).withOpacity(0.25),
+                                const Color(0xFFFF751F).withValues(alpha: 0.25),
                             highlightColor:
                                 const Color.fromARGB(0, 0, 0, 0),
                             onPressed: () {
-                              Share.share(
-                                "Support my campaign: Help Flood Victims\nRaised LKR 240,000",
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Share feature coming soon",
+                                  ),
+                                ),
                               );
                             },
                           ),

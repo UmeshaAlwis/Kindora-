@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dashboard_home.dart';
 import '../profile/profile_page.dart';
 import '../../core/widgets/bottom_nav_bar.dart';
+import '../../campaign_home_page.dart';
+import '../../src/features/payment/presentation/pages/charity_list_page.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,9 +18,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _pages = const [
     DashboardHome(),   // Home
-    Center(child: Text("Feed coming soon")),     // Feed
+    CampaignHomePage(),     // Campaigns
+    CharityListPage(), // Charities/Donations
     Center(child: Text("Messages coming soon")), // Messages
-    Center(child: Text("Merch coming soon")),    // Merch
     ProfilePage(),     // Profile
   ];
 

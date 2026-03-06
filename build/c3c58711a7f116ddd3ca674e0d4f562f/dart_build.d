@@ -1,0 +1,1 @@
+ C:\\Users\\nimet\\OneDrive\\වැඩතලය\\Kindora-\\build\\c3c58711a7f116ddd3ca674e0d4f562f\\dart_build_result.json:  C:\\Users\\nimet\\OneDrive\\වැඩතලය\\Kindora-\\.dart_tool\\package_config.json C:\\Users\\nimet\\OneDrive\\වැඩතලය\\Kindora-\\pubspec.yaml C:\\flutter\\bin\\cache\\dart-sdk\\version c:\\users\\nimet\\onedrive\\වැඩතලය\\kindora-\\.dart_tool\\package_config.json

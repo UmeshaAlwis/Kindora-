@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/auth_gate.dart';
-import 'campaign_home_page.dart';
-import 'start_campaign_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,10 +38,6 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const AuthGate(),
-      routes: {
-        '/campaigns': (context) => const CampaignHomePage(),
-        '/start-campaign': (context) => const StartCampaignPage(),
-      },
     );
   }
 }
