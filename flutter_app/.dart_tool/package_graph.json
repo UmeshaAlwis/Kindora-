@@ -22,7 +22,9 @@
         "firebase_messaging",
         "firebase_storage",
         "flutter",
+        "flutter_feather_icons",
         "flutter_staggered_grid_view",
+        "flutter_svg",
         "get",
         "get_it",
         "go_router",
@@ -35,7 +37,6 @@
         "pay",
         "provider",
         "riverpod",
-        "riverpod_generator",
         "shared_preferences",
         "shimmer",
         "smooth_page_indicator",
@@ -420,22 +421,6 @@
       ]
     },
     {
-      "name": "riverpod_generator",
-      "version": "2.4.0",
-      "dependencies": [
-        "analyzer",
-        "build",
-        "build_config",
-        "collection",
-        "crypto",
-        "meta",
-        "path",
-        "riverpod_analyzer_utils",
-        "riverpod_annotation",
-        "source_gen"
-      ]
-    },
-    {
       "name": "riverpod",
       "version": "2.6.1",
       "dependencies": [
@@ -452,6 +437,24 @@
         "collection",
         "flutter",
         "nested"
+      ]
+    },
+    {
+      "name": "flutter_svg",
+      "version": "2.2.3",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics",
+        "vector_graphics_codec",
+        "vector_graphics_compiler"
+      ]
+    },
+    {
+      "name": "flutter_feather_icons",
+      "version": "2.0.0+1",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -932,7 +935,7 @@
     },
     {
       "name": "google_maps_flutter_ios",
-      "version": "2.17.1",
+      "version": "2.17.2",
       "dependencies": [
         "flutter",
         "google_maps_flutter_platform_interface",
@@ -1371,28 +1374,6 @@
       ]
     },
     {
-      "name": "riverpod_annotation",
-      "version": "2.6.1",
-      "dependencies": [
-        "meta",
-        "riverpod"
-      ]
-    },
-    {
-      "name": "riverpod_analyzer_utils",
-      "version": "0.5.1",
-      "dependencies": [
-        "analyzer",
-        "collection",
-        "crypto",
-        "custom_lint_core",
-        "freezed_annotation",
-        "meta",
-        "path",
-        "source_span"
-      ]
-    },
-    {
       "name": "state_notifier",
       "version": "1.0.0",
       "dependencies": [
@@ -1404,6 +1385,32 @@
       "version": "1.0.0",
       "dependencies": [
         "flutter"
+      ]
+    },
+    {
+      "name": "vector_graphics_compiler",
+      "version": "1.1.20",
+      "dependencies": [
+        "args",
+        "meta",
+        "path",
+        "path_parsing",
+        "vector_graphics_codec",
+        "xml"
+      ]
+    },
+    {
+      "name": "vector_graphics_codec",
+      "version": "1.1.13",
+      "dependencies": []
+    },
+    {
+      "name": "vector_graphics",
+      "version": "1.1.19",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics_codec"
       ]
     },
     {
@@ -1622,17 +1629,6 @@
       "dependencies": []
     },
     {
-      "name": "flutter_svg",
-      "version": "2.2.3",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics",
-        "vector_graphics_codec",
-        "vector_graphics_compiler"
-      ]
-    },
-    {
       "name": "path_provider_windows",
       "version": "2.3.0",
       "dependencies": [
@@ -1681,29 +1677,20 @@
       ]
     },
     {
-      "name": "freezed_annotation",
-      "version": "2.4.4",
+      "name": "xml",
+      "version": "6.6.1",
       "dependencies": [
         "collection",
-        "json_annotation",
-        "meta"
+        "meta",
+        "petitparser"
       ]
     },
     {
-      "name": "custom_lint_core",
-      "version": "0.6.3",
+      "name": "path_parsing",
+      "version": "1.1.0",
       "dependencies": [
-        "analyzer",
-        "analyzer_plugin",
-        "collection",
-        "glob",
-        "matcher",
         "meta",
-        "package_config",
-        "path",
-        "pubspec_parse",
-        "source_span",
-        "yaml"
+        "vector_math"
       ]
     },
     {
@@ -1766,32 +1753,6 @@
       ]
     },
     {
-      "name": "vector_graphics_compiler",
-      "version": "1.1.20",
-      "dependencies": [
-        "args",
-        "meta",
-        "path",
-        "path_parsing",
-        "vector_graphics_codec",
-        "xml"
-      ]
-    },
-    {
-      "name": "vector_graphics_codec",
-      "version": "1.1.13",
-      "dependencies": []
-    },
-    {
-      "name": "vector_graphics",
-      "version": "1.1.19",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics_codec"
-      ]
-    },
-    {
       "name": "ffi",
       "version": "2.1.5",
       "dependencies": []
@@ -1823,14 +1784,11 @@
       ]
     },
     {
-      "name": "analyzer_plugin",
-      "version": "0.11.3",
+      "name": "petitparser",
+      "version": "7.0.1",
       "dependencies": [
-        "analyzer",
         "collection",
-        "dart_style",
-        "pub_semver",
-        "yaml"
+        "meta"
       ]
     },
     {
@@ -1844,23 +1802,6 @@
       "name": "synchronized",
       "version": "3.4.0",
       "dependencies": []
-    },
-    {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
-      "name": "path_parsing",
-      "version": "1.1.0",
-      "dependencies": [
-        "meta",
-        "vector_math"
-      ]
     },
     {
       "name": "native_toolchain_c",
@@ -1892,14 +1833,6 @@
       "dependencies": [
         "collection",
         "hooks"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.1",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     }
   ],
