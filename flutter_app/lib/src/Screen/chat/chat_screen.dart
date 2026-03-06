@@ -10,53 +10,65 @@ class ChatScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F7),
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: Row(
           children: [
             const CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.favorite, color: Colors.red),
+              backgroundColor: Colors.indigo,
+              child: Icon(Icons.volunteer_activism, color: Colors.white),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                name,
-                style: const TextStyle(fontSize: 16),
+            Text(
+              name,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const Icon(Icons.verified, color: Colors.blue, size: 18),
           ],
         ),
       ),
       body: Column(
         children: [
+          const SizedBox(height: 10),
+
+          // CHAT MESSAGES
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: const [
-                _MessageBubble(
+                MessageBubble(
                   message: "Hello! Thank you for supporting our campaign.",
                   isMe: false,
                 ),
-                _MessageBubble(
+                MessageBubble(
                   message: "Happy to help! Keep up the great work.",
                   isMe: true,
+                ),
+                MessageBubble(
+                  message: "We truly appreciate your generosity.",
+                  isMe: false,
                 ),
               ],
             ),
           ),
-          const _MessageInputBar(),
+
+          // INPUT BAR
+          const MessageInputBar(),
         ],
       ),
     );
   }
 }
 
-class _MessageBubble extends StatelessWidget {
+class MessageBubble extends StatelessWidget {
   final String message;
   final bool isMe;
 
-  const _MessageBubble({
+  const MessageBubble({
+    super.key,
     required this.message,
     required this.isMe,
   });
@@ -64,19 +76,29 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 250),
         decoration: BoxDecoration(
-          color: isMe ? Colors.indigo : Colors.white,
+          color: isMe
+              ? Colors.indigo
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            if (!isMe)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 5,
+              ),
+          ],
         ),
         child: Text(
           message,
           style: TextStyle(
-            color: isMe ? Colors.white : Colors.black,
+            color: isMe ? Colors.white : Colors.black87,
           ),
         ),
       ),
@@ -84,16 +106,14 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _MessageInputBar extends StatelessWidget {
-  const _MessageInputBar();
+class MessageInputBar extends StatelessWidget {
+  const MessageInputBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: Colors.white,
       child: Row(
         children: [
           const Expanded(
@@ -102,21 +122,22 @@ class _MessageInputBar extends StatelessWidget {
                 hintText: "Type a message...",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20)),
-                  borderSide: BorderSide.none,
                 ),
-                filled: true,
-                fillColor: Color(0xFFF2F3F7),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
           ),
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.all(10),
             decoration: const BoxDecoration(
               color: Colors.indigo,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.send, color: Colors.white),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.send, color: Colors.white),
+            ),
           )
         ],
       ),
