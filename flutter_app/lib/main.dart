@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/auth_gate.dart';
+import 'start_campaign_page.dart';
+import 'src/features/payment/presentation/pages/charity_list_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,10 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const AuthGate(),
+      routes: {
+        '/start-campaign': (context) => const StartCampaignPage(),
+        '/charities': (context) => const CharityListPage(),
+      },
     );
   }
 }

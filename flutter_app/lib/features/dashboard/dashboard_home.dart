@@ -102,7 +102,9 @@ class DashboardHome extends StatelessWidget {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/start-campaign');
+                      },
                     ),
                   ),
 
@@ -119,7 +121,9 @@ class DashboardHome extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         foregroundColor: Colors.white,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/charities');
+                      },
                     ),
                   ),
                 ],
