@@ -40,6 +40,17 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
+      // Show success message
+      _showSnackBar("Login successful!", Colors.green);
+
+      // Navigate to Dashboard after successful login
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/dashboard',
+          (route) => false,
+        );
+      }
+
     } on FirebaseAuthException catch (e) {
 
       String message;

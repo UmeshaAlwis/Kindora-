@@ -38,17 +38,29 @@ class DashboardHome extends StatelessWidget {
                   bottom: Radius.circular(30),
                 ),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Your Balance",
-                    style: TextStyle(color: Colors.white),
+                  // Header with user icon
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Your Balance",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person_circle, color: Colors.white, size: 32),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/profile');
+                        },
+                      ),
+                    ],
                   ),
 
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
 
-                  Text(
+                  const Text(
                     "\$200",
                     style: TextStyle(
                       fontSize: 28,
@@ -57,10 +69,10 @@ class DashboardHome extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   /// ACTIONS
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _HeaderAction(icon: Icons.add_circle_outline, label: "Top up"),
