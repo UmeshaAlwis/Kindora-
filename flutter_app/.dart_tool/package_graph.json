@@ -22,20 +22,21 @@
         "firebase_messaging",
         "firebase_storage",
         "flutter",
+        "flutter_feather_icons",
         "flutter_staggered_grid_view",
+        "flutter_svg",
         "get",
         "get_it",
         "go_router",
         "google_maps_flutter",
+        "google_sign_in",
         "hive",
         "hive_flutter",
         "http",
         "image_picker",
         "intl",
-        "pay",
         "provider",
         "riverpod",
-        "riverpod_generator",
         "shared_preferences",
         "shimmer",
         "smooth_page_indicator",
@@ -155,7 +156,7 @@
     },
     {
       "name": "google_maps_flutter",
-      "version": "2.14.0",
+      "version": "2.14.2",
       "dependencies": [
         "flutter",
         "google_maps_flutter_android",
@@ -313,18 +314,6 @@
       ]
     },
     {
-      "name": "pay",
-      "version": "1.1.2",
-      "dependencies": [
-        "flutter",
-        "flutter_localizations",
-        "meta",
-        "pay_android",
-        "pay_ios",
-        "pay_platform_interface"
-      ]
-    },
-    {
       "name": "firebase_storage",
       "version": "11.7.7",
       "dependencies": [
@@ -425,7 +414,7 @@
     },
     {
       "name": "dio",
-      "version": "5.9.1",
+      "version": "5.9.2",
       "dependencies": [
         "async",
         "collection",
@@ -434,6 +423,17 @@
         "meta",
         "mime",
         "path"
+      ]
+    },
+    {
+      "name": "google_sign_in",
+      "version": "6.3.0",
+      "dependencies": [
+        "flutter",
+        "google_sign_in_android",
+        "google_sign_in_ios",
+        "google_sign_in_platform_interface",
+        "google_sign_in_web"
       ]
     },
     {
@@ -453,6 +453,24 @@
         "collection",
         "flutter",
         "nested"
+      ]
+    },
+    {
+      "name": "flutter_svg",
+      "version": "2.2.3",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics",
+        "vector_graphics_codec",
+        "vector_graphics_compiler"
+      ]
+    },
+    {
+      "name": "flutter_feather_icons",
+      "version": "2.0.0+1",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -871,7 +889,7 @@
     },
     {
       "name": "matcher",
-      "version": "0.12.17",
+      "version": "0.12.18",
       "dependencies": [
         "async",
         "meta",
@@ -882,7 +900,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.7",
+      "version": "0.7.9",
       "dependencies": [
         "async",
         "boolean_selector",
@@ -945,7 +963,7 @@
     },
     {
       "name": "google_maps_flutter_platform_interface",
-      "version": "2.14.1",
+      "version": "2.14.2",
       "dependencies": [
         "collection",
         "flutter",
@@ -955,7 +973,7 @@
     },
     {
       "name": "google_maps_flutter_ios",
-      "version": "2.17.1",
+      "version": "2.18.0",
       "dependencies": [
         "flutter",
         "google_maps_flutter_platform_interface",
@@ -964,7 +982,7 @@
     },
     {
       "name": "google_maps_flutter_android",
-      "version": "2.18.12",
+      "version": "2.19.2",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -1011,7 +1029,7 @@
     },
     {
       "name": "camera_android",
-      "version": "0.10.10+14",
+      "version": "0.10.10+15",
       "dependencies": [
         "camera_platform_interface",
         "flutter",
@@ -1080,7 +1098,7 @@
     },
     {
       "name": "image_picker_android",
-      "version": "0.8.13+13",
+      "version": "0.8.13+14",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -1160,32 +1178,6 @@
       "dependencies": [
         "flutter",
         "flutter_cache_manager"
-      ]
-    },
-    {
-      "name": "pay_platform_interface",
-      "version": "1.0.4",
-      "dependencies": [
-        "flutter",
-        "yaml"
-      ]
-    },
-    {
-      "name": "pay_ios",
-      "version": "1.0.11",
-      "dependencies": [
-        "flutter",
-        "pay_platform_interface"
-      ]
-    },
-    {
-      "name": "pay_android",
-      "version": "1.0.11",
-      "dependencies": [
-        "flutter",
-        "flutter_localizations",
-        "flutter_svg",
-        "pay_platform_interface"
       ]
     },
     {
@@ -1355,7 +1347,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "version": "2.4.20",
+      "version": "2.4.21",
       "dependencies": [
         "flutter",
         "shared_preferences_platform_interface"
@@ -1385,12 +1377,48 @@
     },
     {
       "name": "dio_web_adapter",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "dependencies": [
         "dio",
         "http_parser",
         "meta",
         "web"
+      ]
+    },
+    {
+      "name": "google_sign_in_web",
+      "version": "0.12.4+4",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "google_identity_services_web",
+        "google_sign_in_platform_interface",
+        "http",
+        "web"
+      ]
+    },
+    {
+      "name": "google_sign_in_platform_interface",
+      "version": "2.5.0",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "google_sign_in_ios",
+      "version": "5.9.0",
+      "dependencies": [
+        "flutter",
+        "google_sign_in_platform_interface"
+      ]
+    },
+    {
+      "name": "google_sign_in_android",
+      "version": "6.2.1",
+      "dependencies": [
+        "flutter",
+        "google_sign_in_platform_interface"
       ]
     },
     {
@@ -1408,20 +1436,46 @@
       ]
     },
     {
+      "name": "vector_graphics_compiler",
+      "version": "1.2.0",
+      "dependencies": [
+        "args",
+        "meta",
+        "path",
+        "path_parsing",
+        "vector_graphics_codec",
+        "xml"
+      ]
+    },
+    {
+      "name": "vector_graphics_codec",
+      "version": "1.1.13",
+      "dependencies": []
+    },
+    {
+      "name": "vector_graphics",
+      "version": "1.1.19",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics_codec"
+      ]
+    },
+    {
       "name": "sky_engine",
       "version": "0.0.0",
       "dependencies": []
     },
     {
       "name": "material_color_utilities",
-      "version": "0.11.1",
+      "version": "0.13.0",
       "dependencies": [
         "collection"
       ]
     },
     {
       "name": "characters",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "dependencies": []
     },
     {
@@ -1482,7 +1536,7 @@
     },
     {
       "name": "json_annotation",
-      "version": "4.10.0",
+      "version": "4.11.0",
       "dependencies": [
         "meta"
       ]
@@ -1513,7 +1567,7 @@
     },
     {
       "name": "built_value",
-      "version": "8.12.3",
+      "version": "8.12.4",
       "dependencies": [
         "built_collection",
         "collection",
@@ -1649,17 +1703,6 @@
       "dependencies": []
     },
     {
-      "name": "flutter_svg",
-      "version": "2.2.3",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics",
-        "vector_graphics_codec",
-        "vector_graphics_compiler"
-      ]
-    },
-    {
       "name": "path_provider_windows",
       "version": "2.3.0",
       "dependencies": [
@@ -1705,6 +1748,31 @@
       "dependencies": [
         "flutter",
         "path_provider_platform_interface"
+      ]
+    },
+    {
+      "name": "google_identity_services_web",
+      "version": "0.3.3+1",
+      "dependencies": [
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "path_parsing",
+      "version": "1.1.0",
+      "dependencies": [
+        "meta",
+        "vector_math"
       ]
     },
     {
@@ -1778,34 +1846,8 @@
       ]
     },
     {
-      "name": "vector_graphics_compiler",
-      "version": "1.1.20",
-      "dependencies": [
-        "args",
-        "meta",
-        "path",
-        "path_parsing",
-        "vector_graphics_codec",
-        "xml"
-      ]
-    },
-    {
-      "name": "vector_graphics_codec",
-      "version": "1.1.13",
-      "dependencies": []
-    },
-    {
-      "name": "vector_graphics",
-      "version": "1.1.19",
-      "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics_codec"
-      ]
-    },
-    {
       "name": "ffi",
-      "version": "2.1.5",
+      "version": "2.2.0",
       "dependencies": []
     },
     {
@@ -1835,6 +1877,14 @@
       ]
     },
     {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
       "name": "csslib",
       "version": "1.0.2",
       "dependencies": [
@@ -1847,25 +1897,8 @@
       "dependencies": []
     },
     {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
-      "name": "path_parsing",
-      "version": "1.1.0",
-      "dependencies": [
-        "meta",
-        "vector_math"
-      ]
-    },
-    {
       "name": "native_toolchain_c",
-      "version": "0.17.4",
+      "version": "0.17.5",
       "dependencies": [
         "code_assets",
         "glob",
@@ -1877,7 +1910,7 @@
     },
     {
       "name": "hooks",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "dependencies": [
         "collection",
         "crypto",
@@ -1893,14 +1926,6 @@
       "dependencies": [
         "collection",
         "hooks"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.1",
-      "dependencies": [
-        "collection",
-        "meta"
       ]
     }
   ],
