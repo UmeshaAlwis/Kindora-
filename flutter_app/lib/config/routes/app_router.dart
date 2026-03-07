@@ -8,12 +8,14 @@ import '../../features/profile/ui/profile_page.dart';
 import '../../features/settings/ui/settings_page.dart';
 import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../core/widgets/auth_gate.dart';
+import '../../core/widgets/main_layout.dart';
 
 /// App Routes Configuration
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/auth',
     routes: [
+      // Authentication routes (without bottom nav)
       GoRoute(
         path: '/auth',
         name: 'auth',
@@ -34,25 +36,33 @@ class AppRouter {
         name: 'signup',
         builder: (context, state) => const SignupScreen(),
       ),
-      GoRoute(
-        path: '/dashboard',
-        name: 'dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: '/campaigns',
-        name: 'campaigns',
-        builder: (context, state) => const CampaignHomePage(),
-      ),
-      GoRoute(
-        path: '/profile',
-        name: 'profile',
-        builder: (context, state) => const ProfilePage(),
-      ),
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        builder: (context, state) => const SettingsPage(),
+      // Main app routes with bottom navigation bar
+      ShellRoute(
+        builder: (context, state, child) {
+          return MainLayout(child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/dashboard',
+            name: 'dashboard',
+            builder: (context, state) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: '/campaigns',
+            name: 'campaigns',
+            builder: (context, state) => const CampaignHomePage(),
+          ),
+          GoRoute(
+            path: '/profile',
+            name: 'profile',
+            builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/settings',
+            name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
