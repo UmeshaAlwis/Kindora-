@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../payment/ui/payment_page.dart';
+import '../../payment/models/payment_model.dart';
 import 'start_campaign_page.dart';
 
 class CampaignHomePage extends StatelessWidget {
@@ -136,11 +138,20 @@ class CampaignList extends StatelessWidget {
                             backgroundColor: const Color(0xFF0C0C79),
                           ),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Support campaign feature coming soon",
-                                ),
+                            final campaign = Campaign(
+                              id: 'campaign_1',
+                              title: 'Help Flood Victims',
+                              image:
+                                  'https://images.unsplash.com/photo-1593113630400-ea4288922497',
+                              raisedAmount: 240000,
+                              targetAmount: 400000,
+                              description:
+                                  'Help the victims affected by recent floods',
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PaymentPage(campaign: campaign),
                               ),
                             );
                           },
@@ -163,8 +174,7 @@ class CampaignList extends StatelessWidget {
                                 const Color(0xFFFF751F).withValues(alpha: 0.15),
                             splashColor:
                                 const Color(0xFFFF751F).withValues(alpha: 0.25),
-                            highlightColor:
-                                const Color.fromARGB(0, 0, 0, 0),
+                            highlightColor: const Color.fromARGB(0, 0, 0, 0),
                             onPressed: () {
                               Navigator.push(
                                 context,
@@ -185,8 +195,7 @@ class CampaignList extends StatelessWidget {
                                 const Color(0xFFFF751F).withValues(alpha: 0.15),
                             splashColor:
                                 const Color(0xFFFF751F).withValues(alpha: 0.25),
-                            highlightColor:
-                                const Color.fromARGB(0, 0, 0, 0),
+                            highlightColor: const Color.fromARGB(0, 0, 0, 0),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
