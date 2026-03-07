@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String name;
 
   const ChatScreen({super.key, required this.name});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+
+List<Map<String, dynamic>> messages = [
+  {"text": "Hello! Thank you for supporting our campaign.", "isMe": false},
+  {"text": "Happy to help! Keep up the great work.", "isMe": true},
+  {"text": "We truly appreciate your generosity.", "isMe": false},
+];
+
+
+final TextEditingController controller = TextEditingController();
+
+
+void sendMessage() {
+  if (controller.text.trim().isEmpty) return;
+
+  setState(() {
+    messages.add({
+      "text": controller.text,
+      "isMe": true,
+    });
+  });
+
+  controller.clear();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +50,7 @@ class ChatScreen extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              name,
+              widget.name,
               style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w600,
@@ -38,25 +67,20 @@ class ChatScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: const [
-                MessageBubble(
-                  message: "Hello! Thank you for supporting our campaign.",
-                  isMe: false,
-                ),
-                MessageBubble(
-                  message: "Happy to help! Keep up the great work.",
-                  isMe: true,
-                ),
-                MessageBubble(
-                  message: "We truly appreciate your generosity.",
-                  isMe: false,
-                ),
-              ],
+              children: messages
+                  .map((msg) => MessageBubble(
+                        message: msg["text"],
+                        isMe: msg["isMe"],
+                      ))
+                  .toList(),
             ),
           ),
 
           // INPUT BAR
-          const MessageInputBar(),
+          MessageInputBar(
+            controller: controller,
+            onSend: sendMessage,
+          ),
         ],
       ),
     );
@@ -107,7 +131,14 @@ class MessageBubble extends StatelessWidget {
 }
 
 class MessageInputBar extends StatelessWidget {
-  const MessageInputBar({super.key});
+  final TextEditingController controller;
+  final VoidCallback onSend;
+  const MessageInputBar({
+    super.key,
+    required this.controller,
+    required this.onSend,
+  });
+  
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +147,7 @@ class MessageInputBar extends StatelessWidget {
       color: Colors.white,
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: TextField(
               decoration: InputDecoration(
                 hintText: "Type a message...",
@@ -135,7 +166,7 @@ class MessageInputBar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              onPressed: () {},
+              onPressed: onSend,
               icon: const Icon(Icons.send, color: Colors.white),
             ),
           )
