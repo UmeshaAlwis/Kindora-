@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../features/home/ui/home_screen.dart';
-import '../features/auth/ui/login_screen.dart';
+import '../../features/auth/ui/login_screen.dart';
+import '../../features/home/ui/home_screen.dart';
 
 /// Auth Gate - Routes user based on authentication status
 class AuthGate extends StatelessWidget {
