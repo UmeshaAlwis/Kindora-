@@ -12,9 +12,13 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
 
 List<Map<String, dynamic>> messages = [
-  {"text": "Hello! Thank you for supporting our campaign.", "isMe": false},
-  {"text": "Happy to help! Keep up the great work.", "isMe": true},
-  {"text": "We truly appreciate your generosity.", "isMe": false},
+  {"text": "Hello! Thank you for supporting our campaign.", "isMe": false, "time": "5m ago"},
+  {"text": "Happy to help! Keep up the great work.", "isMe": true, "time": "4m ago"},
+  {"text": "We truly appreciate your generosity.", "isMe": false, "time": "3m ago"},
+  {"text": "It's our pleasure! Let us know if there are other ways we can assist.", "isMe": true, "time": "2m ago"},
+  {"text": "Will do! Thanks again for your support.", "isMe": false, "time": "1m ago"},
+  {"text": "You're very welcome! We're here to help anytime.", "isMe": true, "time": "Just now"},
+  {"text": "We truly appreciate your generosity.", "isMe": false, "time": "10:20 AM"},
 ];
 
 
@@ -71,6 +75,7 @@ void sendMessage() {
                   .map((msg) => MessageBubble(
                         message: msg["text"],
                         isMe: msg["isMe"],
+                        time: msg["time"],
                       ))
                   .toList(),
             ),
@@ -90,11 +95,13 @@ void sendMessage() {
 class MessageBubble extends StatelessWidget {
   final String message;
   final bool isMe;
+  final String time;
 
   const MessageBubble({
     super.key,
     required this.message,
     required this.isMe,
+    required this.time,
   });
 
   @override
@@ -119,11 +126,26 @@ class MessageBubble extends StatelessWidget {
               ),
           ],
         ),
-        child: Text(
-          message,
-          style: TextStyle(
-            color: isMe ? Colors.white : Colors.black87,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message,
+              style: TextStyle(
+                color: isMe ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: TextStyle(
+                color: isMe
+                    ? Colors.white70
+                    : Colors.black45,
+                fontSize: 11,
+              ),
+            ),
+          ],
         ),
       ),
     );
