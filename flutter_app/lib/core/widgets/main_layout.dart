@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/chat/ui/chat_assistant_button.dart';
 
-/// Main layout wrapper with persistent bottom navigation bar
+/// Main layout wrapper with persistent bottom navigation bar and chat assistant
 class MainLayout extends StatelessWidget {
   final Widget child;
 
@@ -24,8 +25,14 @@ class MainLayout extends StatelessWidget {
     final location = GoRouterState.of(context).location;
 
     return Scaffold(
-      body: SafeArea(
-        child: child,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: child,
+          ),
+          // Chat assistant floating button
+          const ChatAssistantButton(showBadge: true),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

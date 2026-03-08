@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../models/payment_model.dart';
+import 'payhere_payment_webview.dart';
+import 'bank_transfer_page.dart';
 
 class PaymentPage extends StatefulWidget {
   final Campaign campaign;
@@ -18,29 +19,22 @@ class _PaymentPageState extends State<PaymentPage> {
   late TextEditingController _amountController;
   late TextEditingController _donorNameController;
   late TextEditingController _donorEmailController;
-  String _selectedPaymentMethod = 'credit_card';
+  late TextEditingController _donorPhoneController;
+  String _selectedPaymentMethod = 'card_payment';
   bool _isProcessing = false;
 
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
-      id: 'credit_card',
-      name: 'Credit Card',
+      id: 'card_payment',
+      name: 'Card Payment',
       icon: '💳',
-    ),
-    PaymentMethod(
-      id: 'debit_card',
-      name: 'Debit Card',
-      icon: '💳',
+      description: 'Credit/Debit Card',
     ),
     PaymentMethod(
       id: 'bank_transfer',
       name: 'Bank Transfer',
       icon: '🏦',
-    ),
-    PaymentMethod(
-      id: 'mobile_payment',
-      name: 'Mobile Payment',
-      icon: '📱',
+      description: 'Upload receipt for verification',
     ),
   ];
 
@@ -50,6 +44,7 @@ class _PaymentPageState extends State<PaymentPage> {
     _amountController = TextEditingController();
     _donorNameController = TextEditingController();
     _donorEmailController = TextEditingController();
+    _donorPhoneController = TextEditingController();
   }
 
   @override
@@ -57,6 +52,7 @@ class _PaymentPageState extends State<PaymentPage> {
     _amountController.dispose();
     _donorNameController.dispose();
     _donorEmailController.dispose();
+    _donorPhoneController.dispose();
     super.dispose();
   }
 
@@ -67,7 +63,8 @@ class _PaymentPageState extends State<PaymentPage> {
   void _processPayment() async {
     if (_amountController.text.isEmpty ||
         _donorNameController.text.isEmpty ||
-        _donorEmailController.text.isEmpty) {
+        _donorEmailController.text.isEmpty ||
+        _donorPhoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all required fields'),
@@ -80,8 +77,11 @@ class _PaymentPageState extends State<PaymentPage> {
     setState(() => _isProcessing = true);
 
     try {
+      final orderId =
+          'kindora_${DateTime.now().millisecondsSinceEpoch.toString()}';
+
       final payment = Payment(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: orderId,
         campaignId: widget.campaign.id,
         campaignTitle: widget.campaign.title,
         amount: _donationAmount,
@@ -92,40 +92,12 @@ class _PaymentPageState extends State<PaymentPage> {
         donorEmail: _donorEmailController.text,
       );
 
-      // Simulate payment processing
-      await Future.delayed(const Duration(seconds: 2));
-
-      if (mounted) {
-        setState(() => _isProcessing = false);
-
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            icon: const Icon(Icons.check_circle, color: Colors.green, size: 64),
-            title: const Text('Payment Successful'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Amount: LKR ${_donationAmount.toStringAsFixed(2)}'),
-                const SizedBox(height: 8),
-                Text('Campaign: ${widget.campaign.title}'),
-                const SizedBox(height: 8),
-                Text('Reference: ${payment.id.substring(0, 12)}...'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  context.go('/campaigns');
-                },
-                child: const Text('Done'),
-              ),
-            ],
-          ),
-        );
+      if (_selectedPaymentMethod == 'card_payment') {
+        // Handle card payment via PayHere gateway
+        await _processPayHerePayment(payment, orderId);
+      } else if (_selectedPaymentMethod == 'bank_transfer') {
+        // Handle bank transfer
+        await _processBankTransfer(payment);
       }
     } catch (e) {
       if (mounted) {
@@ -133,6 +105,72 @@ class _PaymentPageState extends State<PaymentPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Payment failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _processBankTransfer(Payment payment) async {
+    setState(() => _isProcessing = false);
+
+    if (mounted) {
+      // Navigate to bank transfer page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BankTransferPage(
+            campaign: widget.campaign,
+            amount: _donationAmount,
+            donorName: _donorNameController.text,
+            donorEmail: _donorEmailController.text,
+            donorPhone: _donorPhoneController.text,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _processPayHerePayment(Payment payment, String orderId) async {
+    try {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+
+        // Update payment object with phone number
+        payment = Payment(
+          id: payment.id,
+          campaignId: payment.campaignId,
+          campaignTitle: payment.campaignTitle,
+          amount: payment.amount,
+          paymentMethod: payment.paymentMethod,
+          timestamp: payment.timestamp,
+          status: payment.status,
+          donorName: payment.donorName,
+          donorEmail: payment.donorEmail,
+          donorPhone: _donorPhoneController.text,
+        );
+
+        // Navigate to PayHere WebView checkout screen
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PayHerePaymentWebView(
+                payment: payment,
+                orderRef: orderId,
+                campaignTitle: widget.campaign.title,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PayHere Error: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -289,6 +327,18 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _donorPhoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: 'Phone Number (Required for PayHere)',
+                prefixIcon: const Icon(Icons.phone),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Payment Method Section
@@ -330,7 +380,26 @@ class _PaymentPageState extends State<PaymentPage> {
                           Text(method.icon,
                               style: const TextStyle(fontSize: 20)),
                           const SizedBox(width: 12),
-                          Text(method.name),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  method.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  method.description ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
