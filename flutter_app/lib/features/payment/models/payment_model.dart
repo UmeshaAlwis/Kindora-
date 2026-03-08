@@ -20,11 +20,13 @@ class PaymentMethod {
   final String id;
   final String name;
   final String icon;
+  final String? description;
 
   PaymentMethod({
     required this.id,
     required this.name,
     required this.icon,
+    this.description,
   });
 }
 
@@ -38,6 +40,7 @@ class Payment {
   final String status;
   final String donorName;
   final String donorEmail;
+  final String? donorPhone;
 
   Payment({
     required this.id,
@@ -49,5 +52,6 @@ class Payment {
     required this.status,
     required this.donorName,
     required this.donorEmail,
+    this.donorPhone,
   });
 }
