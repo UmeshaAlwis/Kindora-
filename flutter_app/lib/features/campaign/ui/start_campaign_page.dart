@@ -133,7 +133,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                           ),
                           textButtonTheme: TextButtonThemeData(
                             style: TextButton.styleFrom(
-                              foregroundColor: Color(0xFF0C0C79),
+                              foregroundColor: const Color(0xFF0C0C79),
                             ),
                           ),
                         ),
