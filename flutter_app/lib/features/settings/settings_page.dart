@@ -19,10 +19,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
       appBar: AppBar(
         title: const Text("Settings"),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
         centerTitle: true,
       ),
 
@@ -34,10 +34,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 20),
 
             /// GENERAL SETTINGS
-            const Text(
+            Text(
               "General",
-              style: TextStyle(
-                fontSize: 16,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -47,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
             /// NOTIFICATIONS
             SwitchListTile(
               activeColor: primaryColor,
+              activeTrackColor: primaryColor.withOpacity(0.4),
               title: const Text("Notifications"),
               subtitle: const Text("Receive campaign updates"),
               value: notificationsEnabled,
@@ -62,6 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
             /// DARK MODE
             SwitchListTile(
               activeColor: primaryColor,
+              activeTrackColor: primaryColor.withOpacity(0.4),
               title: const Text("Dark Mode"),
               subtitle: const Text("Enable dark theme"),
               value: context.watch<ThemeController>().isDarkMode,
@@ -81,13 +82,12 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {},
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
             /// LEGAL
-            const Text(
+            Text(
               "Legal",
-              style: TextStyle(
-                fontSize: 16,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -112,13 +112,12 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {},
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
             /// ABOUT
-            const Text(
+            Text(
               "About",
-              style: TextStyle(
-                fontSize: 16,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
