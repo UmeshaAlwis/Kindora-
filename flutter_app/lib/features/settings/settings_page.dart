@@ -20,21 +20,21 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
 
       appBar: AppBar(
-        title: const Text(
-          "Settings",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Settings"),
         backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
         centerTitle: true,
       ),
 
       body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
 
           const SizedBox(height: 10),
 
           /// NOTIFICATIONS
           SwitchListTile(
+            activeColor: primaryColor,
             title: const Text("Notifications"),
             subtitle: const Text("Receive campaign updates"),
             value: notificationsEnabled,
@@ -49,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           /// DARK MODE
           SwitchListTile(
+            activeColor: primaryColor,
             title: const Text("Dark Mode"),
             subtitle: const Text("Enable dark theme"),
             value: darkModeEnabled,
@@ -63,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           /// LANGUAGE
           ListTile(
-            leading: const Icon(Icons.language),
+            leading: Icon(Icons.language, color: primaryColor),
             title: const Text("Language"),
             subtitle: const Text("English"),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -74,7 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           /// PRIVACY POLICY
           ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
+            leading: Icon(Icons.privacy_tip_outlined, color: primaryColor),
             title: const Text("Privacy Policy"),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {},
@@ -84,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           /// TERMS
           ListTile(
-            leading: const Icon(Icons.description_outlined),
+            leading: Icon(Icons.description_outlined, color: primaryColor),
             title: const Text("Terms & Conditions"),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {},
@@ -94,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           /// ABOUT
           ListTile(
-            leading: const Icon(Icons.info_outline),
+            leading: Icon(Icons.info_outline, color: primaryColor),
             title: const Text("About Kindora"),
             subtitle: const Text("Version 1.0.0"),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
