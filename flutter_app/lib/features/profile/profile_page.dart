@@ -5,6 +5,8 @@ import '../settings/settings_page.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  final Color primaryColor = const Color(0xFF0C0C79);
+
   Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
   }
@@ -14,71 +16,81 @@ class ProfilePage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
 
-            const SizedBox(height: 20),
-
-            const CircleAvatar(
-              radius: 45,
-              child: Icon(Icons.person, size: 40),
-            ),
-
-            const SizedBox(height: 16),
-
-            Text(
-              user?.email ?? "No email",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+          /// PROFILE HEADER
+          Column(
+            children: [
+              const CircleAvatar(
+                radius: 45,
+                child: Icon(Icons.person, size: 40),
               ),
-            ),
 
-            const SizedBox(height: 6),
+              const SizedBox(height: 12),
 
-            Text(
-              user?.emailVerified == true
-                  ? "Email Verified ✅"
-                  : "Email Not Verified ❌",
-              style: TextStyle(
-                color: user?.emailVerified == true
-                    ? Colors.green
-                    : Colors.red,
+              Text(
+                user?.email ?? "No email",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                user?.emailVerified == true
+                    ? "Email Verified ✓"
+                    : "Email Not Verified",
+                style: TextStyle(
+                  color: user?.emailVerified == true
+                      ? Colors.green
+                      : Colors.red,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 30),
+
+          /// SETTINGS CARD
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Column(
+              children: [
 
-            const SizedBox(height: 30),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text("Settings"),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsPage(),
+                      ),
+                    );
+                  },
+                ),
 
-            /// SETTINGS BUTTON
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsPage(),
+                const Divider(height: 1),
+
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: const Text(
+                    "Logout",
+                    style: TextStyle(color: Colors.red),
                   ),
-                );
-              },
+                  onTap: () => logout(context),
+                ),
+              ],
             ),
-
-            const Divider(),
-
-            /// LOGOUT BUTTON
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                "Logout",
-                style: TextStyle(color: Colors.red),
-              ),
-              onTap: () => logout(context),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
