@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/campaign.dart';
+import '../../campaign/ui/campaign_home_page.dart';
 
 class CampaignDetailsScreen extends StatelessWidget {
   final Campaign campaign;
@@ -29,27 +30,19 @@ class CampaignDetailsScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 10),
-
             Text(
               campaign.description,
               style: const TextStyle(fontSize: 16),
             ),
-
             const SizedBox(height: 20),
-
             LinearProgressIndicator(value: progress),
-
             const SizedBox(height: 10),
-
             Text(
               "Raised \$${campaign.raisedAmount} of \$${campaign.goalAmount}",
               style: const TextStyle(fontSize: 14),
             ),
-
             const Spacer(),
-
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -57,9 +50,10 @@ class CampaignDetailsScreen extends StatelessWidget {
                 icon: const Icon(Icons.favorite),
                 label: const Text("Donate Now"),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Donation feature coming soon ❤️"),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CampaignHomePage(),
                     ),
                   );
                 },

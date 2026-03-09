@@ -5,7 +5,10 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   file_selector_linux
+<<<<<<< HEAD
   gtk
+=======
+>>>>>>> origin/main
   url_launcher_linux
 )
 

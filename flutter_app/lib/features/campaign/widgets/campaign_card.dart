@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/campaign.dart';
-import '../screens/campaign_details_screen.dart';
+import '../ui/campaign_home_page.dart';
 
 class CampaignCard extends StatelessWidget {
   final Campaign campaign;
@@ -24,7 +24,6 @@ class CampaignCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             /// Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -78,9 +77,7 @@ class CampaignCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CampaignDetailsScreen(
-                        campaign: campaign,
-                      ),
+                      builder: (_) => const CampaignHomePage(),
                     ),
                   );
                 },

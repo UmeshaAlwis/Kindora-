@@ -1,34 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../features/auth/login_screen.dart';
-import '../features/auth/verify_email_screen.dart';
-import '../features/dashboard/dashboard_screen.dart';
+import '../features/home/ui/home_screen.dart';
+import '../features/auth/ui/login_screen.dart';
 
+/// Auth Gate - Routes user based on authentication status
 class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+  const AuthGate({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.idTokenChanges(), // 🔥 IMPORTANT
+      stream: FirebaseAuth.instance.idTokenChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
 
-        final user = snapshot.data;
-
-        if (user == null) {
-          return const LoginScreen();
+        if (snapshot.hasData && snapshot.data != null) {
+          // User is logged in
+          return const HomeScreen();
         }
 
-        if (!user.emailVerified) {
-          return const VerifyEmailScreen();
-        }
-
-        return const DashboardScreen();
+        // User is not logged in
+        return const LoginScreen();
       },
     );
   }
