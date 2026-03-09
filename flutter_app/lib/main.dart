@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-
 import 'firebase_options.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/auth_gate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  /// SUPABASE INITIALIZATION
+  await Supabase.initialize(
+    url: 'https://ucxqakixdpqqmbbpeptm.supabase.co',
+    anonKey: ' sb_publishable_frgCObr7FwO2W_Egb6EH-Q_slJAljVE',
   );
 
   runApp(
