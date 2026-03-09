@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
+import 'firebase_options.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/auth_gate.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeController(),
@@ -17,22 +26,79 @@ class KindoraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final themeController = context.watch<ThemeController>();
 
+    const primaryColor = Color(0xFF0C0C79);
+
     return MaterialApp(
-      title: "Kindora",
       debugShowCheckedModeBanner: false,
+      title: "Kindora",
 
       themeMode: themeController.themeMode,
 
+      /// LIGHT THEME
       theme: ThemeData(
         brightness: Brightness.light,
-        primaryColor: const Color(0xFF0C0C79),
+        primaryColor: primaryColor,
+
+        scaffoldBackgroundColor: Colors.white,
+
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+        ),
+
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.all(primaryColor),
+          trackColor: MaterialStateProperty.all(
+            primaryColor.withOpacity(0.4),
+          ),
+        ),
+
+        listTileTheme: const ListTileThemeData(
+          iconColor: primaryColor,
+        ),
       ),
 
+      /// DARK THEME
       darkTheme: ThemeData(
         brightness: Brightness.dark,
+
+        scaffoldBackgroundColor: const Color(0xFF121212),
+
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.dark,
+        ),
+
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+
+        cardColor: const Color(0xFF1E1E1E),
+
+        dividerColor: Colors.grey,
+
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.all(primaryColor),
+          trackColor: MaterialStateProperty.all(
+            primaryColor.withOpacity(0.5),
+          ),
+        ),
+
+        listTileTheme: const ListTileThemeData(
+          iconColor: Colors.white70,
+        ),
       ),
 
       home: const AuthGate(),
