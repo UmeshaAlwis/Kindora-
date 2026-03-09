@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../settings/settings_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  /// Supabase client
+  final supabase = Supabase.instance.client;
+
   Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+  }
+
+  /// Fetch profile from Supabase
+  Future<Map<String, dynamic>?> getProfile(String userId) async {
+    final response = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response;
   }
 
   @override
@@ -22,60 +38,84 @@ class ProfilePage extends StatelessWidget {
         children: [
 
           /// PROFILE HEADER
-          Column(
-            children: [
-              const CircleAvatar(
-                radius: 45,
-                child: Icon(Icons.person, size: 40),
-              ),
+          FutureBuilder(
+            future: getProfile(user!.uid),
+            builder: (context, snapshot) {
 
-              const SizedBox(height: 12),
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-              Text(
-                user?.email ?? "No email",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              final profile = snapshot.data as Map<String, dynamic>?;
 
-              const SizedBox(height: 6),
+              return Column(
+                children: [
 
-              Text(
-                user?.emailVerified == true
-                    ? "Email Verified ✓"
-                    : "Email Not Verified",
-                style: TextStyle(
-                  color: user?.emailVerified == true
-                      ? Colors.green
-                      : Colors.red,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// EDIT PROFILE BUTTON
-              SizedBox(
-                width: 160,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
+                  const CircleAvatar(
+                    radius: 45,
+                    child: Icon(Icons.person, size: 40),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EditProfilePage(),
+
+                  const SizedBox(height: 12),
+
+                  /// NAME FROM SUPABASE
+                  Text(
+                    profile?['name'] ?? "No Name",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  /// EMAIL FROM FIREBASE
+                  Text(
+                    user.email ?? "",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    user.emailVerified
+                        ? "Email Verified ✓"
+                        : "Email Not Verified",
+                    style: TextStyle(
+                      color: user.emailVerified
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  /// EDIT PROFILE BUTTON
+                  SizedBox(
+                    width: 160,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
                       ),
-                    );
-                  },
-                  child: const Text(
-                    "Edit Profile",
-                    style: TextStyle(color: Colors.white),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const EditProfilePage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Edit Profile",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
 
           const SizedBox(height: 30),
