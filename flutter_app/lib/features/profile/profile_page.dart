@@ -29,16 +29,26 @@ class ProfilePage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     const primaryColor = Color(0xFF0C0C79);
 
+    if (user == null) {
+      return const Center(child: Text("User not logged in"));
+    }
+
     return SafeArea(
       child: FutureBuilder<Map<String, dynamic>?>(
-        future: getProfile(user!.uid),
+        future: getProfile(user.uid),
         builder: (context, snapshot) {
 
-          if (!snapshot.hasData) {
+          /// Loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final profile = snapshot.data as Map<String, dynamic>?;
+          /// Error
+          if (snapshot.hasError) {
+            return const Center(child: Text("Failed to load profile"));
+          }
+
+          final profile = snapshot.data;
 
           return ListView(
             padding: const EdgeInsets.all(20),
@@ -197,7 +207,7 @@ class ProfilePage extends StatelessWidget {
 
               /// ACHIEVEMENTS
               const Text(
-                "Bestsellers",
+                "Achievements",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -210,7 +220,7 @@ class ProfilePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
 
-                  _badge(Icons.emoji_events, "Top Donor", Colors.yellow),
+                  _badge(Icons.emoji_events, "Top Donor", Colors.orange),
 
                   _badge(Icons.local_fire_department,
                       "Streak Week", Colors.blueGrey),
@@ -260,7 +270,7 @@ class ProfilePage extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 28,
-          backgroundColor: color.withValues(alpha: 0.2),
+          backgroundColor: color.withOpacity(0.2),
           child: Icon(icon, color: color),
         ),
         const SizedBox(height: 6),
