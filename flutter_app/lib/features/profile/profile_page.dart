@@ -6,8 +6,6 @@ import 'edit_profile_page.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  final Color primaryColor = const Color(0xFF0C0C79);
-
   Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
   }
@@ -15,6 +13,8 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+
+    const primaryColor = Color(0xFF0C0C79);
 
     return SafeArea(
       child: ListView(
@@ -51,6 +51,30 @@ class ProfilePage extends StatelessWidget {
                       : Colors.red,
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              /// EDIT PROFILE BUTTON
+              SizedBox(
+                width: 160,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfilePage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Edit Profile",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ],
           ),
 
@@ -64,6 +88,7 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               children: [
 
+                /// SETTINGS
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text("Settings"),
@@ -80,6 +105,7 @@ class ProfilePage extends StatelessWidget {
 
                 const Divider(height: 1),
 
+                /// LOGOUT
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text(
