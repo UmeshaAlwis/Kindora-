@@ -14,11 +14,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardHome(),   // Home
-    Center(child: Text("Feed coming soon")),     // Feed
-    Center(child: Text("Messages coming soon")), // Messages
-    Center(child: Text("Merch coming soon")),    // Merch
+  final List<Widget> _pages = [
+    const DashboardHome(),   // Home
+    const Center(child: Text("Feed coming soon")),     // Feed
+    const Center(child: Text("Messages coming soon")), // Messages
+    const Center(child: Text("Merch coming soon")),    // Merch
     ProfilePage(),     // Profile
   ];
 
