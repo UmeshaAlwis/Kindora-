@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/theme/theme_controller.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,7 +12,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
   bool notificationsEnabled = true;
-  bool darkModeEnabled = false;
 
   final Color primaryColor = const Color(0xFF0C0C79);
 
@@ -43,6 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 10),
 
+            /// NOTIFICATIONS
             SwitchListTile(
               activeColor: primaryColor,
               title: const Text("Notifications"),
@@ -57,20 +59,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const Divider(),
 
+            /// DARK MODE
             SwitchListTile(
               activeColor: primaryColor,
               title: const Text("Dark Mode"),
               subtitle: const Text("Enable dark theme"),
-              value: darkModeEnabled,
+              value: context.watch<ThemeController>().isDarkMode,
               onChanged: (value) {
-                setState(() {
-                  darkModeEnabled = value;
-                });
+                context.read<ThemeController>().toggleTheme(value);
               },
             ),
 
             const Divider(),
 
+            /// LANGUAGE
             ListTile(
               leading: Icon(Icons.language, color: primaryColor),
               title: const Text("Language"),
@@ -92,6 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 10),
 
+            /// PRIVACY POLICY
             ListTile(
               leading: Icon(Icons.privacy_tip_outlined, color: primaryColor),
               title: const Text("Privacy Policy"),
@@ -101,6 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const Divider(),
 
+            /// TERMS
             ListTile(
               leading: Icon(Icons.description_outlined, color: primaryColor),
               title: const Text("Terms & Conditions"),

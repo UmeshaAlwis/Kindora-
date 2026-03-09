@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'core/theme/theme_controller.dart';
 import 'core/auth_gate.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeController(),
+      child: const KindoraApp(),
+    ),
   );
-
-  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class KindoraApp extends StatelessWidget {
+  const KindoraApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+
+    final themeController = context.watch<ThemeController>();
+
+    return MaterialApp(
+      title: "Kindora",
       debugShowCheckedModeBanner: false,
-      home: AuthGate(), // 🔥 THIS MUST BE HERE
+
+      themeMode: themeController.themeMode,
+
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: const Color(0xFF0C0C79),
+      ),
+
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+      ),
+
+      home: const AuthGate(),
     );
   }
 }
