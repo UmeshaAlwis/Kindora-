@@ -1,4 +1,5 @@
 import { getDatabase } from './database.service';
+import { WalletService } from './wallet.service';
 import { Donation } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,9 +10,18 @@ export class DonationService {
   static async createDonation(donorId: string, data: any) {
     const db = getDatabase();
 
+    const donationId = uuidv4();
+    const isWalletPayment = data.payment_method === 'wallet';
+    const status = isWalletPayment ? 'success' : 'pending';
+
+    // If wallet payment, deduct from wallet first
+    if (isWalletPayment) {
+      await WalletService.deductFromWallet(donorId, data.amount, donationId);
+    }
+
     const donation = await db('donations')
       .insert({
-        donation_id: uuidv4(),
+        donation_id: donationId,
         donor_id: donorId,
         campaign_id: data.campaign_id,
         amount: data.amount,
@@ -20,10 +30,16 @@ export class DonationService {
         recurring_frequency: data.recurring_frequency,
         message: data.message,
         is_anonymous: data.is_anonymous || false,
-        status: 'pending',
+        status,
         timestamp: new Date(),
       })
       .returning('*');
+
+    // If wallet payment, immediately update campaign and points
+    if (isWalletPayment) {
+      await this.updateCampaignAmount(data.campaign_id, data.amount);
+      await this.awardDonationPoints(donorId, data.amount);
+    }
 
     return donation[0];
   }

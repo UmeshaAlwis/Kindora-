@@ -44,7 +44,7 @@ export interface DonationModel {
   donor_id: string;
   campaign_id: string;
   amount: number;
-  payment_method: 'card' | 'mobile_wallet' | 'bank_transfer' | 'crypto';
+  payment_method: 'card' | 'wallet' | 'bank_transfer' | 'stripe' | 'payhere' | 'crypto';
   transaction_id?: string;
   status: 'success' | 'failed' | 'pending' | 'refunded';
   donation_type: 'one-time' | 'recurring';

@@ -272,6 +272,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "dart_jsonwebtoken",
+      "rootUri": "file:///C:/Users/asus/AppData/Local/Pub/Cache/hosted/pub.dev/dart_jsonwebtoken-3.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "dart_style",
       "rootUri": "file:///Users/umeshaalwis/.pub-cache/hosted/pub.dev/dart_style-2.3.6",
       "packageUri": "lib/",
@@ -310,6 +316,12 @@
     {
       "name": "ed25519_edwards",
       "rootUri": "file:///Users/umeshaalwis/.pub-cache/hosted/pub.dev/ed25519_edwards-0.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "ed25519_edwards",
+      "rootUri": "file:///C:/Users/asus/AppData/Local/Pub/Cache/hosted/pub.dev/ed25519_edwards-0.3.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -470,6 +482,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_dotenv",
+      "rootUri": "file:///C:/Users/asus/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dotenv-5.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_feather_icons",
       "rootUri": "file:///Users/umeshaalwis/.pub-cache/hosted/pub.dev/flutter_feather_icons-2.0.0+1",
       "packageUri": "lib/",
@@ -506,6 +524,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_stripe",
+      "rootUri": "file:///C:/Users/asus/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_stripe-9.6.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "flutter_svg",
       "rootUri": "file:///Users/umeshaalwis/.pub-cache/hosted/pub.dev/flutter_svg-2.2.4",
       "packageUri": "lib/",
@@ -538,6 +562,12 @@
     {
       "name": "functions_client",
       "rootUri": "file:///Users/umeshaalwis/.pub-cache/hosted/pub.dev/functions_client-2.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "functions_client",
+      "rootUri": "file:///C:/Users/asus/AppData/Local/Pub/Cache/hosted/pub.dev/functions_client-2.5.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },

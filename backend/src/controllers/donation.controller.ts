@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { DonationService } from '../services/donation.service';
+import { WalletService } from '../services/wallet.service';
+import { StripeService } from '../services/stripe.service';
 import { NotFoundError, ValidationError, UnauthorizedError } from '../utils/errors';
 import Joi from 'joi';
 
@@ -7,7 +9,7 @@ const createDonationSchema = Joi.object({
   campaign_id: Joi.string().uuid().required(),
   amount: Joi.number().required().positive().min(10).max(100000),
   payment_method: Joi.string()
-    .valid('card', 'mobile_wallet', 'bank_transfer', 'crypto')
+    .valid('card', 'wallet', 'bank_transfer', 'stripe', 'payhere')
     .required(),
   donation_type: Joi.string().valid('one-time', 'recurring'),
   recurring_frequency: Joi.string().valid('daily', 'weekly', 'monthly', 'yearly'),
@@ -31,18 +33,24 @@ export class DonationController {
         throw new UnauthorizedError();
       }
 
-      const donation = await DonationService.createDonation(userId, value);
+      // Check wallet balance if wallet payment method is selected
+      if (value.payment_method === 'wallet') {
+        const balance = await WalletService.getWalletBalance(userId);
+        if (balance < value.amount) {
+          throw new ValidationError(
+            `Insufficient wallet balance. Available: ${balance}, Required: ${value.amount}`
+          );
+        }
+      }
 
-      // TODO: Integrate with PayHere payment gateway
-      // For now, return donation ready for payment
+      const donation = await DonationService.createDonation(userId, value);
 
       res.status(201).json({
         success: true,
-        data: {
-          ...donation,
-          payment_url: 'https://payhere.lk/pay/...', // PayHere payment URL
-        },
-        message: 'Donation created. Proceed to payment.',
+        data: donation,
+        message: value.payment_method === 'wallet' 
+          ? 'Donation successful!' 
+          : 'Donation created. Proceed to payment.',
       });
     } catch (error) {
       next(error);
@@ -187,6 +195,206 @@ export class DonationController {
       }
 
       res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get user wallet balance
+   */
+  static async getWalletBalance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const balance = await WalletService.getWalletBalance(userId);
+
+      res.json({
+        success: true,
+        data: { balance },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get wallet transactions
+   */
+  static async getWalletTransactions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
+
+      const result = await WalletService.getWalletTransactions(userId, page, limit);
+
+      res.json({
+        success: true,
+        data: result.transactions,
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        pages: result.pages,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Create Stripe payment intent
+   */
+  static async createStripePaymentIntent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const { campaign_id, amount, donor_email, donor_name } = req.body;
+
+      if (!campaign_id || !amount || !donor_email) {
+        throw new ValidationError('campaign_id, amount, and donor_email are required');
+      }
+
+      // Amount in cents for Stripe
+      const amountInCents = Math.round(amount * 100);
+
+      const paymentResult = await StripeService.createPaymentIntent({
+        amount: amountInCents,
+        currency: 'USD', // Change to your currency
+        description: `Donation to campaign: ${campaign_id}`,
+        customerEmail: donor_email,
+        customerName: donor_name || 'Anonymous',
+        successUrl: `${process.env.PAYMENT_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: process.env.PAYMENT_CANCEL_URL || 'http://localhost:3000/cancel',
+        metadata: {
+          donor_id: userId,
+          campaign_id,
+          donation_type: 'one-time',
+        },
+      });
+
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error);
+      }
+
+      res.json({
+        success: true,
+        data: {
+          clientSecret: paymentResult.clientSecret,
+          paymentIntentId: paymentResult.paymentIntentId,
+          publishableKey: StripeService.getPublishableKey(),
+        },
+        message: 'Payment intent created. Use clientSecret for payment.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Confirm Stripe payment
+   */
+  static async confirmStripePayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const { payment_intent_id, campaign_id, amount, is_anonymous, message } = req.body;
+
+      if (!payment_intent_id || !campaign_id || !amount) {
+        throw new ValidationError('payment_intent_id, campaign_id, and amount are required');
+      }
+
+      // Verify payment with Stripe
+      const paymentIntent = await StripeService.retrievePaymentIntent(payment_intent_id);
+
+      if (paymentIntent.status !== 'succeeded') {
+        throw new ValidationError(`Payment status is ${paymentIntent.status}, expected succeeded`);
+      }
+
+      // Create donation record
+      const donation = await DonationService.createDonation(userId, {
+        campaign_id,
+        amount,
+        payment_method: 'stripe',
+        donation_type: 'one-time',
+        message,
+        is_anonymous: is_anonymous || false,
+      });
+
+      // Update donation with transaction ID
+      await DonationService.updateDonationStatus(donation.donation_id, 'success', payment_intent_id);
+
+      res.json({
+        success: true,
+        data: donation,
+        message: 'Donation successful!',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Handle Stripe webhook
+   */
+  static async handleStripeWebhook(req: Request, res: Response, next: NextFunction) {
+    try {
+      const signature = req.headers['stripe-signature'] as string;
+      const body = req.body;
+
+      const event = StripeService.verifyWebhookSignature(body, signature);
+
+      if (!event) {
+        throw new ValidationError('Invalid webhook signature');
+      }
+
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log(`Payment succeeded: ${paymentIntent.id}`);
+          // Handle payment success - update donation status if needed
+          break;
+
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          console.log(`Payment failed: ${failedPayment.id}`);
+          // Handle payment failure
+          break;
+
+        default:
+          console.log(`Unhandled event type: ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get Stripe publishable key
+   */
+  static async getStripePublishableKey(req: Request, res: Response, next: NextFunction) {
+    try {
+      const publishableKey = StripeService.getPublishableKey();
+
+      res.json({
+        success: true,
+        data: { publishableKey },
+      });
     } catch (error) {
       next(error);
     }

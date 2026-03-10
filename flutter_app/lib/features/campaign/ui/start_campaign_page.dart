@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kindora/providers/supabase_providers.dart';
 
-class StartCampaignPage extends StatefulWidget {
+class StartCampaignPage extends ConsumerStatefulWidget {
   const StartCampaignPage({super.key});
 
   @override
-  State<StartCampaignPage> createState() => _StartCampaignPageState();
+  ConsumerState<StartCampaignPage> createState() => _StartCampaignPageState();
 }
 
-class _StartCampaignPageState extends State<StartCampaignPage> {
+class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   String category = "Campaign";
   String campaignCategory = "Personal";
@@ -36,6 +39,69 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
     campaignerNameController.dispose();
     targetAmountController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitCampaign() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final repository = ref.read(campaignRepositoryProvider);
+      final targetAmount =
+          double.tryParse(targetAmountController.text) ?? 1000.0;
+
+      // For now, using placeholder values for required backend fields
+      // TODO: Update the form to collect charity_id, beneficiary_details, beneficiary_location
+      const String charityId = 'default-charity';
+      const String beneficiaryDetails = 'Campaign beneficiary';
+      const String beneficiaryLocation = 'General';
+
+      await repository.createCampaign(
+        title: titleController.text,
+        campaignerName: campaignerNameController.text,
+        category: category,
+        campaignCategory: campaignCategory,
+        targetAmount: targetAmount,
+        image: null,
+        description: null,
+        charityId: charityId,
+        beneficiaryDetails: beneficiaryDetails,
+        beneficiaryLocation: beneficiaryLocation,
+        galleryUrls: [],
+        endDate: selectedDate,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Campaign created successfully"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Invalidate cache to refresh the campaigns list
+        ref.invalidate(allCampaignsProvider);
+
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error creating campaign: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      debugPrint('Campaign creation error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -277,19 +343,24 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: Submit to backend
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Campaign created successfully"),
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text("Create Campaign"),
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                await _submitCampaign();
+                              }
+                            },
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text("Create Campaign"),
                     ),
                   ),
                 ],
