@@ -90,7 +90,7 @@ class AppTheme {
         secondary: accentColor,
         error: errorColor,
         surface: Color(0xFF1E1E1E),
-        surfaceVariant: Color(0xFF2C2C2C),
+        surfaceContainerHighest: Color(0xFF2C2C2C),
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: true,
