@@ -85,9 +85,6 @@ dependencies:
   # Environment Configuration
   flutter_dotenv: ^5.1.0
   
-  # Supabase
-  supabase_flutter: ^2.0.0
-  
   # Stripe Payment Integration
   flutter_stripe: ^9.4.0
 
