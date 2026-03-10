@@ -48,7 +48,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
       });
 
       final repository = ref.read(campaignRepositoryProvider);
-      final targetAmount = double.tryParse(targetAmountController.text) ?? 0.0;
+      final targetAmount =
+          double.tryParse(targetAmountController.text) ?? 1000.0;
 
       // For now, using placeholder values for required backend fields
       // TODO: Update the form to collect charity_id, beneficiary_details, beneficiary_location
