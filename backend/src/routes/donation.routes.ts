@@ -1,18 +1,20 @@
 import { Router } from 'express';
+import { DonationController } from '../controllers/donation.controller';
+import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
 
 // Donation routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Get all donations' });
-});
+router.post('/', authenticateToken, DonationController.createDonation);
+router.get('/history', authenticateToken, DonationController.getDonationHistory);
+router.get('/total', authenticateToken, DonationController.getTotalDonated);
+router.post('/recurring', authenticateToken, DonationController.setupRecurring);
+router.delete('/recurring/:donationId', authenticateToken, DonationController.cancelRecurring);
+router.get('/campaign/:campaignId/stats', DonationController.getCampaignStats);
+router.post('/confirm-payment', DonationController.confirmPayment);
 
-router.post('/', (req, res) => {
-  res.json({ message: 'Create donation' });
-});
-
-router.get('/:id', (req, res) => {
-  res.json({ message: `Get donation ${req.params.id}` });
-});
+// Wallet routes
+router.get('/wallet/balance', authenticateToken, DonationController.getWalletBalance);
+router.get('/wallet/transactions', authenticateToken, DonationController.getWalletTransactions);
 
 export default router;

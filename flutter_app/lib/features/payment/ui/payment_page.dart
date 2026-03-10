@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/payment_model.dart';
 import 'payhere_payment_webview.dart';
 import 'bank_transfer_page.dart';
@@ -22,8 +23,16 @@ class _PaymentPageState extends State<PaymentPage> {
   late TextEditingController _donorPhoneController;
   String _selectedPaymentMethod = 'card_payment';
   bool _isProcessing = false;
+  double _walletBalance = 0.0;
+  bool _loadingWallet = true;
 
   final List<PaymentMethod> paymentMethods = [
+    PaymentMethod(
+      id: 'wallet',
+      name: 'Wallet',
+      icon: '👛',
+      description: 'Use your app wallet balance',
+    ),
     PaymentMethod(
       id: 'card_payment',
       name: 'Card Payment',
@@ -45,6 +54,16 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorNameController = TextEditingController();
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
+    _fetchWalletBalance();
+  }
+
+  Future<void> _fetchWalletBalance() async {
+    // TODO: Implement API call to fetch wallet balance
+    // For now, set a dummy value
+    setState(() {
+      _walletBalance = 5000.0; // Example balance
+      _loadingWallet = false;
+    });
   }
 
   @override
@@ -74,6 +93,21 @@ class _PaymentPageState extends State<PaymentPage> {
       return;
     }
 
+    // Validate wallet balance for wallet payments
+    if (_selectedPaymentMethod == 'wallet') {
+      if (_walletBalance < _donationAmount) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Insufficient wallet balance. Available: LKR ${_walletBalance.toStringAsFixed(2)}, Required: LKR ${_donationAmount.toStringAsFixed(2)}',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     setState(() => _isProcessing = true);
 
     try {
@@ -92,7 +126,10 @@ class _PaymentPageState extends State<PaymentPage> {
         donorEmail: _donorEmailController.text,
       );
 
-      if (_selectedPaymentMethod == 'card_payment') {
+      if (_selectedPaymentMethod == 'wallet') {
+        // Handle wallet payment
+        await _processWalletPayment(payment, orderId);
+      } else if (_selectedPaymentMethod == 'card_payment') {
         // Handle card payment via PayHere gateway
         await _processPayHerePayment(payment, orderId);
       } else if (_selectedPaymentMethod == 'bank_transfer') {
@@ -129,6 +166,44 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       );
+    }
+  }
+
+  Future<void> _processWalletPayment(Payment payment, String orderId) async {
+    try {
+      setState(() => _isProcessing = false);
+
+      if (mounted) {
+        // TODO: Implement actual wallet payment API call
+        // For now, show success dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Wallet donation successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Update wallet balance
+        setState(() {
+          _walletBalance -= _donationAmount;
+        });
+
+        // Navigate back after a short delay
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Wallet payment failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -351,6 +426,10 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const SizedBox(height: 12),
             ...paymentMethods.map((method) {
+              final isWallet = method.id == 'wallet';
+              final walletDisplay = isWallet
+                  ? ' (Balance: LKR ${_walletBalance.toStringAsFixed(2)})'
+                  : '';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
@@ -385,7 +464,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  method.name,
+                                  method.name + walletDisplay,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -429,17 +508,19 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Processing Fee:'),
-                      Text(
-                        'LKR ${(_donationAmount * 0.02).toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
+                  if (_selectedPaymentMethod != 'wallet') ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Processing Fee:'),
+                        Text(
+                          'LKR ${(_donationAmount * 0.02).toStringAsFixed(2)}',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ],
                   const Divider(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -452,7 +533,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        'LKR ${(_donationAmount + (_donationAmount * 0.02)).toStringAsFixed(2)}',
+                        'LKR ${(_selectedPaymentMethod == 'wallet' ? _donationAmount : _donationAmount + (_donationAmount * 0.02)).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
