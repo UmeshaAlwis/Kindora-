@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'features/auth/ui/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,9 +76,11 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // Navigate to features when implemented
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Features coming soon!')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
                 );
               },
               child: const Text('Get Started'),

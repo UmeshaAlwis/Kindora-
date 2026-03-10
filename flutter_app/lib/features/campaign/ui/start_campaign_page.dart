@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/services/campaign_service.dart';
 
 class StartCampaignPage extends StatefulWidget {
   const StartCampaignPage({super.key});
@@ -10,6 +11,7 @@ class StartCampaignPage extends StatefulWidget {
 
 class _StartCampaignPageState extends State<StartCampaignPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   String category = "Campaign";
   String campaignCategory = "Personal";
@@ -36,6 +38,61 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
     campaignerNameController.dispose();
     targetAmountController.dispose();
     super.dispose();
+  }
+
+  /// Submit campaign to backend
+  Future<void> _submitCampaign() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // TODO: Get auth token from Firebase/Auth service
+      const String authToken = 'placeholder_token';
+      
+      // TODO: Get charity ID from current user
+      const String charityId = 'default_charity';
+
+      final request = CreateCampaignRequest(
+        title: titleController.text.trim(),
+        description: campaignerNameController.text.trim(),
+        category: category,
+        targetAmount: double.parse(targetAmountController.text),
+        beneficiaryDetails: campaignerNameController.text,
+        endDate: selectedDate,
+        charityId: charityId,
+      );
+
+      final campaignId = await CampaignService.createCampaign(
+        request,
+        authToken,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Campaign created successfully (ID: $campaignId)'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -277,19 +334,16 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // TODO: Submit to backend
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Campaign created successfully"),
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text("Create Campaign"),
+                      onPressed: _isLoading ? null : _submitCampaign,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text("Create Campaign"),
                     ),
                   ),
                 ],
