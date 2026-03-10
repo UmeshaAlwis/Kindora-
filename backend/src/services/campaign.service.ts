@@ -1,4 +1,4 @@
-import { getDatabase } from './database.service';
+import { supabase } from './supabase.service';
 import { Campaign } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,206 +16,195 @@ export class CampaignService {
       searchQuery?: string;
     } = {}
   ) {
-    const db = getDatabase();
-    let query = db('campaigns')
-      .join('charities', 'campaigns.charity_id', 'charities.charity_id')
-      .select('campaigns.*', 'charities.name as charity_name', 'charities.logo_url');
+    try {
+      const offset = (page - 1) * limit;
+      const options: any = {
+        select:
+          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image,description,created_at,status',
+        limit,
+        offset,
+        orderBy: { column: 'created_at', ascending: false },
+      };
 
-    // Apply filters
-    if (filters.status) {
-      query = query.where('campaigns.status', filters.status);
-    }
-    if (filters.category) {
-      query = query.where('campaigns.category', filters.category);
-    }
-    if (filters.charityId) {
-      query = query.where('campaigns.charity_id', filters.charityId);
-    }
-    if (filters.searchQuery) {
-      query = query.where('campaigns.title', 'ilike', `%${filters.searchQuery}%`);
-    }
+      // Add filters if provided
+      if (filters.status || filters.category || filters.charityId) {
+        options.filters = {};
+        if (filters.status) options.filters.status = filters.status;
+        if (filters.category) options.filters.category = filters.category;
+        if (filters.charityId) options.filters.charity_id = filters.charityId;
+      }
 
-    const total = await query.clone().count('* as count').first();
-    const campaigns = await query
-      .offset((page - 1) * limit)
-      .limit(limit)
-      .orderBy('campaigns.created_at', 'desc');
+      const campaigns = await supabase.select<Campaign>('campaigns', options);
 
-    return {
-      campaigns: campaigns.map(this.formatCampaign),
-      total: total?.count || 0,
-      page,
-      limit,
-      pages: Math.ceil((total?.count || 0) / limit),
-    };
+      return {
+        campaigns,
+        total: campaigns.length,
+        page,
+        limit,
+        pages: Math.ceil(campaigns.length / limit),
+      };
+    } catch (error) {
+      throw new Error(`Failed to fetch campaigns: ${error instanceof Error ? error.message : error}`);
+    }
   }
 
   /**
    * Get campaign by ID
    */
   static async getCampaignById(campaignId: string) {
-    const db = getDatabase();
-    const campaign = await db('campaigns')
-      .join('charities', 'campaigns.charity_id', 'charities.charity_id')
-      .where('campaigns.campaign_id', campaignId)
-      .select('campaigns.*', 'charities.name as charity_name')
-      .first();
-
-    if (!campaign) {
-      return null;
+    try {
+      const campaigns = await supabase.select<Campaign>('campaigns', {
+        filters: { id: campaignId },
+      });
+      return campaigns[0] || null;
+    } catch (error) {
+      throw new Error(`Failed to fetch campaign: ${error instanceof Error ? error.message : error}`);
     }
+  }
 
-    // Get beneficiaries
-    const beneficiaries = await db('beneficiaries').where('campaign_id', campaignId);
-
-    // Get recent donations
-    const donations = await db('donations')
-      .where('campaign_id', campaignId)
-      .where('status', 'success')
-      .orderBy('timestamp', 'desc')
-      .limit(10)
-      .select('donation_id', 'amount', 'timestamp');
-
-    return {
-      ...this.formatCampaign(campaign),
-      beneficiaries,
-      recentDonations: donations,
-    };
+  /**
+   * Get campaigns by category
+   */
+  static async getCampaignsByCategory(category: string) {
+    try {
+      const campaigns = await supabase.select<Campaign>('campaigns', {
+        filters: { category },
+        orderBy: { column: 'created_at', ascending: false },
+      });
+      return campaigns;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch campaigns by category: ${error instanceof Error ? error.message : error}`
+      );
+    }
   }
 
   /**
    * Create campaign
    */
   static async createCampaign(charityId: string, data: any) {
-    const db = getDatabase();
-
-    const campaign = await db('campaigns')
-      .insert({
-        campaign_id: uuidv4(),
+    try {
+      const campaignData = {
+        id: uuidv4(),
         charity_id: charityId,
         title: data.title,
         description: data.description,
         category: data.category,
+        campaign_category: data.campaign_category,
         target_amount: data.target_amount,
         beneficiary_details: data.beneficiary_details,
         beneficiary_location: data.beneficiary_location,
-        image_url: data.image_url,
+        image: data.image_url || data.image,
         gallery_urls: data.gallery_urls || [],
         status: 'active',
         end_date: data.end_date,
-        created_at: new Date(),
-        updated_at: new Date(),
-      })
-      .returning('*');
+        campaigner_name: data.campaigner_name,
+        raised_amount: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-    return campaign[0];
+      const campaign = await supabase.insert<Campaign>('campaigns', campaignData);
+
+      return campaign;
+    } catch (error) {
+      throw new Error(`Failed to create campaign: ${error instanceof Error ? error.message : error}`);
+    }
   }
 
   /**
    * Update campaign
    */
   static async updateCampaign(campaignId: string, data: any) {
-    const db = getDatabase();
-
-    const campaign = await db('campaigns')
-      .where('campaign_id', campaignId)
-      .update({
+    try {
+      const updateData = {
         ...data,
-        updated_at: new Date(),
-      })
-      .returning('*');
+        updated_at: new Date().toISOString(),
+      };
 
-    return campaign[0];
+      const campaign = await supabase.update<Campaign>('campaigns', updateData, {
+        id: campaignId,
+      });
+
+      return campaign;
+    } catch (error) {
+      throw new Error(`Failed to update campaign: ${error instanceof Error ? error.message : error}`);
+    }
   }
 
   /**
    * Get campaign progress
    */
   static async getCampaignProgress(campaignId: string) {
-    const db = getDatabase();
+    try {
+      const campaigns = await supabase.select<any>('campaigns', {
+        filters: { id: campaignId },
+        select: 'id,target_amount,raised_amount,end_date',
+      });
 
-    const campaign = await db('campaigns')
-      .where('campaign_id', campaignId)
-      .select('target_amount', 'current_amount')
-      .first();
+      const campaign = campaigns[0];
 
-    if (!campaign) {
-      return null;
+      if (!campaign) {
+        return null;
+      }
+
+      const progress = (campaign.raised_amount / campaign.target_amount) * 100;
+      const daysLeft = this.calculateDaysLeft(campaign.end_date);
+
+      return {
+        target_amount: campaign.target_amount,
+        raised_amount: campaign.raised_amount,
+        progress: Math.min(progress, 100),
+        daysLeft,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to get campaign progress: ${error instanceof Error ? error.message : error}`
+      );
     }
-
-    const progress = (campaign.current_amount / campaign.target_amount) * 100;
-    const daysLeft = await this.getDaysLeft(campaignId);
-
-    return {
-      target_amount: campaign.target_amount,
-      current_amount: campaign.current_amount,
-      progress: Math.min(progress, 100),
-      daysLeft,
-    };
   }
 
   /**
-   * Get days left for campaign
+   * Calculate days left until campaign end date
    */
-  private static async getDaysLeft(campaignId: string): Promise<number> {
-    const db = getDatabase();
-
-    const campaign = await db('campaigns')
-      .where('campaign_id', campaignId)
-      .select('end_date')
-      .first();
-
-    if (!campaign?.end_date) {
-      return -1;
-    }
-
-    const today = new Date();
-    const endDate = new Date(campaign.end_date);
-    const daysLeft = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
+  private static calculateDaysLeft(endDate: string | Date): number {
+    const end = new Date(endDate).getTime();
+    const now = new Date().getTime();
+    const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
     return Math.max(daysLeft, 0);
   }
 
   /**
-   * Get recommended campaigns for user
+   * Update campaign raised amount (called after donation)
    */
-  static async getRecommendedCampaigns(userId: string, limit: number = 10) {
-    const db = getDatabase();
+  static async updateRaisedAmount(campaignId: string, amount: number) {
+    try {
+      const campaigns = await supabase.select<any>('campaigns', {
+        filters: { id: campaignId },
+        select: 'raised_amount',
+      });
 
-    // Get user's donation history to understand preferences
-    const userDonations = await db('donations')
-      .join('campaigns', 'donations.campaign_id', 'campaigns.campaign_id')
-      .where('donations.donor_id', userId)
-      .select('campaigns.category')
-      .groupBy('campaigns.category');
+      const campaign = campaigns[0];
+      const newRaisedAmount = (campaign?.raised_amount || 0) + amount;
 
-    const categories = userDonations.map((d: any) => d.category);
-
-    // Get campaigns in similar categories that are active
-    let query = db('campaigns')
-      .where('campaigns.status', 'active')
-      .join('charities', 'campaigns.charity_id', 'charities.charity_id')
-      .select('campaigns.*', 'charities.name as charity_name');
-
-    if (categories.length > 0) {
-      query = query.whereIn('campaigns.category', categories);
+      await supabase.update<Campaign>(
+        'campaigns',
+        { raised_amount: newRaisedAmount },
+        { id: campaignId }
+      );
+    } catch (error) {
+      throw new Error(`Failed to update raised amount: ${error instanceof Error ? error.message : error}`);
     }
-
-    const campaigns = await query
-      .limit(limit)
-      .orderBy('campaigns.current_amount', 'desc');
-
-    return campaigns.map(this.formatCampaign);
   }
 
   /**
-   * Format campaign response
+   * Delete campaign
    */
-  private static formatCampaign(campaign: any): Campaign {
-    const progress = (campaign.current_amount / campaign.target_amount) * 100;
-    return {
-      ...campaign,
-      progress: Math.min(progress, 100),
-    };
+  static async deleteCampaign(campaignId: string) {
+    try {
+      await supabase.delete('campaigns', { id: campaignId });
+    } catch (error) {
+      throw new Error(`Failed to delete campaign: ${error instanceof Error ? error.message : error}`);
+    }
   }
 }
