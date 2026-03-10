@@ -80,12 +80,37 @@ class _SignupScreenState extends State<SignupScreen> {
         Colors.green,
       );
 
-      context.go('/');
+      context.go('/login');
 
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? "Signup failed.", Colors.red);
-    } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+
+      String message;
+
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = "An account already exists with this email.";
+          break;
+
+        case 'invalid-email':
+          message = "The email address is invalid.";
+          break;
+
+        case 'weak-password':
+          message = "Password should be at least 6 characters.";
+          break;
+
+        case 'network-request-failed':
+          message = "Network error. Please check your internet.";
+          break;
+
+        default:
+          message = e.message ?? "Signup failed.";
+      }
+
+      _showSnackBar(message, Colors.red);
+
+    } catch (e) {
+      _showSnackBar("Unexpected error occurred.", Colors.red);
     }
 
     if (mounted) {
@@ -116,7 +141,7 @@ class _SignupScreenState extends State<SignupScreen> {
       _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
 
     } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+      _showSnackBar("Something went wrong with Google sign-up.", Colors.red);
     }
   }
 
@@ -167,7 +192,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: primaryColor,
                 ),
               ),
+
               const SizedBox(height: 30),
+
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -178,7 +205,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
+
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -206,7 +235,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 6),
+
               if (passwordController.text.isNotEmpty)
                 Align(
                   alignment: Alignment.centerLeft,
@@ -218,7 +249,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
+
               const SizedBox(height: 16),
+
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
@@ -243,7 +276,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 6),
+
               if (confirmPasswordController.text.isNotEmpty)
                 Align(
                   alignment: Alignment.centerLeft,
@@ -257,7 +292,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
+
               const SizedBox(height: 24),
+
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -288,7 +325,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                 ),
               ),
+
               const SizedBox(height: 16),
+
               SizedBox(
                 width: double.infinity,
                 height: 50,
