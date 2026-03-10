@@ -64,7 +64,7 @@ export interface Donation {
   donor_id: string;
   campaign_id: string;
   amount: number;
-  payment_method: 'card' | 'mobile_wallet' | 'bank_transfer' | 'crypto';
+  payment_method: 'card' | 'wallet' | 'bank_transfer' | 'crypto';
   transaction_id?: string;
   status: 'success' | 'failed' | 'pending' | 'refunded';
   donation_type: 'one-time' | 'recurring';
@@ -73,6 +73,27 @@ export interface Donation {
   is_anonymous: boolean;
   timestamp: Date;
   receipt_url?: string;
+}
+
+// Wallet Types
+export interface Wallet {
+  wallet_id: string;
+  user_id: string;
+  balance: number;
+  total_recharged: number;
+  total_spent: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface WalletTransaction {
+  transaction_id: string;
+  wallet_id: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  reference_id?: string;
+  description: string;
+  timestamp: Date;
 }
 
 // Message Types

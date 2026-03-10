@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { DonationService } from '../services/donation.service';
+import { WalletService } from '../services/wallet.service';
 import { NotFoundError, ValidationError, UnauthorizedError } from '../utils/errors';
 import Joi from 'joi';
 
@@ -7,7 +8,7 @@ const createDonationSchema = Joi.object({
   campaign_id: Joi.string().uuid().required(),
   amount: Joi.number().required().positive().min(10).max(100000),
   payment_method: Joi.string()
-    .valid('card', 'mobile_wallet', 'bank_transfer', 'crypto')
+    .valid('card', 'wallet', 'bank_transfer', 'crypto')
     .required(),
   donation_type: Joi.string().valid('one-time', 'recurring'),
   recurring_frequency: Joi.string().valid('daily', 'weekly', 'monthly', 'yearly'),
@@ -31,18 +32,24 @@ export class DonationController {
         throw new UnauthorizedError();
       }
 
-      const donation = await DonationService.createDonation(userId, value);
+      // Check wallet balance if wallet payment method is selected
+      if (value.payment_method === 'wallet') {
+        const balance = await WalletService.getWalletBalance(userId);
+        if (balance < value.amount) {
+          throw new ValidationError(
+            `Insufficient wallet balance. Available: ${balance}, Required: ${value.amount}`
+          );
+        }
+      }
 
-      // TODO: Integrate with PayHere payment gateway
-      // For now, return donation ready for payment
+      const donation = await DonationService.createDonation(userId, value);
 
       res.status(201).json({
         success: true,
-        data: {
-          ...donation,
-          payment_url: 'https://payhere.lk/pay/...', // PayHere payment URL
-        },
-        message: 'Donation created. Proceed to payment.',
+        data: donation,
+        message: value.payment_method === 'wallet' 
+          ? 'Donation successful!' 
+          : 'Donation created. Proceed to payment.',
       });
     } catch (error) {
       next(error);
@@ -187,6 +194,55 @@ export class DonationController {
       }
 
       res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get user wallet balance
+   */
+  static async getWalletBalance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const balance = await WalletService.getWalletBalance(userId);
+
+      res.json({
+        success: true,
+        data: { balance },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get wallet transactions
+   */
+  static async getWalletTransactions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
+
+      const result = await WalletService.getWalletTransactions(userId, page, limit);
+
+      res.json({
+        success: true,
+        data: result.transactions,
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        pages: result.pages,
+      });
     } catch (error) {
       next(error);
     }
