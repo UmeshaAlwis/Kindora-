@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:go_router/go_router.dart';
+import '../../../features/dashboard/ui/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,9 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
       // Show success message
       _showSnackBar("Login successful!", Colors.green);
 
-      // Navigate to Dashboard using GoRouter
+      // Navigate to Dashboard
       if (mounted) {
-        context.go('/dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -88,7 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
       await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (mounted) {
-        context.go('/dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
