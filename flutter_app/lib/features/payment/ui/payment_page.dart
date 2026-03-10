@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/payment_model.dart';
+import '../services/stripe_service.dart';
 import 'payhere_payment_webview.dart';
 import 'bank_transfer_page.dart';
 
@@ -25,6 +26,7 @@ class _PaymentPageState extends State<PaymentPage> {
   bool _isProcessing = false;
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
+  late StripeService _stripeService;
 
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
@@ -34,10 +36,16 @@ class _PaymentPageState extends State<PaymentPage> {
       description: 'Use your app wallet balance',
     ),
     PaymentMethod(
-      id: 'card_payment',
-      name: 'Card Payment',
+      id: 'stripe',
+      name: 'Stripe',
       icon: '💳',
-      description: 'Credit/Debit Card',
+      description: 'Credit/Debit Card via Stripe',
+    ),
+    PaymentMethod(
+      id: 'card_payment',
+      name: 'PayHere',
+      icon: '💳',
+      description: 'Credit/Debit Card via PayHere',
     ),
     PaymentMethod(
       id: 'bank_transfer',
@@ -54,6 +62,7 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorNameController = TextEditingController();
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
+    _stripeService = StripeService();
     _fetchWalletBalance();
   }
 
@@ -129,6 +138,9 @@ class _PaymentPageState extends State<PaymentPage> {
       if (_selectedPaymentMethod == 'wallet') {
         // Handle wallet payment
         await _processWalletPayment(payment, orderId);
+      } else if (_selectedPaymentMethod == 'stripe') {
+        // Handle Stripe payment
+        await _processStripePayment(payment, orderId);
       } else if (_selectedPaymentMethod == 'card_payment') {
         // Handle card payment via PayHere gateway
         await _processPayHerePayment(payment, orderId);
@@ -146,26 +158,6 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         );
       }
-    }
-  }
-
-  Future<void> _processBankTransfer(Payment payment) async {
-    setState(() => _isProcessing = false);
-
-    if (mounted) {
-      // Navigate to bank transfer page
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BankTransferPage(
-            campaign: widget.campaign,
-            amount: _donationAmount,
-            donorName: _donorNameController.text,
-            donorEmail: _donorEmailController.text,
-            donorPhone: _donorPhoneController.text,
-          ),
-        ),
-      );
     }
   }
 
@@ -204,6 +196,94 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _processStripePayment(Payment payment, String orderId) async {
+    try {
+      // Step 1: Create payment intent on backend
+      final intentData = await _stripeService.createPaymentIntent(
+        amount: _donationAmount,
+        donorName: _donorNameController.text,
+        donorEmail: _donorEmailController.text,
+        campaignId: widget.campaign.id,
+        currency: 'USD', // Change to LKR if Stripe supports it
+      );
+
+      final clientSecret = intentData['client_secret'] ?? '';
+      final customerId = intentData['customer_id'] ?? '';
+
+      if (clientSecret.isEmpty) {
+        throw Exception('Failed to get client secret from server');
+      }
+
+      // Step 2: Initialize payment sheet
+      await _stripeService.initPaymentSheet(
+        clientSecret: clientSecret,
+        customerId: customerId,
+      );
+
+      // Step 3: Present payment sheet to user
+      final success = await _stripeService.presentPaymentSheet();
+
+      if (success && mounted) {
+        setState(() => _isProcessing = false);
+
+        // Success - Payment completed
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate back after a short delay
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+
+        // Check if user cancelled
+        if (e.toString().contains('cancelled')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment cancelled'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Stripe Error: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _processBankTransfer(Payment payment) async {
+    setState(() => _isProcessing = false);
+
+    if (mounted) {
+      // Navigate to bank transfer page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BankTransferPage(
+            campaign: widget.campaign,
+            amount: _donationAmount,
+            donorName: _donorNameController.text,
+            donorEmail: _donorEmailController.text,
+            donorPhone: _donorPhoneController.text,
+          ),
+        ),
+      );
     }
   }
 
@@ -407,7 +487,7 @@ class _PaymentPageState extends State<PaymentPage> {
               controller: _donorPhoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                hintText: 'Phone Number (Required for PayHere)',
+                hintText: 'Phone Number',
                 prefixIcon: const Icon(Icons.phone),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -508,7 +588,8 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ],
                   ),
-                  if (_selectedPaymentMethod != 'wallet') ...[
+                  if (_selectedPaymentMethod != 'wallet' &&
+                      _selectedPaymentMethod != 'stripe') ...[
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -533,7 +614,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        'LKR ${(_selectedPaymentMethod == 'wallet' ? _donationAmount : _donationAmount + (_donationAmount * 0.02)).toStringAsFixed(2)}',
+                        'LKR ${(_selectedPaymentMethod == 'wallet' || _selectedPaymentMethod == 'stripe' ? _donationAmount : _donationAmount + (_donationAmount * 0.02)).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
