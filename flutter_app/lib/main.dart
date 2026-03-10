@@ -1,33 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-import 'features/auth/ui/login_screen.dart';
-import 'features/auth/ui/signup_screen.dart';
-import 'features/dashboard/ui/dashboard_screen.dart';
+import 'config/routes/app_router.dart';
 
-final GoRouter _router = GoRouter(
-  initialLocation: '/',
-  routes: [
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const LoginScreen(),
-    ),
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-    GoRoute(
-      path: '/signup',
-      builder: (context, state) => const SignupScreen(),
-    ),
-
-    GoRoute(
-      path: '/dashboard',
-      builder: (context, state) => const DashboardScreen(),
-    ),
-
-  ],
-);
-
-void main() {
   runApp(const KindoraApp());
 }
 
@@ -39,7 +22,7 @@ class KindoraApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Kindora',
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: AppRouter.router,
     );
   }
 }
