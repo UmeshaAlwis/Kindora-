@@ -999,6 +999,13 @@
       ]
     },
     {
+      "name": "stripe_android",
+      "version": "9.6.0+2",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
       "name": "typed_data",
       "version": "1.4.0",
       "dependencies": [
@@ -2278,13 +2285,6 @@
       "version": "1.0.0",
       "dependencies": [
         "fixnum"
-      ]
-    },
-    {
-      "name": "stripe_android",
-      "version": "9.6.0+2",
-      "dependencies": [
-        "flutter"
       ]
     }
   ],
