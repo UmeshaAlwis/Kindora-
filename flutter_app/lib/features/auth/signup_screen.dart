@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -40,7 +41,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // EMAIL SIGNUP
   Future<void> signup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -80,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Colors.green,
       );
 
-      Navigator.pop(context);
+      context.go('/');
 
     } on FirebaseAuthException catch (e) {
       _showSnackBar(e.message ?? "Signup failed.", Colors.red);
@@ -93,7 +93,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // GOOGLE SIGNUP
   Future<void> signUpWithGoogle() async {
     try {
       final googleProvider = GoogleAuthProvider();
@@ -103,6 +102,9 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+      if (!mounted) return;
+      context.go('/dashboard');
 
     } on FirebaseAuthException catch (e) {
 
@@ -152,14 +154,11 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(24),
-
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               Text(
                 'Join Kindora',
                 style: TextStyle(
@@ -168,10 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: primaryColor,
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              // EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -182,10 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -213,9 +206,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 6),
-
               if (passwordController.text.isNotEmpty)
                 Align(
                   alignment: Alignment.centerLeft,
@@ -227,10 +218,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
               const SizedBox(height: 16),
-
-              // CONFIRM PASSWORD
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
@@ -255,9 +243,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 6),
-
               if (confirmPasswordController.text.isNotEmpty)
                 Align(
                   alignment: Alignment.centerLeft,
@@ -271,24 +257,18 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
               const SizedBox(height: 24),
-
-              // SIGNUP BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   onPressed: isLoading ? null : signup,
-
                   child: isLoading
                       ? const SizedBox(
                           height: 20,
@@ -308,29 +288,22 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // GOOGLE SIGNUP
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton.icon(
-
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: primaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   icon: Icon(Icons.login, color: primaryColor),
-
                   label: Text(
                     "Sign up with Google",
                     style: TextStyle(color: primaryColor),
                   ),
-
                   onPressed: signUpWithGoogle,
                 ),
               ),
