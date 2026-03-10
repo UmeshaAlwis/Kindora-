@@ -5,14 +5,17 @@ import Joi from 'joi';
 
 const createCampaignSchema = Joi.object({
   title: Joi.string().required().min(3).max(255),
+  campaigner_name: Joi.string().optional(),
   description: Joi.string().required().min(10),
   category: Joi.string().required(),
+  campaign_category: Joi.string().optional(),
   target_amount: Joi.number().required().positive(),
-  beneficiary_details: Joi.string(),
-  beneficiary_location: Joi.string(),
-  image_url: Joi.string().uri(),
-  gallery_urls: Joi.array().items(Joi.string().uri()),
-  end_date: Joi.date(),
+  beneficiary_details: Joi.string().optional(),
+  beneficiary_location: Joi.string().optional(),
+  image_url: Joi.string().uri().optional().allow(null, ''),
+  gallery_urls: Joi.array().items(Joi.string().uri()).optional(),
+  end_date: Joi.date().optional(),
+  charity_id: Joi.string().optional(),
 });
 
 export class CampaignController {
@@ -72,13 +75,19 @@ export class CampaignController {
    */
   static async createCampaign(req: Request, res: Response, next: NextFunction) {
     try {
-      const { error, value } = createCampaignSchema.validate(req.body);
+      const { error, value } = createCampaignSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        throw new ValidationError(error.message);
+        const errorDetails = error.details.map(e => ({
+          field: e.path.join('.'),
+          message: e.message,
+        }));
+        console.error('Validation errors:', errorDetails);
+        console.error('Request body:', req.body);
+        throw new ValidationError(`Validation failed: ${error.details.map(e => e.message).join('; ')}`);
       }
 
       // TODO: Get charity ID from user
-      const charityId = req.body.charityId;
+      const charityId = req.body.charity_id;
 
       const campaign = await CampaignService.createCampaign(charityId, value);
 

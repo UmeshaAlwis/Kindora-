@@ -20,6 +20,7 @@ class SupabaseClient {
       baseURL: `${this.url}/rest/v1`,
       headers: {
         'Authorization': `Bearer ${this.serviceRoleKey}`,
+        'apikey': this.serviceRoleKey,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation',
       },
@@ -78,10 +79,18 @@ class SupabaseClient {
    */
   async insert<T>(table: string, data: any): Promise<T> {
     try {
+      console.log(`[Supabase] Inserting into ${table}:`, JSON.stringify(data, null, 2));
       const response = await this.client.post(`/${table}`, data);
       return response.data[0] || response.data;
-    } catch (error) {
-      throw new Error(`INSERT into ${table} failed: ${error instanceof Error ? error.message : error}`);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message;
+      console.error(`[Supabase] INSERT error details:`, {
+        table,
+        status: error.response?.status,
+        message: errorMsg,
+        data: error.response?.data,
+      });
+      throw new Error(`INSERT into ${table} failed: ${errorMsg || error.message}`);
     }
   }
 
