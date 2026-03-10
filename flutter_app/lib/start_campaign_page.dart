@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
+import 'services/campaign_services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+
 
 class StartCampaignPage extends StatefulWidget {
   const StartCampaignPage({super.key});
@@ -17,6 +21,9 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
   DateTime selectedDate = DateTime.now();
 
   late TextEditingController dateController;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
 
   @override
   void initState() {
@@ -27,6 +34,9 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
   @override
   void dispose() {
     dateController.dispose();
+    titleController.dispose();
+    nameController.dispose();
+    amountController.dispose();  
     super.dispose();
   }
 
@@ -78,6 +88,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
               /// Title
               TextFormField(
+                controller: titleController,
                 decoration: const InputDecoration(
                   labelText: "Title",
                   border: OutlineInputBorder(),
@@ -88,6 +99,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
               /// Campaigner Name
               TextFormField(
+                controller: nameController,
                 decoration: const InputDecoration(
                   labelText: "Campaigner Name",
                   border: OutlineInputBorder(),
@@ -215,6 +227,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                   Expanded(
                   flex: 4,
                   child: TextFormField(
+                    controller: nameController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
@@ -245,13 +258,27 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Submit logic
-                        }
-                      },
-                      child: const Text("Create campaign"),
-                    ),
+                      onPressed: () async {
+
+                        final supabase = Supabase.instance.client;
+
+                        final title = titleController.text;
+                        final amount = double.tryParse(amountController.text) ?? 0;
+
+                        await supabase.from('campaigns').insert({
+                          'title': title,
+                          'target_amount': amount,
+                          'raised_amount': 0
+                        });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Campaign created successfully")),
+                  );
+
+                  Navigator.pop(context);
+                },
+                child: const Text("Create campaign"),
+              )
                   ),
                 ],
               ),
