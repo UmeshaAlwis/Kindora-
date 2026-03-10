@@ -83,10 +83,10 @@ class ProfilePage extends StatelessWidget {
                   Positioned(
                     bottom: 0,
                     right: MediaQuery.of(context).size.width / 2 - 60,
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       radius: 16,
                       backgroundColor: primaryColor,
-                      child: const Icon(
+                      child: Icon(
                         Icons.edit,
                         size: 16,
                         color: Colors.white,

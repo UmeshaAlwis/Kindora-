@@ -15,7 +15,8 @@ dependencies:
  
   # State Management
   provider: ^6.1.2
-  riverpod: ^2.3.0
+  flutter_riverpod: ^2.4.0
+ 
 
   # Supabase
   supabase_flutter: ^2.5.6

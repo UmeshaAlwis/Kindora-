@@ -1,33 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'core/theme/theme_controller.dart';
-import 'core/auth_gate.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 
-void main() async {
+import 'features/auth/ui/login_screen.dart';
+import 'features/auth/ui/signup_screen.dart';
+import 'features/dashboard/ui/dashboard_screen.dart';
 
-  WidgetsFlutterBinding.ensureInitialized();
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  routes: [
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  /// SUPABASE INITIALIZATION
-  await Supabase.initialize(
-    url: 'https://ucxqakixdpqqmbbpeptm.supabase.co',
-    anonKey: ' sb_publishable_frgCObr7FwO2W_Egb6EH-Q_slJAljVE',
-  );
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeController(),
-      child: const KindoraApp(),
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const LoginScreen(),
     ),
-  );
+
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => const SignupScreen(),
+    ),
+
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardScreen(),
+    ),
+
+  ],
+);
+
+void main() {
+  runApp(const KindoraApp());
 }
 
 class KindoraApp extends StatelessWidget {
@@ -35,82 +36,10 @@ class KindoraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeController = context.watch<ThemeController>();
-
-    const primaryColor = Color(0xFF0C0C79);
-
-    return MaterialApp(
+    return MaterialApp.router(
+      title: 'Kindora',
       debugShowCheckedModeBanner: false,
-      title: "Kindora",
-
-      themeMode: themeController.themeMode,
-
-      /// LIGHT THEME
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primaryColor: primaryColor,
-
-        scaffoldBackgroundColor: Colors.white,
-
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryColor,
-          brightness: Brightness.light,
-        ),
-
-        appBarTheme: const AppBarTheme(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-        ),
-
-        switchTheme: SwitchThemeData(
-          thumbColor: MaterialStateProperty.all(primaryColor),
-          trackColor: MaterialStateProperty.all(
-            primaryColor.withOpacity(0.4),
-          ),
-        ),
-
-        listTileTheme: const ListTileThemeData(
-          iconColor: primaryColor,
-        ),
-      ),
-
-      /// DARK THEME
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-
-        scaffoldBackgroundColor: const Color(0xFF121212),
-
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryColor,
-          brightness: Brightness.dark,
-        ),
-
-        appBarTheme: const AppBarTheme(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-        ),
-
-        cardColor: const Color(0xFF1E1E1E),
-
-        dividerColor: Colors.grey,
-
-        switchTheme: SwitchThemeData(
-          thumbColor: MaterialStateProperty.all(primaryColor),
-          trackColor: MaterialStateProperty.all(
-            primaryColor.withOpacity(0.5),
-          ),
-        ),
-
-        listTileTheme: const ListTileThemeData(
-          iconColor: Colors.white70,
-        ),
-      ),
-
-      home: const AuthGate(),
+      routerConfig: _router,
     );
   }
 }

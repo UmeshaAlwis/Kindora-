@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/chat_model.dart';
 import '../services/chat_service.dart';
 
+
+
 /// Chat state provider
 class ChatNotifier extends StateNotifier<List<ChatMessage>> {
   final ChatService _chatService;

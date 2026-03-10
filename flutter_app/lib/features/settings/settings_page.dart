@@ -45,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// NOTIFICATIONS
             SwitchListTile(
-              activeColor: primaryColor,
+              activeThumbColor: primaryColor,
               activeTrackColor: primaryColor.withOpacity(0.4),
               title: const Text("Notifications"),
               subtitle: const Text("Receive campaign updates"),
@@ -61,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// DARK MODE
             SwitchListTile(
-              activeColor: primaryColor,
+              activeThumbColor: primaryColor,
               activeTrackColor: primaryColor.withOpacity(0.4),
               title: const Text("Dark Mode"),
               subtitle: const Text("Enable dark theme"),

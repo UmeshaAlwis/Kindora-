@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
+import '../dashboard/ui/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final Color primaryColor = const Color(0xFF0C0C79);
   final Color accentColor = const Color(0xFFFF751F);
 
-  // EMAIL LOGIN
   Future<void> login() async {
 
     final email = emailController.text.trim();
@@ -40,14 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      // Show success message
       _showSnackBar("Login successful!", Colors.green);
 
-      // Navigate to Dashboard after successful login
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/dashboard',
-          (route) => false,
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardScreen(),
+          ),
         );
       }
 
@@ -56,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String message;
 
       switch (e.code) {
+
         case 'user-not-found':
           message = "No account found with this email.";
           break;
@@ -84,8 +85,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // GOOGLE LOGIN
   Future<void> signInWithGoogle() async {
+
+    if (isLoading) return;
+
+    setState(() => isLoading = true);
 
     try {
 
@@ -96,6 +100,15 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardScreen(),
+          ),
+        );
+      }
 
     } on FirebaseAuthException catch (e) {
 
@@ -110,10 +123,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
       _showSnackBar("Google sign-in failed.", Colors.red);
 
+    } finally {
+
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+
     }
   }
 
-  // RESET PASSWORD
   Future<void> resetPassword() async {
 
     final email = emailController.text.trim();
@@ -194,7 +212,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              // EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -208,7 +225,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              // PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -247,7 +263,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              // LOGIN BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -285,7 +300,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              // GOOGLE LOGIN
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -312,7 +326,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              // SIGNUP
               TextButton(
                 onPressed: () {
 

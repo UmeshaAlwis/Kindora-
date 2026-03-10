@@ -25,33 +25,33 @@ class AppBottomNavBar extends StatelessWidget {
         elevation: 0,
         enableFeedback: false,
         onTap: onTap,
-        items: [
+        items: const [
 
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: "Home",
           ),
 
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.campaign_outlined),
             activeIcon: Icon(Icons.campaign),
             label: "Campaigns",
           ),
 
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.favorite_outline),
             activeIcon: Icon(Icons.favorite),
             label: "Donate",
           ),
 
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.message_outlined),
             activeIcon: Icon(Icons.message),
             label: "Messages",
           ),
 
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
             label: "Profile",
