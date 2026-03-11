@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/ui/login_screen.dart';
-import '../../features/auth/ui/signup_screen.dart';
-import '../../features/home/ui/home_screen.dart';
-import '../../features/dashboard/ui/dashboard_screen.dart';
-import '../../features/profile/ui/profile_page.dart';
-import '../../features/settings/ui/settings_page.dart';
-import '../../features/campaign/ui/campaign_home_page.dart';
+import 'package:kindora/features/auth/ui/login_screen.dart';
+import 'package:kindora/features/auth/ui/signup_screen.dart';
+import 'package:kindora/features/home/ui/home_screen.dart';
+import 'package:kindora/features/dashboard/ui/dashboard_screen.dart';
+import 'package:kindora/features/profile/ui/profile_page.dart';
+import 'package:kindora/features/settings/ui/settings_page.dart';
+import 'package:kindora/features/campaign/ui/campaign_home_page.dart';
 
-import '../../core/widgets/auth_gate.dart';
-import '../../core/widgets/main_layout.dart';
+import 'package:kindora/core/auth/auth_gate.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -18,16 +17,9 @@ class AppRouter {
 
     routes: [
 
-      /// HOME
-      GoRoute(
-        path: '/',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
-      ),
-
       /// AUTH GATE
       GoRoute(
-        path: '/auth',
+        path: '/',
         name: 'auth',
         builder: (context, state) => const AuthGate(),
       ),
@@ -46,42 +38,32 @@ class AppRouter {
         builder: (context, state) => const SignupScreen(),
       ),
 
-      /// MAIN APP (Bottom Navigation)
-      ShellRoute(
-        builder: (context, state, child) {
-          return MainLayout(child: child);
-        },
-        routes: [
+      /// DASHBOARD
+      GoRoute(
+        path: '/dashboard',
+        name: 'dashboard',
+        builder: (context, state) => const DashboardScreen(),
+      ),
 
-          /// DASHBOARD
-          GoRoute(
-            path: '/dashboard',
-            name: 'dashboard',
-            builder: (context, state) => const DashboardScreen(),
-          ),
+      /// CAMPAIGNS
+      GoRoute(
+        path: '/campaigns',
+        name: 'campaigns',
+        builder: (context, state) => const CampaignHomePage(),
+      ),
 
-          /// CAMPAIGNS
-          GoRoute(
-            path: '/campaigns',
-            name: 'campaigns',
-            builder: (context, state) => const CampaignHomePage(),
-          ),
+      /// PROFILE
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
 
-          /// PROFILE
-          GoRoute(
-            path: '/profile',
-            name: 'profile',
-            builder: (context, state) => const ProfilePage(),
-          ),
-
-          /// SETTINGS
-          GoRoute(
-            path: '/settings',
-            name: 'settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
-
-        ],
+      /// SETTINGS
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsPage(),
       ),
     ],
 
