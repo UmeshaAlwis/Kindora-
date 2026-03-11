@@ -17,9 +17,16 @@ class AppRouter {
 
     routes: [
 
-      /// AUTH GATE
+      /// HOME PAGE (FIRST SCREEN)
       GoRoute(
         path: '/',
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
+      ),
+
+      /// AUTH GATE
+      GoRoute(
+        path: '/auth',
         name: 'auth',
         builder: (context, state) => const AuthGate(),
       ),
