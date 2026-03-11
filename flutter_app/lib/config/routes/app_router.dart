@@ -10,6 +10,7 @@ import 'package:kindora/features/dashboard/ui/dashboard_screen.dart';
 import 'package:kindora/features/profile/ui/profile_page.dart';
 import 'package:kindora/features/settings/ui/settings_page.dart';
 import 'package:kindora/features/campaign/ui/campaign_home_page.dart';
+import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
 
 class AppRouter {
 
@@ -72,6 +73,11 @@ class AppRouter {
       GoRoute(
         path: '/campaigns',
         builder: (context, state) => const CampaignHomePage(),
+      ),
+
+      GoRoute(
+         path: '/create-campaign',
+         builder: (context, state) => const StartCampaignPage(),
       ),
 
       GoRoute(

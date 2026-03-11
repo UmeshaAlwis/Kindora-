@@ -24,15 +24,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         break;
 
       case 1:
-        // Feed page
         break;
 
       case 2:
-        // Messages page
         break;
 
       case 3:
-        // Merch page
         break;
 
       case 4:
@@ -72,31 +69,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
 
                     /// HEADER
-/// HEADER
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    const Text(
-      "Your Balance",
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Your Balance",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
 
-    /// NOTIFICATION ICON
-    IconButton(
-      icon: const Icon(
-        Icons.notifications_none,
-        color: Colors.white,
-        size: 22,
-      ),
-      onPressed: () {
-        context.push('/notifications'); // optional future page
-      },
-    ),
-  ],
-),
+                        /// NOTIFICATION ICON
+                        IconButton(
+                          icon: const Icon(
+                            Icons.notifications_none,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          onPressed: () {
+                            context.push('/notifications');
+                          },
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 6),
 
@@ -156,7 +152,7 @@ Row(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () {
-                          context.push('/campaigns');
+                          context.push('/create-campaign');
                         },
                       ),
                     ),
