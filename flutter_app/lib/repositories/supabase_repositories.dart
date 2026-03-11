@@ -10,24 +10,40 @@ class CampaignRepository {
   CampaignRepository({SupabaseClient? supabase})
       : _supabase = supabase ?? SupabaseService.supabaseClient;
 
-  /// Fetch all campaigns
+  /// Fetch all campaigns via backend API
   Future<List<Campaign>> getAllCampaigns() async {
     try {
-      print('[CampaignRepository] Fetching campaigns...');
-      final response = await _supabase
-          .from('campaigns')
-          .select(
-              'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at')
-          .order('created_at', ascending: false);
-      print('[CampaignRepository] Raw response: $response');
-      print('[CampaignRepository] Response type: ${response.runtimeType}');
-      final campaigns =
-          (response as List).map((data) => Campaign.fromJson(data)).toList();
-      print('[CampaignRepository] Parsed ${campaigns.length} campaigns');
-      campaigns.forEach((c) => print('[Campaign] $c'));
-      return campaigns;
+      print('[CampaignRepository] Fetching campaigns from backend API...');
+      final dio = Dio();
+      final apiUrl = '${AppEnv.apiBaseUrl}/campaigns';
+      print('[CampaignRepository] API URL: $apiUrl');
+
+      final response = await dio.get(
+        apiUrl,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      print('[CampaignRepository] Response status: ${response.statusCode}');
+      print('[CampaignRepository] Response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final campaignsList = (data['data'] as List)
+            .map((json) => Campaign.fromJson(json))
+            .toList();
+        print(
+            '[CampaignRepository] Successfully parsed ${campaignsList.length} campaigns');
+        return campaignsList;
+      } else {
+        throw Exception('Failed to fetch campaigns: ${response.statusCode}');
+      }
     } catch (e) {
       print('[CampaignRepository] ERROR: $e');
+      print('[CampaignRepository] Stack: ${StackTrace.current}');
       throw Exception('Failed to fetch campaigns: $e');
     }
   }

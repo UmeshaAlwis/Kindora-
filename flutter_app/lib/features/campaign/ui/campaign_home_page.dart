@@ -62,23 +62,30 @@ class CampaignList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('[CampaignList] Building CampaignList widget');
     final campaignsAsync = ref.watch(allCampaignsProvider);
+    print('[CampaignList] campaignsAsync state: ${campaignsAsync.runtimeType}');
 
     return campaignsAsync.when(
       loading: () => const Center(
         child: CircularProgressIndicator(),
       ),
-      error: (err, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Error loading campaigns: $err'),
-          ],
-        ),
-      ),
+      error: (err, stack) {
+        print('[CampaignList] ERROR: $err');
+        print('[CampaignList] STACK: $stack');
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error loading campaigns: $err'),
+            ],
+          ),
+        );
+      },
       data: (campaigns) {
+        print('[CampaignList] DATA received: ${campaigns.length} campaigns');
         if (campaigns.isEmpty) {
           return Center(
             child: Column(
@@ -106,6 +113,7 @@ class CampaignList extends ConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () async {
+            print('[CampaignList] Refreshing campaigns...');
             ref.invalidate(allCampaignsProvider);
           },
           child: ListView.builder(

@@ -20,7 +20,7 @@ export class CampaignService {
       const offset = (page - 1) * limit;
       const options: any = {
         select:
-          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,description,created_at',
+          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at',
         limit,
         offset,
         orderBy: { column: 'created_at', ascending: false },
