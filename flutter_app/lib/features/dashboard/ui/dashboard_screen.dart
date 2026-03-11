@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindora/core/widgets/app_bottom_nav_bar.dart';
+import 'package:kindora/features/campaign/widgets/campaign_card.dart';
+import 'package:kindora/models/campaign.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -10,36 +12,52 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-
   int _currentIndex = 0;
 
   void _onNavTap(int index) {
-
     setState(() {
       _currentIndex = index;
     });
 
-    switch (index) {
-      case 0:
-        break;
-
-      case 1:
-        break;
-
-      case 2:
-        break;
-
-      case 3:
-        break;
-
-      case 4:
-        context.push('/profile');
-        break;
+    if (index == 4) {
+      context.push('/profile');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    /// Temporary campaigns for dashboard preview
+    final List<Campaign> campaigns = [
+      Campaign(
+        id: "1",
+        title: "Cancer Treatment Fund",
+        description: "Help raise funds for urgent medical treatment.",
+        goalAmount: 10000,
+        raisedAmount: 4500,
+      ),
+      Campaign(
+        id: "2",
+        title: "Flood Victim Support",
+        description: "Support families affected by floods.",
+        goalAmount: 8000,
+        raisedAmount: 3200,
+      ),
+      Campaign(
+        id: "3",
+        title: "School Supplies",
+        description: "Provide books and school supplies.",
+        goalAmount: 5000,
+        raisedAmount: 2700,
+      ),
+      Campaign(
+        id: "4",
+        title: "Food for Homeless",
+        description: "Help provide meals.",
+        goalAmount: 7000,
+        raisedAmount: 3900,
+      ),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -54,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             children: [
 
-              /// HEADER BALANCE
+              /// HEADER
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -68,28 +86,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    /// HEADER
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+
                         const Text(
                           "Your Balance",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white),
                         ),
 
-                        /// NOTIFICATION ICON
                         IconButton(
-                          icon: const Icon(
-                            Icons.notifications_none,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          onPressed: () {
-                            context.push('/notifications');
-                          },
+                          icon: const Icon(Icons.notifications_none, color: Colors.white),
+                          onPressed: () {},
                         ),
                       ],
                     ),
@@ -107,7 +115,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                     const SizedBox(height: 18),
 
-                    /// ACTION ICONS
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -123,24 +130,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               const SizedBox(height: 20),
 
-              /// SHARE KINDNESS
+              /// START / SUPPORT
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    const Text(
-                      "Share Kindness Today",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    /// START CAMPAIGN
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -148,18 +143,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         label: const Text("Start a Campaign"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF751F),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () {
-                          context.push('/create-campaign');
-                        },
+                        onPressed: () => context.push('/create-campaign'),
                       ),
                     ),
 
                     const SizedBox(height: 10),
 
-                    /// SUPPORT CAMPAIGN
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -167,12 +157,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         label: const Text("Support a Campaign"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0C0C79),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () {
-                          context.push('/campaigns');
-                        },
+                        onPressed: () => context.push('/campaigns'),
                       ),
                     ),
                   ],
@@ -184,50 +170,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               /// URGENT DONATIONS
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Urgent Donations",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text("See all"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 4,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.8,
-                      ),
-                      itemBuilder: (context, index) {
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            title: Text('Campaign ${index + 1}'),
-                            subtitle: const Text('Support this campaign'),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: campaigns.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemBuilder: (context, index) {
+                    return CampaignCard(
+                      campaign: campaigns[index],
+                    );
+                  },
                 ),
               ),
 
@@ -255,13 +212,7 @@ class _HeaderAction extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white, size: 26),
         const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
       ],
     );
   }

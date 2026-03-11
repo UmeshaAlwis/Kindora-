@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../models/campaign.dart';
-import '../ui/campaign_home_page.dart';
+
 
 class CampaignCard extends StatelessWidget {
   final Campaign campaign;
@@ -12,19 +13,29 @@ class CampaignCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = campaign.raisedAmount / campaign.goalAmount;
+
+    /// Safe progress calculation
+    final progress = campaign.goalAmount == 0
+        ? 0.0
+        : (campaign.raisedAmount / campaign.goalAmount).clamp(0.0, 1.0);
+
+    final percent = (progress * 100).toInt();
 
     return Card(
+      elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+
       child: Padding(
         padding: const EdgeInsets.all(12),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Image
+
+            /// Campaign Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -35,7 +46,7 @@ class CampaignCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             /// Title
             Text(
@@ -51,36 +62,61 @@ class CampaignCard extends StatelessWidget {
             /// Description
             Text(
               campaign.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 14),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            /// Progress
-            LinearProgressIndicator(value: progress),
+            /// Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: Colors.grey.shade300,
+                valueColor: const AlwaysStoppedAnimation(
+                  Color(0xFFFF751F),
+                ),
+              ),
+            ),
 
             const SizedBox(height: 6),
 
-            Text(
-              "Raised \$${campaign.raisedAmount}",
-              style: const TextStyle(fontSize: 12),
+            /// Raised info
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Raised \$${campaign.raisedAmount}",
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Text(
+                  "$percent%",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            /// Donate button
+            /// Donate Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                child: const Text("Donate"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0C0C79),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CampaignHomePage(),
-                    ),
-                  );
+                  context.push('/campaigns');
                 },
+                child: const Text("Donate"),
               ),
             ),
           ],
