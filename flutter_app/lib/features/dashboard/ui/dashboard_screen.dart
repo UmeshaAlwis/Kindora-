@@ -72,28 +72,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
 
                     /// HEADER
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Your Balance",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            context.push('/profile');
-                          },
-                        ),
-                      ],
-                    ),
+/// HEADER
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    const Text(
+      "Your Balance",
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+      ),
+    ),
+
+    /// NOTIFICATION ICON
+    IconButton(
+      icon: const Icon(
+        Icons.notifications_none,
+        color: Colors.white,
+        size: 22,
+      ),
+      onPressed: () {
+        context.push('/notifications'); // optional future page
+      },
+    ),
+  ],
+),
 
                     const SizedBox(height: 6),
 
