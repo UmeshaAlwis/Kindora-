@@ -41,7 +41,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // EMAIL SIGNUP
   Future<void> signup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -81,11 +80,37 @@ class _SignupScreenState extends State<SignupScreen> {
         Colors.green,
       );
 
-      Navigator.pop(context);
+      context.go('/login');
+
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? "Signup failed.", Colors.red);
-    } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+
+      String message;
+
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = "An account already exists with this email.";
+          break;
+
+        case 'invalid-email':
+          message = "The email address is invalid.";
+          break;
+
+        case 'weak-password':
+          message = "Password should be at least 6 characters.";
+          break;
+
+        case 'network-request-failed':
+          message = "Network error. Please check your internet.";
+          break;
+
+        default:
+          message = e.message ?? "Signup failed.";
+      }
+
+      _showSnackBar(message, Colors.red);
+
+    } catch (e) {
+      _showSnackBar("Unexpected error occurred.", Colors.red);
     }
 
     if (mounted) {
@@ -93,7 +118,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // GOOGLE SIGNUP
   Future<void> signUpWithGoogle() async {
     try {
       final googleProvider = GoogleAuthProvider();
@@ -103,15 +127,21 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+      if (!mounted) return;
+      context.go('/dashboard');
+
     } on FirebaseAuthException catch (e) {
+
       if (e.code == 'popup-closed-by-user' ||
           e.code == 'cancelled-popup-request') {
         return;
       }
 
       _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
+
     } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+      _showSnackBar("Something went wrong with Google sign-up.", Colors.red);
     }
   }
 
@@ -165,7 +195,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 30),
 
-              // EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -179,7 +208,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
-              // PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -195,7 +223,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -222,7 +252,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
-              // CONFIRM PASSWORD
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
@@ -240,7 +269,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     onPressed: () {
                       setState(() {
-                        obscureConfirmPassword = !obscureConfirmPassword;
+                        obscureConfirmPassword =
+                            !obscureConfirmPassword;
                       });
                     },
                   ),
@@ -257,14 +287,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         ? "Passwords match ✓"
                         : "Passwords do not match",
                     style: TextStyle(
-                      color: passwordsMatch ? Colors.green : Colors.red,
+                      color:
+                          passwordsMatch ? Colors.green : Colors.red,
                     ),
                   ),
                 ),
 
               const SizedBox(height: 24),
 
-              // SIGNUP BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -298,27 +328,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
-              // ALREADY HAVE ACCOUNT
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Already have an account? ",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.push('/login');
-                    },
-                    child: Text(
-                      "Sign In",
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: primaryColor),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
+                  icon: Icon(Icons.login, color: primaryColor),
+                  label: Text(
+                    "Sign up with Google",
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  onPressed: signUpWithGoogle,
+                ),
               ),
             ],
           ),

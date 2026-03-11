@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/core/widgets/app_bottom_nav_bar.dart';
+import '../../features/chat/ui/chat_assistant_button.dart';
 
-/// Custom Bottom Navigation Bar Widget
-class AppBottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  final Function(int) onIndexChanged;
+class MainLayout extends StatefulWidget {
+  final Widget child;
 
-  const AppBottomNavBar({
+  const MainLayout({
     super.key,
-    required this.currentIndex,
-    required this.onIndexChanged,
+    required this.child,
   });
 
   @override
+  State<MainLayout> createState() => _MainLayoutState();
+}
+
+class _MainLayoutState extends State<MainLayout> {
+
+  int _currentIndex = 0;
+
+  void _onTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onIndexChanged,
-      type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.campaign),
-          label: 'Campaigns',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite),
-          label: 'Favorites',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          SafeArea(child: widget.child),
+
+          const ChatAssistantButton(showBadge: true),
+        ],
+      ),
+
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onTap,
+      ),
     );
   }
 }

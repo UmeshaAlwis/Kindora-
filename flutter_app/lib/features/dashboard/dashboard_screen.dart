@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kindora/features/home/ui/home_screen.dart';
 import 'package:kindora/features/profile/ui/profile_page.dart';
-import 'package:kindora/core/widgets/bottom_nav_bar.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,26 +21,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ProfilePage(),
   ];
 
-  void _onNavTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _pages,
-        ),
-      ),
-
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTapped,
+    return SafeArea(
+      child: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
     );
   }

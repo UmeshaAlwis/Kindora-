@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:go_router/go_router.dart';
+import 'signup_screen.dart';
+import '../dashboard/ui/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,17 +11,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool isLoading = false;
   bool obscurePassword = true;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFFF751F);
+  static const Color primaryColor = Color(0xFF0C0C79);
 
-  // EMAIL LOGIN
+  /// EMAIL LOGIN
   Future<void> login() async {
+
+    if (isLoading) return;
+
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
@@ -33,72 +36,123 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Show success message
-      _showSnackBar("Login successful!", Colors.green);
+      if (userCredential.user != null && mounted) {
 
-      // Navigate to Dashboard using GoRouter
-      if (mounted) {
-        context.go('/dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardScreen(),
+          ),
+        );
+
       }
+
     } on FirebaseAuthException catch (e) {
+
       String message;
 
       switch (e.code) {
+
         case 'user-not-found':
           message = "No account found with this email.";
           break;
+
         case 'wrong-password':
         case 'invalid-credential':
           message = "Incorrect email or password.";
           break;
+
         case 'too-many-requests':
           message = "Too many attempts. Try again later.";
           break;
+
+        case 'network-request-failed':
+          message = "Check your internet connection.";
+          break;
+
         default:
-          message = e.message ?? "Login failed.";
+          message = e.message ?? e.code;
+
       }
 
       _showSnackBar(message, Colors.red);
+
     } finally {
+
       if (mounted) {
         setState(() => isLoading = false);
       }
+
     }
   }
 
-  // GOOGLE LOGIN
+  /// GOOGLE LOGIN (POPUP METHOD)
   Future<void> signInWithGoogle() async {
+
+    if (isLoading) return;
+
+    setState(() => isLoading = true);
+
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final googleUser = await googleSignIn.signIn();
 
-      if (googleUser == null) return;
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+      googleProvider.setCustomParameters({
+        'prompt': 'select_account',
+      });
+
+      final userCredential =
+          await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+      if (userCredential.user != null && mounted) {
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardScreen(),
+          ),
+        );
+
+      }
+
+    } on FirebaseAuthException catch (e) {
+
+      debugPrint("Google error: ${e.code}");
+      debugPrint("Google message: ${e.message}");
+
+      _showSnackBar(
+        e.message ?? "Google sign-in failed",
+        Colors.red,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+
+      debugPrint("Google login error: $e");
+
+      _showSnackBar(
+        "Google sign-in failed",
+        Colors.red,
+      );
+
+    } finally {
 
       if (mounted) {
-        context.go('/dashboard');
+        setState(() => isLoading = false);
       }
-    } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
-    } catch (e) {
-      _showSnackBar("Google sign-in failed.", Colors.red);
+
     }
   }
 
-  // RESET PASSWORD
+  /// RESET PASSWORD
   Future<void> resetPassword() async {
+
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
@@ -107,18 +161,32 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: email,
+      );
+
       _showSnackBar("Password reset email sent.", Colors.green);
-    } catch (_) {
-      _showSnackBar("Failed to send reset email.", Colors.red);
+
+    } on FirebaseAuthException catch (e) {
+
+      _showSnackBar(
+        e.message ?? e.code,
+        Colors.red,
+      );
+
     }
   }
 
+  /// SNACKBAR
   void _showSnackBar(String message, Color color) {
+
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
+        width: 400,
         content: Text(message),
         backgroundColor: color,
       ),
@@ -127,14 +195,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+
     emailController.dispose();
     passwordController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       appBar: AppBar(
         title: const Text(
           'Login to Kindora',
@@ -144,12 +216,17 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(24),
+
         child: SingleChildScrollView(
+
           child: Column(
+
             children: [
-              Text(
+
+              const Text(
                 'Welcome Back',
                 style: TextStyle(
                   fontSize: 26,
@@ -157,8 +234,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: primaryColor,
                 ),
               ),
+
               const SizedBox(height: 30),
-              // EMAIL
+
+              /// EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -169,8 +248,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
-              // PASSWORD
+
+              /// PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -181,7 +262,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -191,107 +274,94 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: resetPassword,
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: primaryColor),
-                  ),
+                  child: const Text("Forgot Password?"),
                 ),
               ),
+
               const SizedBox(height: 16),
-              // LOGIN BUTTON
+
+              /// LOGIN BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+
                   onPressed: isLoading ? null : login,
+
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Login',
                           style: TextStyle(
-                            color: Colors.white,
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                 ),
               ),
-              const SizedBox(height: 20),
-              // OR DIVIDER
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: Colors.grey[300],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      "OR",
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: Colors.grey[300],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // GOOGLE LOGIN BUTTON
+
+              const SizedBox(height: 16),
+
+              /// GOOGLE LOGIN
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.mail),
+
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.grey),
+                    side: const BorderSide(color: primaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: signInWithGoogle,
-                  label: const Text('Sign in with Google'),
+
+                  icon: Image.network(
+                    "https://developers.google.com/identity/images/g-logo.png",
+                    height: 20,
+                  ),
+
+                  label: const Text(
+                    "Sign in with Google",
+                    style: TextStyle(color: primaryColor),
+                  ),
+
+                  onPressed: isLoading ? null : signInWithGoogle,
                 ),
               ),
-              const SizedBox(height: 20),
-              // DON'T HAVE ACCOUNT
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.push('/signup');
-                    },
-                    child: Text(
-                      "Sign up",
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+
+              const SizedBox(height: 16),
+
+              /// SIGNUP
+              TextButton(
+                onPressed: () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SignupScreen(),
                     ),
-                  ),
-                ],
+                  );
+
+                },
+                child: const Text(
+                  'Don’t have an account? Sign Up',
+                ),
               ),
+
             ],
           ),
         ),
