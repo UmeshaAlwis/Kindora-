@@ -1,93 +1,58 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'go_router_refresh_stream.dart';
 
-import 'package:kindora/features/auth/ui/login_screen.dart';
-import 'package:kindora/features/auth/ui/signup_screen.dart';
-import 'package:kindora/features/home/ui/home_screen.dart';
-import 'package:kindora/features/dashboard/ui/dashboard_screen.dart';
-import 'package:kindora/features/profile/ui/profile_page.dart';
-import 'package:kindora/features/settings/ui/settings_page.dart';
-import 'package:kindora/features/campaign/ui/campaign_home_page.dart';
-import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
+import '../../core/layouts/app_shell.dart';
+import '../../features/dashboard/ui/dashboard_screen.dart';
+import '../../features/profile/ui/profile_page.dart';
 
-class AppRouter {
+final router = GoRouter(
+  initialLocation: '/dashboard',
 
-  static final GoRouter router = GoRouter(
+  routes: [
 
-    initialLocation: '/',
+    ShellRoute(
+      builder: (context, state, child) {
+        return AppShell(
+          child: child,
+          location: state.location,
+        );
+      },
 
-    refreshListenable: GoRouterRefreshStream(
-      FirebaseAuth.instance.authStateChanges(),
+      routes: [
+
+        GoRoute(
+          path: '/dashboard',
+          builder: (context, state) => const DashboardScreen(),
+        ),
+
+        GoRoute(
+          path: '/feed',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text("Feed Page")),
+          ),
+        ),
+
+        GoRoute(
+          path: '/messages',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text("Messages Page")),
+          ),
+        ),
+
+        GoRoute(
+          path: '/merch',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text("Merch Page")),
+          ),
+        ),
+
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfilePage(),
+        ),
+
+      ],
     ),
 
-    redirect: (context, state) {
-
-      final user = FirebaseAuth.instance.currentUser;
-
-      final loggingIn =
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/signup';
-
-      /// allow landing page
-      if (state.matchedLocation == '/') {
-        return null;
-      }
-
-      /// user not logged in
-      if (user == null && !loggingIn) {
-        return '/login';
-      }
-
-      /// user logged in
-      if (user != null && loggingIn) {
-        return '/dashboard';
-      }
-
-      return null;
-    },
-
-    routes: [
-
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const HomeScreen(),
-      ),
-
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupScreen(),
-      ),
-
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-
-      GoRoute(
-        path: '/campaigns',
-        builder: (context, state) => const CampaignHomePage(),
-      ),
-
-      GoRoute(
-         path: '/create-campaign',
-         builder: (context, state) => const StartCampaignPage(),
-      ),
-
-      GoRoute(
-        path: '/profile',
-        builder: (context, state) => const ProfilePage(),
-      ),
-
-      GoRoute(
-        path: '/settings',
-        builder: (context, state) => const SettingsPage(),
-      ),
-    ],
-  );
-}
+  ],
+);
