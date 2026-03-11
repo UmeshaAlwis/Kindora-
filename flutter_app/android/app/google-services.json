@@ -12,7 +12,12 @@
           "package_name": "com.example.kindora"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1041289552556-5b6thq3ccdbsbk1mtoaprviflslu0s91.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDAsICp9ykoQaWNT3tShtsz53goGaF8D5o"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041289552556-5b6thq3ccdbsbk1mtoaprviflslu0s91.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1041289552556-13n6vlfedp4ofoaje0jgthh7qdrp90uv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kindora"
+              }
+            }
+          ]
         }
       }
     }

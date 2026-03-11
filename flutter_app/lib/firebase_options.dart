@@ -60,6 +60,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1041289552556',
     projectId: 'kindora-f3757',
     storageBucket: 'kindora-f3757.firebasestorage.app',
+    iosClientId: '1041289552556-13n6vlfedp4ofoaje0jgthh7qdrp90uv.apps.googleusercontent.com',
     iosBundleId: 'com.example.kindora',
   );
 

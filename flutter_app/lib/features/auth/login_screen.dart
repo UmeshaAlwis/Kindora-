@@ -18,10 +18,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool obscurePassword = true;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFFF751F);
+  static const Color primaryColor = Color(0xFF0C0C79);
 
+  /// EMAIL LOGIN
   Future<void> login() async {
+
+    if (isLoading) return;
 
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -35,20 +37,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      _showSnackBar("Login successful!", Colors.green);
+      if (userCredential.user != null && mounted) {
 
-      if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => const DashboardScreen(),
           ),
         );
+
       }
 
     } on FirebaseAuthException catch (e) {
@@ -70,8 +73,13 @@ class _LoginScreenState extends State<LoginScreen> {
           message = "Too many attempts. Try again later.";
           break;
 
+        case 'network-request-failed':
+          message = "Check your internet connection.";
+          break;
+
         default:
-          message = e.message ?? "Login failed.";
+          message = e.message ?? e.code;
+
       }
 
       _showSnackBar(message, Colors.red);
@@ -85,6 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// GOOGLE LOGIN (POPUP METHOD)
   Future<void> signInWithGoogle() async {
 
     if (isLoading) return;
@@ -99,29 +108,38 @@ class _LoginScreenState extends State<LoginScreen> {
         'prompt': 'select_account',
       });
 
-      await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      final userCredential =
+          await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
-      if (mounted) {
+      if (userCredential.user != null && mounted) {
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => const DashboardScreen(),
           ),
         );
+
       }
 
     } on FirebaseAuthException catch (e) {
 
-      if (e.code == 'popup-closed-by-user' ||
-          e.code == 'cancelled-popup-request') {
-        return;
-      }
+      debugPrint("Google error: ${e.code}");
+      debugPrint("Google message: ${e.message}");
 
-      _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
+      _showSnackBar(
+        e.message ?? "Google sign-in failed",
+        Colors.red,
+      );
 
-    } catch (_) {
+    } catch (e) {
 
-      _showSnackBar("Google sign-in failed.", Colors.red);
+      debugPrint("Google login error: $e");
+
+      _showSnackBar(
+        "Google sign-in failed",
+        Colors.red,
+      );
 
     } finally {
 
@@ -132,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// RESET PASSWORD
   Future<void> resetPassword() async {
 
     final email = emailController.text.trim();
@@ -149,19 +168,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
       _showSnackBar("Password reset email sent.", Colors.green);
 
-    } catch (_) {
+    } on FirebaseAuthException catch (e) {
 
-      _showSnackBar("Failed to send reset email.", Colors.red);
+      _showSnackBar(
+        e.message ?? e.code,
+        Colors.red,
+      );
 
     }
   }
 
+  /// SNACKBAR
   void _showSnackBar(String message, Color color) {
 
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
+        width: 400,
         content: Text(message),
         backgroundColor: color,
       ),
@@ -188,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
 
@@ -201,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             children: [
 
-              Text(
+              const Text(
                 'Welcome Back',
                 style: TextStyle(
                   fontSize: 26,
@@ -212,6 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
+              /// EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -225,6 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
+              /// PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -254,19 +281,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: resetPassword,
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: primaryColor),
-                  ),
+                  child: const Text("Forgot Password?"),
                 ),
               ),
 
               const SizedBox(height: 16),
 
+              /// LOGIN BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
-
                 child: ElevatedButton(
 
                   style: ElevatedButton.styleFrom(
@@ -279,20 +303,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: isLoading ? null : login,
 
                   child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Login',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                 ),
@@ -300,32 +316,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
+              /// GOOGLE LOGIN
               SizedBox(
                 width: double.infinity,
                 height: 50,
-
                 child: OutlinedButton.icon(
 
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primaryColor),
+                    side: const BorderSide(color: primaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
 
-                  icon: Icon(Icons.login, color: primaryColor),
+                  icon: Image.network(
+                    "https://developers.google.com/identity/images/g-logo.png",
+                    height: 20,
+                  ),
 
-                  label: Text(
+                  label: const Text(
                     "Sign in with Google",
                     style: TextStyle(color: primaryColor),
                   ),
 
-                  onPressed: signInWithGoogle,
+                  onPressed: isLoading ? null : signInWithGoogle,
                 ),
               ),
 
               const SizedBox(height: 16),
 
+              /// SIGNUP
               TextButton(
                 onPressed: () {
 
@@ -337,9 +357,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
 
                 },
-                child: Text(
+                child: const Text(
                   'Don’t have an account? Sign Up',
-                  style: TextStyle(color: primaryColor),
                 ),
               ),
 

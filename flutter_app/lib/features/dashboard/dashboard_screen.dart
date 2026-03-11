@@ -14,23 +14,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   int _currentIndex = 0;
 
-  late final List<Widget> _pages;
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    Center(child: Text("Feed coming soon")),
+    Center(child: Text("Messages coming soon")),
+    Center(child: Text("Merch coming soon")),
+    ProfilePage(),
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-
-    _pages = [
-      const HomeScreen(),
-      const Center(child: Text("Feed coming soon")),
-      const Center(child: Text("Messages coming soon")),
-      const Center(child: Text("Merch coming soon")),
-      const ProfilePage(),
-    ];
+  void _onNavTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
@@ -38,13 +38,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: _pages,
         ),
       ),
+
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: _onNavTapped,
       ),
     );
   }
