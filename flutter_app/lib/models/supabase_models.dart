@@ -39,7 +39,7 @@ class Campaign extends Equatable {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
-      image: json['image'],
+      image: json['image_url'],
       description: json['description'],
       raisedAmount: json['raised_amount'] != null
           ? double.tryParse(json['raised_amount'].toString())

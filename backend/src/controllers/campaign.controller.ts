@@ -6,13 +6,14 @@ import Joi from 'joi';
 const createCampaignSchema = Joi.object({
   title: Joi.string().required().min(3).max(255),
   campaigner_name: Joi.string().optional(),
-  description: Joi.string().required().min(10),
-  category: Joi.string().required(),
+  category: Joi.string().optional(),
   campaign_category: Joi.string().optional(),
   target_amount: Joi.number().required().positive(),
+  image_url: Joi.string().uri().optional().allow(null, ''),
+  // These fields are sent from Flutter but not stored in campaigns table
+  description: Joi.string().optional(),
   beneficiary_details: Joi.string().optional(),
   beneficiary_location: Joi.string().optional(),
-  image_url: Joi.string().uri().optional().allow(null, ''),
   gallery_urls: Joi.array().items(Joi.string().uri()).optional(),
   end_date: Joi.date().optional(),
   charity_id: Joi.string().optional(),

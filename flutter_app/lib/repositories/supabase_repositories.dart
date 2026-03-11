@@ -13,9 +13,21 @@ class CampaignRepository {
   /// Fetch all campaigns
   Future<List<Campaign>> getAllCampaigns() async {
     try {
-      final response = await _supabase.from('campaigns').select();
-      return (response as List).map((data) => Campaign.fromJson(data)).toList();
+      print('[CampaignRepository] Fetching campaigns...');
+      final response = await _supabase
+          .from('campaigns')
+          .select(
+              'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at')
+          .order('created_at', ascending: false);
+      print('[CampaignRepository] Raw response: $response');
+      print('[CampaignRepository] Response type: ${response.runtimeType}');
+      final campaigns =
+          (response as List).map((data) => Campaign.fromJson(data)).toList();
+      print('[CampaignRepository] Parsed ${campaigns.length} campaigns');
+      campaigns.forEach((c) => print('[Campaign] $c'));
+      return campaigns;
     } catch (e) {
+      print('[CampaignRepository] ERROR: $e');
       throw Exception('Failed to fetch campaigns: $e');
     }
   }
@@ -63,23 +75,22 @@ class CampaignRepository {
     try {
       final dio = Dio();
       final apiUrl = '${AppEnv.apiBaseUrl}/campaigns';
+      print('[CampaignRepository] Creating campaign at: $apiUrl');
+
+      // Only send fields that exist in the campaigns table schema
+      final data = {
+        'title': title,
+        'campaigner_name': campaignerName,
+        'category': category,
+        'campaign_category': campaignCategory,
+        'target_amount': targetAmount ?? 1000.0,
+        'image_url': image,
+      };
+      print('[CampaignRepository] Request payload: $data');
 
       final response = await dio.post(
         apiUrl,
-        data: {
-          'title': title,
-          'campaigner_name': campaignerName,
-          'description': description ?? 'Campaign: $title',
-          'category': category ?? 'General',
-          'campaign_category': campaignCategory,
-          'target_amount': targetAmount ?? 1000.0,
-          'image_url': image,
-          'charity_id': charityId,
-          'beneficiary_details': beneficiaryDetails,
-          'beneficiary_location': beneficiaryLocation,
-          'gallery_urls': galleryUrls ?? [],
-          'end_date': endDate?.toIso8601String(),
-        },
+        data: data,
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -87,12 +98,18 @@ class CampaignRepository {
         ),
       );
 
+      print(
+          '[CampaignRepository] Response: ${response.statusCode} - ${response.data}');
+
       if (response.statusCode == 201 || response.statusCode == 200) {
-        return Campaign.fromJson(response.data['data'] ?? response.data);
+        final campaign = Campaign.fromJson(response.data[0] ?? response.data);
+        print('[CampaignRepository] Campaign created: ${campaign.id}');
+        return campaign;
       } else {
         throw Exception('Failed to create campaign: ${response.statusMessage}');
       }
     } catch (e) {
+      print('[CampaignRepository] ERROR: $e');
       throw Exception('Failed to create campaign: $e');
     }
   }
