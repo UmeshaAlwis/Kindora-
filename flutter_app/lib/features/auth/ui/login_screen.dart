@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'signup_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,8 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      // DO NOT NAVIGATE
-      // AuthGate will automatically open Dashboard
+      /// DO NOT NAVIGATE
+      /// Router/AuthGate will handle dashboard navigation
 
     } on FirebaseAuthException catch (e) {
 
@@ -96,8 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
-      // DO NOT NAVIGATE
-      // AuthGate handles routing
+      /// Router handles navigation
 
     } on FirebaseAuthException catch (e) {
 
@@ -314,23 +313,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              /// SIGNUP
-              TextButton(
-                onPressed: () {
+              /// SIGN UP LINK (MATCHES SIGNUP SCREEN STYLE)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const SignupScreen(),
+                  const Text("Don't have an account? "),
+
+                  GestureDetector(
+                    onTap: () {
+                      context.go('/signup');
+                    },
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  );
+                  ),
 
-                },
-                child: const Text(
-                  'Don’t have an account? Sign Up',
-                ),
+                ],
               ),
 
             ],

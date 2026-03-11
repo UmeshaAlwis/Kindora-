@@ -10,6 +10,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -19,29 +20,54 @@ class _SignupScreenState extends State<SignupScreen> {
   bool obscureConfirmPassword = true;
 
   final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFFF751F);
 
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
 
-  void checkPasswordStrength(String password) {
-    if (password.length < 6) {
-      passwordStrength = "Weak";
-      strengthColor = Colors.red;
-    } else if (password.length < 10) {
-      passwordStrength = "Medium";
-      strengthColor = Colors.orange;
-    } else if (RegExp(r'[0-9]').hasMatch(password) &&
-        RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
-      passwordStrength = "Strong";
-      strengthColor = Colors.green;
-    } else {
-      passwordStrength = "Medium";
-      strengthColor = Colors.orange;
-    }
+  /// PASSWORD STRENGTH CHECK
+void checkPasswordStrength(String password) {
+
+  if (password.isEmpty) {
+    passwordStrength = "";
+    strengthColor = Colors.grey;
+    return;
   }
 
+  int score = 0;
+
+  // length score
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+
+  // lowercase
+  if (RegExp(r'[a-z]').hasMatch(password)) score++;
+
+  // uppercase
+  if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+
+  // numbers
+  if (RegExp(r'[0-9]').hasMatch(password)) score++;
+
+  // symbols (ANY special character)
+  if (RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]~`]').hasMatch(password)) score++;
+
+  if (score <= 2) {
+    passwordStrength = "Weak";
+    strengthColor = Colors.red;
+  } 
+  else if (score <= 4) {
+    passwordStrength = "Medium";
+    strengthColor = Colors.orange;
+  } 
+  else {
+    passwordStrength = "Strong";
+    strengthColor = Colors.green;
+  }
+}
+
+  /// SIGNUP
   Future<void> signup() async {
+
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
@@ -56,9 +82,18 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    if (passwordStrength == "Weak") {
+      _showSnackBar(
+        "Password too weak. Use uppercase, lowercase, number and symbol.",
+        Colors.orange,
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
 
     try {
+
       final userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -87,6 +122,7 @@ class _SignupScreenState extends State<SignupScreen> {
       String message;
 
       switch (e.code) {
+
         case 'email-already-in-use':
           message = "An account already exists with this email.";
           break;
@@ -109,7 +145,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       _showSnackBar(message, Colors.red);
 
-    } catch (e) {
+    } catch (_) {
       _showSnackBar("Unexpected error occurred.", Colors.red);
     }
 
@@ -118,34 +154,9 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  Future<void> signUpWithGoogle() async {
-    try {
-      final googleProvider = GoogleAuthProvider();
-
-      googleProvider.setCustomParameters({
-        'prompt': 'select_account',
-      });
-
-      await FirebaseAuth.instance.signInWithPopup(googleProvider);
-
-      if (!mounted) return;
-      context.go('/dashboard');
-
-    } on FirebaseAuthException catch (e) {
-
-      if (e.code == 'popup-closed-by-user' ||
-          e.code == 'cancelled-popup-request') {
-        return;
-      }
-
-      _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
-
-    } catch (_) {
-      _showSnackBar("Something went wrong with Google sign-up.", Colors.red);
-    }
-  }
-
+  /// SNACKBAR
   void _showSnackBar(String message, Color color) {
+
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -166,10 +177,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final passwordsMatch =
         passwordController.text == confirmPasswordController.text;
 
     return Scaffold(
+
       appBar: AppBar(
         title: const Text(
           'Create Account',
@@ -179,11 +192,14 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(24),
+
         child: SingleChildScrollView(
           child: Column(
             children: [
+
               Text(
                 'Join Kindora',
                 style: TextStyle(
@@ -195,6 +211,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 30),
 
+              /// EMAIL
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -208,6 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
+              /// PASSWORD
               TextField(
                 controller: passwordController,
                 obscureText: obscurePassword,
@@ -242,7 +260,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Strength: $passwordStrength",
+                    "Password Strength: $passwordStrength",
                     style: TextStyle(
                       color: strengthColor,
                       fontWeight: FontWeight.bold,
@@ -252,6 +270,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
+              /// CONFIRM PASSWORD
               TextField(
                 controller: confirmPasswordController,
                 obscureText: obscureConfirmPassword,
@@ -295,6 +314,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 24),
 
+              /// SIGN UP BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -307,14 +327,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   onPressed: isLoading ? null : signup,
                   child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Sign Up',
                           style: TextStyle(
@@ -326,25 +339,29 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primaryColor),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              /// SIGN IN LINK
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  const Text("Already have an account? "),
+
+                  GestureDetector(
+                    onTap: () {
+                      context.go('/login');
+                    },
+                    child: Text(
+                      "Sign In",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  icon: Icon(Icons.login, color: primaryColor),
-                  label: Text(
-                    "Sign up with Google",
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  onPressed: signUpWithGoogle,
-                ),
+
+                ],
               ),
             ],
           ),
