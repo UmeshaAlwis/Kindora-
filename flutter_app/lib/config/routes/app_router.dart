@@ -17,18 +17,18 @@ class AppRouter {
 
     routes: [
 
-      /// HOME PAGE (FIRST SCREEN)
-      GoRoute(
-        path: '/',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
-      ),
-
       /// AUTH GATE
       GoRoute(
-        path: '/auth',
+        path: '/',
         name: 'auth',
         builder: (context, state) => const AuthGate(),
+      ),
+
+      /// HOME PAGE
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
       ),
 
       /// LOGIN
@@ -79,7 +79,6 @@ class AppRouter {
       body: Center(
         child: Text(
           'Route not found: ${state.location}',
-          style: const TextStyle(fontSize: 16),
         ),
       ),
     ),

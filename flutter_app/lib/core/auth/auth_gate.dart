@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kindora/features/auth/ui/login_screen.dart';
-import 'package:kindora/features/dashboard/ui/dashboard_screen.dart';
+import '../../features/auth/ui/login_screen.dart';
+import '../../features/dashboard/ui/dashboard_screen.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -10,7 +10,9 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+      // THIS IS THE IMPORTANT CHANGE
+      stream: FirebaseAuth.instance.idTokenChanges(),
+
       builder: (context, snapshot) {
 
         // Loading
@@ -20,12 +22,12 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        // Logged in
-        if (snapshot.hasData) {
+        // User logged in
+        if (snapshot.data != null) {
           return const DashboardScreen();
         }
 
-        // Not logged in
+        // User not logged in
         return const LoginScreen();
       },
     );

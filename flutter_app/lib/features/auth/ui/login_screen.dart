@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
-import '../../dashboard/ui/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,22 +36,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
 
-      final userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (userCredential.user != null && mounted) {
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DashboardScreen(),
-          ),
-        );
-
-      }
+      // DO NOT NAVIGATE
+      // AuthGate will automatically open Dashboard
 
     } on FirebaseAuthException catch (e) {
 
@@ -93,12 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  /// GOOGLE LOGIN (POPUP METHOD)
+  /// GOOGLE LOGIN
   Future<void> signInWithGoogle() async {
-
-    if (isLoading) return;
-
-    setState(() => isLoading = true);
 
     try {
 
@@ -108,19 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
         'prompt': 'select_account',
       });
 
-      final userCredential =
-          await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
-      if (userCredential.user != null && mounted) {
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DashboardScreen(),
-          ),
-        );
-
-      }
+      // DO NOT NAVIGATE
+      // AuthGate handles routing
 
     } on FirebaseAuthException catch (e) {
 
@@ -140,12 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
         "Google sign-in failed",
         Colors.red,
       );
-
-    } finally {
-
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
 
     }
   }
@@ -339,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: primaryColor),
                   ),
 
-                  onPressed: isLoading ? null : signInWithGoogle,
+                  onPressed: signInWithGoogle,
                 ),
               ),
 

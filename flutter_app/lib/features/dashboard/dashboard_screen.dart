@@ -31,17 +31,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _pages,
-        ),
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTapped,
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+
+        final bool isDesktop = constraints.maxWidth > 600;
+
+        Widget scaffold = Scaffold(
+          body: SafeArea(
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _pages,
+            ),
+          ),
+          bottomNavigationBar: AppBottomNavBar(
+            currentIndex: _currentIndex,
+            onTap: _onNavTapped,
+          ),
+        );
+
+        /// Mobile layout
+        if (!isDesktop) {
+          return scaffold;
+        }
+
+        /// Web / Desktop centered layout
+        return Center(
+          child: SizedBox(
+            width: 420,
+            child: scaffold,
+          ),
+        );
+      },
     );
   }
 }
