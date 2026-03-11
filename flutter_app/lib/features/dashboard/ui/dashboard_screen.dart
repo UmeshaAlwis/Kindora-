@@ -1,13 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindora/core/widgets/app_bottom_nav_bar.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+
+  int _currentIndex = 0;
+
+  void _onNavTap(int index) {
+
+    setState(() {
+      _currentIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        break;
+
+      case 1:
+        // Feed page
+        break;
+
+      case 2:
+        // Messages page
+        break;
+
+      case 3:
+        // Merch page
+        break;
+
+      case 4:
+        context.push('/profile');
+        break;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
+
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavTap,
+      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
