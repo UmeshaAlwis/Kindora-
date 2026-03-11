@@ -329,8 +329,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  icon: Image.network(
-                    "https://developers.google.com/identity/images/g-logo.png",
+                  icon: Image.asset(
+                    "assets/icons/google.png",
                     height: 20,
                   ),
 
