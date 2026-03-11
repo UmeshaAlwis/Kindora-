@@ -14,15 +14,34 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
-  void _onNavTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+void _onNavTap(int index) {
 
-    if (index == 4) {
-      context.push('/profile');
-    }
+  setState(() {
+    _currentIndex = index;
+  });
+
+  switch (index) {
+    case 0:
+      context.go('/dashboard');
+      break;
+
+    case 1:
+      context.go('/feed');
+      break;
+
+    case 2:
+      context.go('/messages');
+      break;
+
+    case 3:
+      context.go('/merch');
+      break;
+
+    case 4:
+      context.go('/profile');
+      break;
   }
+}
 
   @override
   Widget build(BuildContext context) {
