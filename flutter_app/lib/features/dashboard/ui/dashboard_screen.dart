@@ -1,47 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kindora/core/widgets/app_bottom_nav_bar.dart';
 import 'package:kindora/features/campaign/widgets/campaign_card.dart';
 import 'package:kindora/models/campaign.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
-
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
-
-void _onNavTap(int index) {
-
-  setState(() {
-    _currentIndex = index;
-  });
-
-  switch (index) {
-    case 0:
-      context.go('/dashboard');
-      break;
-
-    case 1:
-      context.go('/feed');
-      break;
-
-    case 2:
-      context.go('/messages');
-      break;
-
-    case 3:
-      context.go('/merch');
-      break;
-
-    case 4:
-      context.go('/profile');
-      break;
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +44,6 @@ void _onNavTap(int index) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
 
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
-      ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -115,7 +73,10 @@ void _onNavTap(int index) {
                         ),
 
                         IconButton(
-                          icon: const Icon(Icons.notifications_none, color: Colors.white),
+                          icon: const Icon(
+                            Icons.notifications_none,
+                            color: Colors.white,
+                          ),
                           onPressed: () {},
                         ),
                       ],
@@ -233,7 +194,10 @@ class _HeaderAction extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white, size: 26),
         const SizedBox(height: 6),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
       ],
     );
   }
