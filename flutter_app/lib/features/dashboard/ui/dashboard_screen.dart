@@ -143,6 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         label: const Text("Start a Campaign"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF751F),
+                          foregroundColor: Colors.white,
                         ),
                         onPressed: () => context.push('/create-campaign'),
                       ),
@@ -157,6 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         label: const Text("Support a Campaign"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0C0C79),
+                          foregroundColor: Colors.white,
                         ),
                         onPressed: () => context.push('/campaigns'),
                       ),

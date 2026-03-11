@@ -17,6 +17,16 @@ class AppBottomNavBar extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
+
+      /// Color when selected
+      selectedItemColor: const Color(0xFF0C0C79),
+
+      /// Color when not selected
+      unselectedItemColor: Colors.grey,
+
+      /// Show all labels
+      showUnselectedLabels: true,
+
       items: [
         const BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -35,6 +45,9 @@ class AppBottomNavBar extends StatelessWidget {
             "assets/icons/heart.svg",
             height: 24,
             width: 24,
+            color: currentIndex == 3
+        ? const Color(0xFF0C0C79)
+        : Colors.grey,
           ),
           label: 'Merch',
         ),

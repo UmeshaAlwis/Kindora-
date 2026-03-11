@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../models/campaign.dart';
 
-
 class CampaignCard extends StatelessWidget {
   final Campaign campaign;
 
@@ -23,58 +22,65 @@ class CampaignCard extends StatelessWidget {
 
     return Card(
       elevation: 3,
-      margin: const EdgeInsets.only(bottom: 16),
+
+      /// Remove extra margin (GridView already adds spacing)
+      margin: EdgeInsets.zero,
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
 
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+
           children: [
 
-            /// Campaign Image
+            /// Campaign Image (reduced height)
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 "https://picsum.photos/400/200",
-                height: 140,
+                height: 90,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
             /// Title
             Text(
               campaign.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
 
             /// Description
             Text(
               campaign.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 12),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
             /// Progress Bar
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
                 value: progress,
-                minHeight: 8,
+                minHeight: 6,
                 backgroundColor: Colors.grey.shade300,
                 valueColor: const AlwaysStoppedAnimation(
                   Color(0xFFFF751F),
@@ -82,7 +88,7 @@ class CampaignCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
 
             /// Raised info
             Row(
@@ -90,19 +96,19 @@ class CampaignCard extends StatelessWidget {
               children: [
                 Text(
                   "Raised \$${campaign.raisedAmount}",
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 11),
                 ),
                 Text(
                   "$percent%",
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
             /// Donate Button
             SizedBox(
@@ -111,12 +117,15 @@ class CampaignCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0C0C79),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                 ),
                 onPressed: () {
                   context.push('/campaigns');
                 },
-                child: const Text("Donate"),
+                child: const Text(
+                  "Donate",
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
             ),
           ],
