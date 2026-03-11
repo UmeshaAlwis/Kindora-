@@ -1,45 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:kindora/core/widgets/app_bottom_nav_bar.dart';
-import '../../features/chat/ui/chat_assistant_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class MainLayout extends StatefulWidget {
-  final Widget child;
+class AppBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
 
-  const MainLayout({
+  const AppBottomNavBar({
     super.key,
-    required this.child,
+    required this.currentIndex,
+    required this.onTap,
   });
 
   @override
-  State<MainLayout> createState() => _MainLayoutState();
-}
-
-class _MainLayoutState extends State<MainLayout> {
-
-  int _currentIndex = 0;
-
-  void _onTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(child: widget.child),
-
-          const ChatAssistantButton(showBadge: true),
-        ],
-      ),
-
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
-      ),
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: onTap,
+      type: BottomNavigationBarType.fixed,
+      items: [
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.rss_feed),
+          label: 'Feed',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.message),
+          label: 'Messages',
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(
+            "assets/icons/heart.svg",
+            height: 24,
+            width: 24,
+          ),
+          label: 'Merch',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
     );
   }
 }
