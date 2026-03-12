@@ -154,5 +154,6 @@ class SupabaseClient {
   }
 }
 
-// Export singleton instance
+// Export class and singleton instance
+export { SupabaseClient };
 export const supabase = new SupabaseClient();

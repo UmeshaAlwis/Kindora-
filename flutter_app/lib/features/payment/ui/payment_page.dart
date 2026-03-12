@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/payment_model.dart';
 import '../services/stripe_service.dart';
+import 'package:kindora/services/wallet_service.dart';
 import 'bank_transfer_page.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _PaymentPageState extends State<PaymentPage> {
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
   late StripeService _stripeService;
+  late WalletService _walletService;
 
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
@@ -56,16 +58,29 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
     _stripeService = StripeService();
+    _walletService = WalletService();
     _fetchWalletBalance();
   }
 
   Future<void> _fetchWalletBalance() async {
-    // TODO: Implement API call to fetch wallet balance
-    // For now, set a dummy value
-    setState(() {
-      _walletBalance = 5000.0; // Example balance
-      _loadingWallet = false;
-    });
+    setState(() => _loadingWallet = true);
+    try {
+      final balance = await _walletService.getWalletBalance();
+      setState(() {
+        _walletBalance = balance;
+        _loadingWallet = false;
+      });
+    } catch (e) {
+      setState(() => _loadingWallet = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load wallet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -164,11 +179,18 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Future<void> _processWalletPayment(Payment payment, String orderId) async {
     try {
-      setState(() => _isProcessing = false);
+      // Process wallet payment through the service
+      await _walletService.processWalletPayment(
+        amount: _donationAmount,
+        campaignId: widget.campaign.id,
+        donorName: _donorNameController.text,
+        donorEmail: _donorEmailController.text,
+      );
 
       if (mounted) {
-        // TODO: Implement actual wallet payment API call
-        // For now, show success dialog
+        setState(() => _isProcessing = false);
+
+        // Show success dialog
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Wallet donation successful!'),
