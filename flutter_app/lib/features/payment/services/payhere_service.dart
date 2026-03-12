@@ -73,7 +73,7 @@ class PayHerePaymentService {
       PayHereConfig.merchantSecret,
     );
 
-    final paymentUrl =
+    const paymentUrl =
         PayHereConfig.isProduction ? productionPaymentUrl : sandboxPaymentUrl;
 
     // Build URL with ONLY required PayHere parameters

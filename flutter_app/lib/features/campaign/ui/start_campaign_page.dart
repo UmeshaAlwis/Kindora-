@@ -22,6 +22,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
   late TextEditingController titleController;
   late TextEditingController campaignerNameController;
   late TextEditingController targetAmountController;
+  late TextEditingController descriptionController;
+  late TextEditingController imageUrlController;
 
   @override
   void initState() {
@@ -30,6 +32,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
     titleController = TextEditingController();
     campaignerNameController = TextEditingController();
     targetAmountController = TextEditingController();
+    descriptionController = TextEditingController();
+    imageUrlController = TextEditingController();
   }
 
   @override
@@ -38,6 +42,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
     titleController.dispose();
     campaignerNameController.dispose();
     targetAmountController.dispose();
+    descriptionController.dispose();
+    imageUrlController.dispose();
     super.dispose();
   }
 
@@ -51,8 +57,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
       final targetAmount =
           double.tryParse(targetAmountController.text) ?? 1000.0;
 
-      // For now, using placeholder values for required backend fields
-      // TODO: Update the form to collect charity_id, beneficiary_details, beneficiary_location
+      // Placeholder values for future enhancement (not in current schema)
       const String charityId = 'default-charity';
       const String beneficiaryDetails = 'Campaign beneficiary';
       const String beneficiaryLocation = 'General';
@@ -63,8 +68,11 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
         category: category,
         campaignCategory: campaignCategory,
         targetAmount: targetAmount,
-        image: null,
-        description: null,
+        image:
+            imageUrlController.text.isNotEmpty ? imageUrlController.text : null,
+        description: descriptionController.text.isNotEmpty
+            ? descriptionController.text
+            : null,
         charityId: charityId,
         beneficiaryDetails: beneficiaryDetails,
         beneficiaryLocation: beneficiaryLocation,
@@ -280,7 +288,39 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
               const SizedBox(height: 16),
 
-              /// Target Amount
+              /// Description (Optional)
+              TextFormField(
+                controller: descriptionController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: "Campaign Description (Optional)",
+                  hintText: "Share details about your campaign...",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Image URL (Optional)
+              TextFormField(
+                controller: imageUrlController,
+                decoration: const InputDecoration(
+                  labelText: "Campaign Image URL (Optional)",
+                  hintText: "https://example.com/image.jpg",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    final uri = Uri.tryParse(value);
+                    if (uri == null || !uri.hasAbsolutePath) {
+                      return "Please enter a valid URL";
+                    }
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(

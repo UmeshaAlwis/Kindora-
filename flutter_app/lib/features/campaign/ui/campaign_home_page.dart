@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../payment/ui/payment_page.dart';
-import '../../payment/models/payment_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kindora/providers/supabase_providers.dart';
 import 'start_campaign_page.dart';
 
-class CampaignHomePage extends StatelessWidget {
+class CampaignHomePage extends ConsumerWidget {
   const CampaignHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -57,165 +57,231 @@ class CampaignHomePage extends StatelessWidget {
   }
 }
 
-class CampaignList extends StatelessWidget {
+class CampaignList extends ConsumerWidget {
   const CampaignList({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromARGB(26, 0, 0, 0),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    print('[CampaignList] Building CampaignList widget');
+    final campaignsAsync = ref.watch(allCampaignsProvider);
+    print('[CampaignList] campaignsAsync state: ${campaignsAsync.runtimeType}');
+
+    return campaignsAsync.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (err, stack) {
+        print('[CampaignList] ERROR: $err');
+        print('[CampaignList] STACK: $stack');
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error loading campaigns: $err'),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+        );
+      },
+      data: (campaigns) {
+        print('[CampaignList] DATA received: ${campaigns.length} campaigns');
+        if (campaigns.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    "https://images.unsplash.com/photo-1593113630400-ea4288922497",
-                    height: 80,
-                    width: 80,
-                    fit: BoxFit.cover,
-                  ),
+                const Icon(Icons.campaign, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
+                const Text('No campaigns available yet'),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const StartCampaignPage(),
+                      ),
+                    );
+                  },
+                  child: const Text('Start a Campaign'),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            print('[CampaignList] Refreshing campaigns...');
+            ref.invalidate(allCampaignsProvider);
+          },
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: campaigns.length,
+            itemBuilder: (context, index) {
+              final campaign = campaigns[index];
+              final targetAmount = campaign.targetAmount ?? 0.0;
+              final raisedAmount = campaign.raisedAmount ?? 0.0;
+              final progress = targetAmount > 0
+                  ? (raisedAmount / targetAmount).clamp(0.0, 1.0)
+                  : 0.0;
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(26, 0, 0, 0),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      /// Title
-                      const Text(
-                        "Help Flood Victims",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0C0C79),
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      /// Raised Amount
-                      const Text(
-                        "Raised LKR 240,000",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color.fromARGB(255, 128, 128, 128),
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      /// Progress Bar
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: 0.6,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey[200],
-                          color: const Color(0xFFFF751F),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-
-                      /// Support Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0C0C79),
-                          ),
-                          onPressed: () {
-                            final campaign = Campaign(
-                              id: 'campaign_1',
-                              title: 'Help Flood Victims',
-                              image:
-                                  'https://images.unsplash.com/photo-1593113630400-ea4288922497',
-                              raisedAmount: 240000,
-                              targetAmount: 400000,
-                              description:
-                                  'Help the victims affected by recent floods',
-                            );
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PaymentPage(campaign: campaign),
+                        borderRadius: BorderRadius.circular(12),
+                        child: campaign.image != null &&
+                                campaign.image!.isNotEmpty
+                            ? Image.network(
+                                campaign.image!,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  height: 80,
+                                  width: 80,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image_not_supported),
+                                ),
+                              )
+                            : Container(
+                                height: 80,
+                                width: 80,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.campaign),
                               ),
-                            );
-                          },
-                          child: const Text("Support Campaign"),
-                        ),
                       ),
-
-                      const SizedBox(height: 8),
-
-                      /// Edit & Share Buttons
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit,
-                              size: 20,
-                              color: Color(0xFF0C0C79),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// Title
+                            Text(
+                              campaign.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF0C0C79),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            hoverColor:
-                                const Color(0xFFFF751F).withValues(alpha: 0.15),
-                            splashColor:
-                                const Color(0xFFFF751F).withValues(alpha: 0.25),
-                            highlightColor: const Color.fromARGB(0, 0, 0, 0),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const StartCampaignPage(),
+
+                            const SizedBox(height: 6),
+
+                            /// Raised Amount
+                            Text(
+                              'Raised LKR ${(campaign.raisedAmount ?? 0.0).toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color.fromARGB(255, 128, 128, 128),
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            /// Progress Bar
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 8,
+                                backgroundColor: Colors.grey[200],
+                                color: const Color(0xFFFF751F),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+
+                            /// Support Button
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0C0C79),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.share,
-                              size: 20,
-                              color: Color(0xFF0C0C79),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Donation feature coming soon'),
+                                    ),
+                                  );
+                                },
+                                child: const Text("Support Campaign"),
+                              ),
                             ),
-                            hoverColor:
-                                const Color(0xFFFF751F).withValues(alpha: 0.15),
-                            splashColor:
-                                const Color(0xFFFF751F).withValues(alpha: 0.25),
-                            highlightColor: const Color.fromARGB(0, 0, 0, 0),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Share feature coming soon",
+
+                            const SizedBox(height: 8),
+
+                            /// Edit & Share Buttons
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    size: 20,
+                                    color: Color(0xFF0C0C79),
                                   ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const StartCampaignPage(),
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                          ),
-                        ],
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.share,
+                                    size: 20,
+                                    color: Color(0xFF0C0C79),
+                                  ),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Share feature coming soon",
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
