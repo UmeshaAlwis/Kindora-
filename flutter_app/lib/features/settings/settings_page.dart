@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/theme_controller.dart';
 
@@ -16,7 +17,62 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool notificationsEnabled = true;
 
+  final supabase = Supabase.instance.client;
+
   static const Color primaryColor = Color(0xFF0C0C79);
+
+  @override
+  void initState() {
+    super.initState();
+    loadNotificationSetting();
+  }
+
+  /// LOAD NOTIFICATION SETTING FROM SUPABASE
+  Future<void> loadNotificationSetting() async {
+
+    try {
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) return;
+
+      final data = await supabase
+          .from('profiles')
+          .select('notifications_enabled')
+          .eq('id', user.uid)
+          .maybeSingle();
+
+      if (data != null) {
+        setState(() {
+          notificationsEnabled = data['notifications_enabled'] ?? true;
+        });
+      }
+
+    } catch (e) {
+      debugPrint("Notification load error: $e");
+    }
+  }
+
+  /// SAVE NOTIFICATION SETTING
+  Future<void> updateNotificationSetting(bool value) async {
+
+    try {
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) return;
+
+      await supabase
+          .from('profiles')
+          .update({
+            'notifications_enabled': value,
+          })
+          .eq('id', user.uid);
+
+    } catch (e) {
+      debugPrint("Notification save error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +107,13 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text("Notifications"),
               subtitle: const Text("Receive campaign updates"),
               value: notificationsEnabled,
-              onChanged: (value) {
+              onChanged: (value) async {
+
                 setState(() {
                   notificationsEnabled = value;
                 });
+
+                await updateNotificationSetting(value);
               },
             ),
 
