@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
 
 class DashboardHome extends StatelessWidget {
   const DashboardHome({super.key});
@@ -100,7 +101,12 @@ class DashboardHome extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () {
-                        context.push('/campaigns');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const StartCampaignPage(),
+                          ),
+                        );
                       },
                     ),
                   ),
