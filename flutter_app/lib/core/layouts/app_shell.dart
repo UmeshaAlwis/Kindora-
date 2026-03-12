@@ -4,15 +4,15 @@ import '../widgets/app_bottom_nav_bar.dart';
 
 class AppShell extends StatelessWidget {
   final Widget child;
-  final String location;
 
   const AppShell({
     super.key,
     required this.child,
-    required this.location,
   });
 
-  int _getIndex() {
+  int _getIndex(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/feed')) return 1;
     if (location.startsWith('/messages')) return 2;
@@ -22,7 +22,7 @@ class AppShell extends StatelessWidget {
     return 0;
   }
 
-  void _onTap(int index, BuildContext context) {
+  void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0:
         context.go('/dashboard');
@@ -44,15 +44,13 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final currentIndex = _getIndex();
+    final currentIndex = _getIndex(context);
 
     return Scaffold(
       body: child,
-
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: currentIndex,
-        onTap: (i) => _onTap(i, context),
+        onTap: (index) => _onTap(context, index),
       ),
     );
   }
