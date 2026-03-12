@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:kindora/l10n/app_localizations.dart';
+
 import '../../../core/theme/theme_controller.dart';
+import '../../../core/language/language_controller.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -78,12 +81,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
 
     final themeController = context.watch<ThemeController>();
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: Text(t.settings),
         centerTitle: true,
       ),
 
@@ -96,7 +100,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 20),
 
             /// GENERAL
-            _sectionTitle(context, "General"),
+            _sectionTitle(context, t.general),
 
             const SizedBox(height: 10),
 
@@ -104,8 +108,8 @@ class _SettingsPageState extends State<SettingsPage> {
             SwitchListTile(
               activeThumbColor: primaryColor,
               activeTrackColor: primaryColor.withOpacity(0.4),
-              title: const Text("Notifications"),
-              subtitle: const Text("Receive campaign updates"),
+              title: Text(t.notifications),
+              subtitle: Text(t.receiveCampaignUpdates),
               value: notificationsEnabled,
               onChanged: (value) async {
 
@@ -123,8 +127,8 @@ class _SettingsPageState extends State<SettingsPage> {
             SwitchListTile(
               activeThumbColor: primaryColor,
               activeTrackColor: primaryColor.withOpacity(0.4),
-              title: const Text("Dark Mode"),
-              subtitle: const Text("Enable dark theme"),
+              title: Text(t.darkMode),
+              subtitle: Text(t.enableDarkTheme),
               value: themeController.isDarkMode,
               onChanged: (value) {
                 context.read<ThemeController>().toggleTheme(value);
@@ -136,14 +140,45 @@ class _SettingsPageState extends State<SettingsPage> {
             /// LANGUAGE
             ListTile(
               leading: const Icon(Icons.language),
-              title: const Text("Language"),
-              subtitle: const Text("English"),
+              title: Text(t.language),
+              subtitle: Text(_currentLanguage(context)),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Language switching coming soon"),
-                  ),
+
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        ListTile(
+                          title: const Text("English"),
+                          onTap: () {
+                            context.read<LanguageController>().changeLanguage('en');
+                            Navigator.pop(context);
+                          },
+                        ),
+
+                        ListTile(
+                          title: const Text("සිංහල"),
+                          onTap: () {
+                            context.read<LanguageController>().changeLanguage('si');
+                            Navigator.pop(context);
+                          },
+                        ),
+
+                        ListTile(
+                          title: const Text("தமிழ்"),
+                          onTap: () {
+                            context.read<LanguageController>().changeLanguage('ta');
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -151,143 +186,53 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 25),
 
             /// SECURITY
-            _sectionTitle(context, "Security"),
+            _sectionTitle(context, t.security),
 
             const SizedBox(height: 10),
 
-            /// CHANGE PASSWORD
             ListTile(
               leading: const Icon(Icons.lock_outline),
-              title: const Text("Change Password"),
+              title: Text(t.changePassword),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Password change coming soon"),
-                  ),
-                );
-              },
             ),
 
             const Divider(),
 
-            /// DELETE ACCOUNT
             ListTile(
               leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: const Text("Delete Account"),
-              onTap: () async {
-
-                final confirm = await showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Delete Account"),
-                      content: const Text(
-                        "This action cannot be undone.",
-                      ),
-                      actions: [
-
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: const Text("Cancel"),
-                        ),
-
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          child: const Text(
-                            "Delete",
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-
-                if (confirm == true) {
-                  try {
-
-                    final user = FirebaseAuth.instance.currentUser;
-
-                    await user?.delete();
-
-                    if (!mounted) return;
-
-                    context.go('/');
-
-                  } catch (e) {
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "Please re-login before deleting your account.",
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
+              title: Text(t.deleteAccount),
             ),
 
             const SizedBox(height: 25),
 
             /// LEGAL
-            _sectionTitle(context, "Legal"),
+            _sectionTitle(context, t.legal),
 
             const SizedBox(height: 10),
 
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
-              title: const Text("Privacy Policy"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Privacy policy page coming soon"),
-                  ),
-                );
-              },
+              title: Text(t.privacyPolicy),
             ),
 
             const Divider(),
 
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text("Terms & Conditions"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Terms page coming soon"),
-                  ),
-                );
-              },
+              title: Text(t.termsConditions),
             ),
 
             const SizedBox(height: 25),
 
             /// ABOUT
-            _sectionTitle(context, "About"),
+            _sectionTitle(context, t.about),
 
             const SizedBox(height: 10),
 
             ListTile(
               leading: const Icon(Icons.info_outline),
-              title: const Text("About Kindora"),
+              title: Text(t.aboutKindora),
               subtitle: const Text("Version 1.0.0"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: "Kindora",
-                  applicationVersion: "1.0.0",
-                  applicationLegalese: "© 2026 Kindora Team",
-                );
-              },
             ),
 
             const SizedBox(height: 20),
@@ -295,7 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
             /// LOGOUT
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text("Logout"),
+              title: Text(t.logout),
               onTap: () async {
 
                 await FirebaseAuth.instance.signOut();
@@ -321,5 +266,21 @@ class _SettingsPageState extends State<SettingsPage> {
             fontWeight: FontWeight.bold,
           ),
     );
+  }
+
+  /// CURRENT LANGUAGE LABEL
+  String _currentLanguage(BuildContext context) {
+
+    final locale =
+        context.watch<LanguageController>().locale.languageCode;
+
+    switch (locale) {
+      case 'si':
+        return "සිංහල";
+      case 'ta':
+        return "தமிழ்";
+      default:
+        return "English";
+    }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "@@locale": "si",
+
+  "settings": "සැකසුම්",
+  "general": "සාමාන්‍ය",
+  "notifications": "දැනුම්දීම්",
+  "receiveCampaignUpdates": "ව්‍යාපාර යාවත්කාලීන ලබාගන්න",
+  "darkMode": "අඳුරු මාදිලිය",
+  "enableDarkTheme": "අඳුරු තේමාව සක්‍රීය කරන්න",
+  "language": "භාෂාව",
+
+  "security": "ආරක්ෂාව",
+  "changePassword": "මුරපදය වෙනස් කරන්න",
+  "deleteAccount": "ගිණුම මකා දමන්න",
+
+  "legal": "නීතිමය",
+  "privacyPolicy": "පෞද්ගලිකත්ව ප්‍රතිපත්තිය",
+  "termsConditions": "නියම සහ කොන්දේසි",
+
+  "about": "ගැන",
+  "aboutKindora": "Kindora ගැන",
+  "version": "අනුවාදය",
+
+  "logout": "පිටවීම",
+
+  "cancel": "අවලංගු කරන්න",
+  "delete": "මකා දමන්න",
+  "deleteAccountConfirm": "මෙම ක්‍රියාව ආපසු හැරවිය නොහැක."
+}

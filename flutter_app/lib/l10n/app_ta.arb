@@ -1,0 +1,29 @@
+{
+  "@@locale": "ta",
+
+  "settings": "அமைப்புகள்",
+  "general": "பொது",
+  "notifications": "அறிவிப்புகள்",
+  "receiveCampaignUpdates": "பிரச்சார புதுப்பிப்புகளை பெறுங்கள்",
+  "darkMode": "டார்க் மோட்",
+  "enableDarkTheme": "இருண்ட தீமை இயக்கவும்",
+  "language": "மொழி",
+
+  "security": "பாதுகாப்பு",
+  "changePassword": "கடவுச்சொல்லை மாற்று",
+  "deleteAccount": "கணக்கை நீக்கு",
+
+  "legal": "சட்டம்",
+  "privacyPolicy": "தனியுரிமைக் கொள்கை",
+  "termsConditions": "விதிமுறைகள் மற்றும் நிபந்தனைகள்",
+
+  "about": "பற்றி",
+  "aboutKindora": "Kindora பற்றி",
+  "version": "பதிப்பு",
+
+  "logout": "வெளியேறு",
+
+  "cancel": "ரத்து செய்",
+  "delete": "நீக்கு",
+  "deleteAccountConfirm": "இந்த செயலை மீட்டெடுக்க முடியாது."
+}

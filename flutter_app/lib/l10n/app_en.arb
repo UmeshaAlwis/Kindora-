@@ -1,0 +1,29 @@
+{
+  "@@locale": "en",
+
+  "settings": "Settings",
+  "general": "General",
+  "notifications": "Notifications",
+  "receiveCampaignUpdates": "Receive campaign updates",
+  "darkMode": "Dark Mode",
+  "enableDarkTheme": "Enable dark theme",
+  "language": "Language",
+
+  "security": "Security",
+  "changePassword": "Change Password",
+  "deleteAccount": "Delete Account",
+
+  "legal": "Legal",
+  "privacyPolicy": "Privacy Policy",
+  "termsConditions": "Terms & Conditions",
+
+  "about": "About",
+  "aboutKindora": "About Kindora",
+  "version": "Version",
+
+  "logout": "Logout",
+
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "deleteAccountConfirm": "This action cannot be undone."
+}

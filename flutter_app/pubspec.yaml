@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+    
   cupertino_icons: ^1.0.2
   flutter_feather_icons: ^2.0.0
   flutter_svg: ^2.0.10
@@ -51,7 +55,6 @@ dependencies:
   
   # Localization
   intl: ^0.20.2
-  easy_localization: ^3.0.0
   
   # Notifications
   awesome_notifications: ^0.10.1
@@ -98,6 +101,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   
   assets:
     - .env
