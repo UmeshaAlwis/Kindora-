@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
+import 'package:kindora/features/wallet/ui/wallet_topup_page.dart';
+import 'package:kindora/features/wallet/ui/wallet_transaction_history_page.dart';
 
 class DashboardHome extends StatelessWidget {
   const DashboardHome({super.key});
@@ -56,15 +58,52 @@ class DashboardHome extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   /// ACTIONS
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _HeaderAction(
-                          icon: Icons.add_circle_outline, label: "Top up"),
-                      _HeaderAction(icon: Icons.swap_horiz, label: "Transfer"),
+                        icon: Icons.add_circle_outline,
+                        label: "Top up",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const WalletTopUpPage(),
+                            ),
+                          );
+                        },
+                      ),
                       _HeaderAction(
-                          icon: Icons.favorite_border, label: "Donate"),
-                      _HeaderAction(icon: Icons.history, label: "History"),
+                        icon: Icons.swap_horiz,
+                        label: "Transfer",
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Transfer feature coming soon'),
+                            ),
+                          );
+                        },
+                      ),
+                      _HeaderAction(
+                        icon: Icons.favorite_border,
+                        label: "Donate",
+                        onTap: () {
+                          context.push('/campaigns');
+                        },
+                      ),
+                      _HeaderAction(
+                        icon: Icons.history,
+                        label: "History",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const WalletTransactionHistoryPage(),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -190,27 +229,32 @@ class DashboardHome extends StatelessWidget {
 class _HeaderAction extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   const _HeaderAction({
     required this.icon,
     required this.label,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 28,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }
