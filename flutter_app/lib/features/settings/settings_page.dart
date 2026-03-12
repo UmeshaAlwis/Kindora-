@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/theme_controller.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -80,9 +83,94 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Language selection coming soon"),
+                    content: Text("Language switching coming soon"),
                   ),
                 );
+              },
+            ),
+
+            const SizedBox(height: 25),
+
+            /// SECURITY
+            _sectionTitle(context, "Security"),
+
+            const SizedBox(height: 10),
+
+            /// CHANGE PASSWORD
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text("Change Password"),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Password change coming soon"),
+                  ),
+                );
+              },
+            ),
+
+            const Divider(),
+
+            /// DELETE ACCOUNT
+            ListTile(
+              leading: const Icon(Icons.delete_forever, color: Colors.red),
+              title: const Text("Delete Account"),
+              onTap: () async {
+
+                final confirm = await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Delete Account"),
+                      content: const Text(
+                        "This action cannot be undone.",
+                      ),
+                      actions: [
+
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  try {
+
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    await user?.delete();
+
+                    if (!mounted) return;
+
+                    context.go('/');
+
+                  } catch (e) {
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Please re-login before deleting your account.",
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
             ),
 
@@ -93,7 +181,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 10),
 
-            /// PRIVACY POLICY
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: const Text("Privacy Policy"),
@@ -109,7 +196,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const Divider(),
 
-            /// TERMS
             ListTile(
               leading: const Icon(Icons.description_outlined),
               title: const Text("Terms & Conditions"),
@@ -117,7 +203,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Terms & Conditions page coming soon"),
+                    content: Text("Terms page coming soon"),
                   ),
                 );
               },
@@ -145,6 +231,22 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
 
+            const SizedBox(height: 20),
+
+            /// LOGOUT
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text("Logout"),
+              onTap: () async {
+
+                await FirebaseAuth.instance.signOut();
+
+                if (!mounted) return;
+
+                context.go('/login');
+              },
+            ),
+
             const SizedBox(height: 30),
           ],
         ),
@@ -152,7 +254,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// SECTION TITLE WIDGET
+  /// SECTION TITLE
   Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
