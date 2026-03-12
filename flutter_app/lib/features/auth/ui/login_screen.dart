@@ -41,15 +41,16 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      /// DO NOT NAVIGATE
-      /// Router/AuthGate will handle dashboard navigation
+      /// Navigate to dashboard after successful login
+      if (mounted) {
+        context.go('/dashboard');
+      }
 
     } on FirebaseAuthException catch (e) {
 
       String message;
 
       switch (e.code) {
-
         case 'user-not-found':
           message = "No account found with this email.";
           break;
@@ -69,7 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
         default:
           message = e.message ?? e.code;
-
       }
 
       _showSnackBar(message, Colors.red);
@@ -96,7 +96,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
-      /// Router handles navigation
+      /// Navigate to dashboard
+      if (mounted) {
+        context.go('/dashboard');
+      }
 
     } on FirebaseAuthException catch (e) {
 
@@ -315,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              /// SIGN UP LINK (MATCHES SIGNUP SCREEN STYLE)
+              /// SIGN UP LINK
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
