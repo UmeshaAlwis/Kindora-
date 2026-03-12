@@ -67,10 +67,20 @@ class SupabaseClient {
         params.order = `${options.orderBy.column}.${direction}`;
       }
 
+      console.log(`[Supabase] SELECT from ${table}:`, { params });
       const response = await this.client.get(url, { params });
+      console.log(`[Supabase] SELECT response: ${response.data.length} rows`);
       return response.data;
-    } catch (error) {
-      throw new Error(`SELECT from ${table} failed: ${error instanceof Error ? error.message : error}`);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message;
+      console.error(`[Supabase] SELECT error:`, {
+        table,
+        status: error.response?.status,
+        message: errorMsg,
+        url: error.config?.url,
+        params: error.config?.params,
+      });
+      throw new Error(`SELECT from ${table} failed: ${errorMsg || error.message}`);
     }
   }
 
@@ -144,5 +154,6 @@ class SupabaseClient {
   }
 }
 
-// Export singleton instance
+// Export class and singleton instance
+export { SupabaseClient };
 export const supabase = new SupabaseClient();

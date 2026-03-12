@@ -21,8 +21,18 @@ final userProfileRepositoryProvider = Provider((ref) {
 
 // Campaign providers
 final allCampaignsProvider = FutureProvider((ref) async {
-  final repository = ref.watch(campaignRepositoryProvider);
-  return repository.getAllCampaigns();
+  print('[allCampaignsProvider] Starting to fetch campaigns...');
+  try {
+    final repository = ref.watch(campaignRepositoryProvider);
+    final campaigns = await repository.getAllCampaigns();
+    print(
+        '[allCampaignsProvider] Successfully fetched ${campaigns.length} campaigns');
+    return campaigns;
+  } catch (error, stackTrace) {
+    print('[allCampaignsProvider] ERROR: $error');
+    print('[allCampaignsProvider] STACK: $stackTrace');
+    rethrow;
+  }
 });
 
 final campaignByIdProvider =

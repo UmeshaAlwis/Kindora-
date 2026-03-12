@@ -20,7 +20,7 @@ export class CampaignService {
       const offset = (page - 1) * limit;
       const options: any = {
         select:
-          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image,description,created_at,status',
+          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at',
         limit,
         offset,
         orderBy: { column: 'created_at', ascending: false },
@@ -86,20 +86,12 @@ export class CampaignService {
     try {
       const campaignData = {
         id: uuidv4(),
-        charity_id: charityId,
         title: data.title,
-        description: data.description,
+        campaigner_name: data.campaigner_name,
         category: data.category,
         campaign_category: data.campaign_category,
         target_amount: data.target_amount,
-        image_url: data.image_url || data.image,
-        gallery_urls: data.gallery_urls || [],
-        status: 'active',
-        end_date: data.end_date,
-        campaigner_name: data.campaigner_name,
-        raised_amount: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        image_url: data.image_url || null,
       };
 
       const campaign = await supabase.insert<Campaign>('campaigns', campaignData);

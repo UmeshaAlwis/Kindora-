@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/payment_model.dart';
 import '../services/stripe_service.dart';
-import 'payhere_payment_webview.dart';
+import 'package:kindora/services/wallet_service.dart';
 import 'bank_transfer_page.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -22,11 +22,12 @@ class _PaymentPageState extends State<PaymentPage> {
   late TextEditingController _donorNameController;
   late TextEditingController _donorEmailController;
   late TextEditingController _donorPhoneController;
-  String _selectedPaymentMethod = 'card_payment';
+  String _selectedPaymentMethod = 'stripe';
   bool _isProcessing = false;
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
   late StripeService _stripeService;
+  late WalletService _walletService;
 
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
@@ -37,15 +38,9 @@ class _PaymentPageState extends State<PaymentPage> {
     ),
     PaymentMethod(
       id: 'stripe',
-      name: 'Stripe',
+      name: 'Card Payments',
       icon: '💳',
-      description: 'Credit/Debit Card via Stripe',
-    ),
-    PaymentMethod(
-      id: 'card_payment',
-      name: 'PayHere',
-      icon: '💳',
-      description: 'Credit/Debit Card via PayHere',
+      description: 'Credit/Debit Card',
     ),
     PaymentMethod(
       id: 'bank_transfer',
@@ -63,16 +58,29 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
     _stripeService = StripeService();
+    _walletService = WalletService();
     _fetchWalletBalance();
   }
 
   Future<void> _fetchWalletBalance() async {
-    // TODO: Implement API call to fetch wallet balance
-    // For now, set a dummy value
-    setState(() {
-      _walletBalance = 5000.0; // Example balance
-      _loadingWallet = false;
-    });
+    setState(() => _loadingWallet = true);
+    try {
+      final balance = await _walletService.getWalletBalance();
+      setState(() {
+        _walletBalance = balance;
+        _loadingWallet = false;
+      });
+    } catch (e) {
+      setState(() => _loadingWallet = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load wallet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -91,11 +99,22 @@ class _PaymentPageState extends State<PaymentPage> {
   void _processPayment() async {
     if (_amountController.text.isEmpty ||
         _donorNameController.text.isEmpty ||
-        _donorEmailController.text.isEmpty ||
-        _donorPhoneController.text.isEmpty) {
+        _donorEmailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all required fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Phone number is required for bank transfer only
+    if (_selectedPaymentMethod == 'bank_transfer' &&
+        _donorPhoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter phone number for bank transfer'),
           backgroundColor: Colors.red,
         ),
       );
@@ -141,9 +160,6 @@ class _PaymentPageState extends State<PaymentPage> {
       } else if (_selectedPaymentMethod == 'stripe') {
         // Handle Stripe payment
         await _processStripePayment(payment, orderId);
-      } else if (_selectedPaymentMethod == 'card_payment') {
-        // Handle card payment via PayHere gateway
-        await _processPayHerePayment(payment, orderId);
       } else if (_selectedPaymentMethod == 'bank_transfer') {
         // Handle bank transfer
         await _processBankTransfer(payment);
@@ -163,11 +179,18 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Future<void> _processWalletPayment(Payment payment, String orderId) async {
     try {
-      setState(() => _isProcessing = false);
+      // Process wallet payment through the service
+      await _walletService.processWalletPayment(
+        amount: _donationAmount,
+        campaignId: widget.campaign.id,
+        donorName: _donorNameController.text,
+        donorEmail: _donorEmailController.text,
+      );
 
       if (mounted) {
-        // TODO: Implement actual wallet payment API call
-        // For now, show success dialog
+        setState(() => _isProcessing = false);
+
+        // Show success dialog
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Wallet donation successful!'),
@@ -284,52 +307,6 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _processPayHerePayment(Payment payment, String orderId) async {
-    try {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-
-        // Update payment object with phone number
-        payment = Payment(
-          id: payment.id,
-          campaignId: payment.campaignId,
-          campaignTitle: payment.campaignTitle,
-          amount: payment.amount,
-          paymentMethod: payment.paymentMethod,
-          timestamp: payment.timestamp,
-          status: payment.status,
-          donorName: payment.donorName,
-          donorEmail: payment.donorEmail,
-          donorPhone: _donorPhoneController.text,
-        );
-
-        // Navigate to PayHere WebView checkout screen
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PayHerePaymentWebView(
-                payment: payment,
-                orderRef: orderId,
-                campaignTitle: widget.campaign.title,
-              ),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('PayHere Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -483,17 +460,18 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _donorPhoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                hintText: 'Phone Number',
-                prefixIcon: const Icon(Icons.phone),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            if (_selectedPaymentMethod == 'bank_transfer')
+              TextField(
+                controller: _donorPhoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'Phone Number',
+                  prefixIcon: const Icon(Icons.phone),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 24),
 
             // Payment Method Section
