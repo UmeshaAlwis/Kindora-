@@ -190,17 +190,68 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 10),
 
+            /// CHANGE PASSWORD
             ListTile(
               leading: const Icon(Icons.lock_outline),
               title: Text(t.changePassword),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                _showChangePasswordDialog(context);
+              },
             ),
 
             const Divider(),
 
+            /// DELETE ACCOUNT
             ListTile(
               leading: const Icon(Icons.delete_forever, color: Colors.red),
               title: Text(t.deleteAccount),
+              onTap: () async {
+
+                final confirm = await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text(t.deleteAccount),
+                      content: Text(t.deleteAccountConfirm),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(t.cancel),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(
+                            t.delete,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  try {
+
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    await user?.delete();
+
+                    if (!mounted) return;
+
+                    context.go('/login');
+
+                  } catch (e) {
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please re-login before deleting account"),
+                      ),
+                    );
+                  }
+                }
+              },
             ),
 
             const SizedBox(height: 25),
@@ -213,6 +264,15 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: Text(t.privacyPolicy),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const AlertDialog(
+                    title: Text("Privacy Policy"),
+                    content: Text("Privacy policy page coming soon."),
+                  ),
+                );
+              },
             ),
 
             const Divider(),
@@ -220,6 +280,15 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.description_outlined),
               title: Text(t.termsConditions),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const AlertDialog(
+                    title: Text("Terms & Conditions"),
+                    content: Text("Terms page coming soon."),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 25),
@@ -233,6 +302,14 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: const Icon(Icons.info_outline),
               title: Text(t.aboutKindora),
               subtitle: const Text("Version 1.0.0"),
+              onTap: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: "Kindora",
+                  applicationVersion: "1.0.0",
+                  applicationLegalese: "© 2026 Kindora Team",
+                );
+              },
             ),
 
             const SizedBox(height: 20),
@@ -255,6 +332,120 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  /// PASSWORD CHANGE DIALOG
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+
+    final currentPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+
+        return AlertDialog(
+          title: const Text("Change Password"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              TextField(
+                controller: currentPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Current Password",
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: newPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "New Password",
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              TextButton(
+                onPressed: () async {
+
+                  if (user.email == null) return;
+
+                  await FirebaseAuth.instance.sendPasswordResetEmail(
+                    email: user.email!,
+                  );
+
+                  if (!mounted) return;
+
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Password reset email sent"),
+                    ),
+                  );
+                },
+                child: const Text("Forgot current password?"),
+              ),
+            ],
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+
+            TextButton(
+              onPressed: () async {
+
+                try {
+
+                  final credential = EmailAuthProvider.credential(
+                    email: user.email!,
+                    password: currentPasswordController.text,
+                  );
+
+                  await user.reauthenticateWithCredential(credential);
+
+                  await user.updatePassword(newPasswordController.text);
+
+                  if (!mounted) return;
+
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Password updated successfully"),
+                    ),
+                  );
+
+                } catch (e) {
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Password update failed"),
+                    ),
+                  );
+                }
+              },
+              child: const Text("Update"),
+            ),
+          ],
+        );
+      },
     );
   }
 
