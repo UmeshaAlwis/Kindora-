@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindora/l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -44,6 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
     const primaryColor = Color(0xFF0C0C79);
 
+    final t = AppLocalizations.of(context)!;
+
     /// If user not logged in
     if (user == null) {
       Future.microtask(() => context.go('/login'));
@@ -55,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
       /// APP BAR
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Profile"),
+        title: Text(t.profile),
         centerTitle: true,
         actions: [
           IconButton(
@@ -76,15 +79,15 @@ class _ProfilePageState extends State<ProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            /// Don't crash UI if Supabase fails
             if (snapshot.hasError) {
               debugPrint("Profile error: ${snapshot.error}");
             }
 
             final profile = snapshot.data;
 
-            /// fallback to Firebase
-            final name = profile?['name'] ?? "User";
+            /// SAFE FALLBACK
+            final t = AppLocalizations.of(context)!;
+            final name = profile?['name'] ?? t.user;
             final email = user.email ?? "";
 
             final firstLetter =
@@ -138,10 +141,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 10),
 
-                const Center(
+                Center(
                   child: Text(
-                    "Active Donor Since 2024",
-                    style: TextStyle(color: Colors.grey),
+                    t.activeDonorSince,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ),
 
@@ -158,9 +161,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Colors.blue.shade100,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      "Verified Humanitarian",
-                      style: TextStyle(
+                    child: Text(
+                      t.verifiedHumanitarian,
+                      style: const TextStyle(
                         color: Colors.blue,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -181,19 +184,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(18),
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
                           child: Column(
                             children: [
-                              Text(
+                              const Text(
                                 "LKR 45K",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text("Total Donated"),
+                              const SizedBox(height: 4),
+                              Text(t.totalDonated),
                             ],
                           ),
                         ),
@@ -208,19 +211,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(18),
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
                           child: Column(
                             children: [
-                              Text(
+                              const Text(
                                 "23",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text("Campaigns Supported"),
+                              const SizedBox(height: 4),
+                              Text(t.campaignsSupported),
                             ],
                           ),
                         ),
@@ -240,9 +243,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () {
                     context.push('/edit-profile');
                   },
-                  child: const Text(
-                    "Edit Profile",
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    t.editProfile,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
 
@@ -251,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 /// LOGOUT
                 OutlinedButton.icon(
                   icon: const Icon(Icons.logout),
-                  label: const Text("Logout"),
+                  label: Text(t.logout),
                   onPressed: logout,
                 ),
 
@@ -261,20 +264,6 @@ class _ProfilePageState extends State<ProfilePage> {
           },
         ),
       ),
-    );
-  }
-
-  static Widget _badge(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 28,
-          backgroundColor: color.withOpacity(0.2),
-          child: Icon(icon, color: color),
-        ),
-        const SizedBox(height: 6),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
     );
   }
 }

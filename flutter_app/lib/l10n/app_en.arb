@@ -25,5 +25,13 @@
 
   "cancel": "Cancel",
   "delete": "Delete",
-  "deleteAccountConfirm": "This action cannot be undone."
+  "deleteAccountConfirm": "This action cannot be undone.",
+
+  "profile": "Profile",
+  "user": "User",
+  "activeDonorSince": "Active Donor Since 2024",
+  "verifiedHumanitarian": "Verified Humanitarian",
+  "totalDonated": "Total Donated",
+  "campaignsSupported": "Campaigns Supported",
+  "editProfile": "Edit Profile"
 }

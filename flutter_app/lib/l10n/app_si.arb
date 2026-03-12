@@ -25,5 +25,13 @@
 
   "cancel": "අවලංගු කරන්න",
   "delete": "මකා දමන්න",
-  "deleteAccountConfirm": "මෙම ක්‍රියාව ආපසු හැරවිය නොහැක."
+  "deleteAccountConfirm": "මෙම ක්‍රියාව ආපසු හැරවිය නොහැක.",
+
+  "profile": "පැතිකඩ",
+  "user": "පරිශීලකයා",
+  "activeDonorSince": "2024 සිට ක්‍රියාකාරී දායකයෙක්",
+  "verifiedHumanitarian": "සත්‍යාපිත මානවහිතවාදී",
+  "totalDonated": "මුළු දානය",
+  "campaignsSupported": "සහාය දුන් ව්‍යාපෘති",
+  "editProfile": "පැතිකඩ සංස්කරණය"
 }

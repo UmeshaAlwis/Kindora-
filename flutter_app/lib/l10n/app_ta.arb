@@ -25,5 +25,13 @@
 
   "cancel": "ரத்து செய்",
   "delete": "நீக்கு",
-  "deleteAccountConfirm": "இந்த செயலை மீட்டெடுக்க முடியாது."
+  "deleteAccountConfirm": "இந்த செயலை மீட்டெடுக்க முடியாது.",
+
+  "profile": "சுயவிவரம்",
+  "user": "பயனர்",
+  "activeDonorSince": "2024 முதல் செயலில் உள்ள நன்கொடையாளர்",
+  "verifiedHumanitarian": "சரிபார்க்கப்பட்ட மனிதாபிமானம்",
+  "totalDonated": "மொத்த நன்கொடை",
+  "campaignsSupported": "ஆதரித்த பிரச்சாரங்கள்",
+  "editProfile": "சுயவிவரம் திருத்து"
 }
