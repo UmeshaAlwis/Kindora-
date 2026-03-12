@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kindora/providers/supabase_providers.dart';
+import 'package:kindora/features/payment/ui/payment_page.dart';
+import 'package:kindora/features/payment/models/payment_model.dart'
+    as payment_model;
 import 'start_campaign_page.dart';
 
 class CampaignHomePage extends ConsumerWidget {
@@ -33,24 +36,41 @@ class CampaignHomePage extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: Column(
           children: [
-            CampaignList(),
-            Center(child: Text("No ongoing campaigns")),
-            Center(child: Text("No successful campaigns")),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color(0xFFFF751F),
-          child: const Icon(Icons.add, color: Colors.white),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const StartCampaignPage(),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  const CampaignList(),
+                  const Center(child: Text("No ongoing campaigns")),
+                  const Center(child: Text("No successful campaigns")),
+                ],
               ),
-            );
-          },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text("Add Campaign"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF751F),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const StartCampaignPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -220,10 +240,22 @@ class CampaignList extends ConsumerWidget {
                                       const EdgeInsets.symmetric(vertical: 8),
                                 ),
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text('Donation feature coming soon'),
+                                  // Convert Supabase campaign to payment model campaign
+                                  final paymentCampaign =
+                                      payment_model.Campaign(
+                                    id: campaign.id,
+                                    title: campaign.title,
+                                    image: campaign.image ?? '',
+                                    raisedAmount: campaign.raisedAmount ?? 0.0,
+                                    targetAmount: campaign.targetAmount ?? 0.0,
+                                    description: campaign.description ?? '',
+                                  );
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => PaymentPage(
+                                          campaign: paymentCampaign),
                                     ),
                                   );
                                 },
