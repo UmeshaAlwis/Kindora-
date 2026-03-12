@@ -30,6 +30,7 @@ migrate_working_dir/
 .packages
 .flutter-plugins
 .flutter-plugins-dependencies
+lib/l10n/*.dart
 .pub-cache/
 .pub/
 /build/
@@ -66,6 +67,7 @@ android/local.properties
 # iOS
 ios/Pods
 ios/Runner.xcworkspace
+.DS_Store
 
 # VS Code
 .vscode/
