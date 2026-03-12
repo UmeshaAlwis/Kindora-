@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
-import 'firebase_options.dart';
 import 'config/routes/app_router.dart';
+import 'core/theme/theme_controller.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase with correct web configuration
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeController(),
+      child: const MyApp(),
+    ),
   );
-
-  // Persist login across browser refresh
-  await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
-
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -24,9 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final themeController = Provider.of<ThemeController>(context);
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeController.themeMode,
     );
   }
 }
