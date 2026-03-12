@@ -12,7 +12,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
   bool notificationsEnabled = true;
-  final Color primaryColor = const Color(0xFF0C0C79);
+
+  static const Color primaryColor = Color(0xFF0C0C79);
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +31,13 @@ class _SettingsPageState extends State<SettingsPage> {
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
+
           children: [
 
             const SizedBox(height: 20),
 
-            /// GENERAL SETTINGS
-            Text(
-              "General",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            /// GENERAL
+            _sectionTitle(context, "General"),
 
             const SizedBox(height: 10),
 
@@ -76,67 +73,92 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// LANGUAGE
             ListTile(
-              leading: Icon(Icons.language, color: primaryColor),
+              leading: const Icon(Icons.language),
               title: const Text("Language"),
               subtitle: const Text("English"),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Language selection coming soon"),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 25),
 
             /// LEGAL
-            Text(
-              "Legal",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            _sectionTitle(context, "Legal"),
 
             const SizedBox(height: 10),
 
             /// PRIVACY POLICY
             ListTile(
-              leading: Icon(Icons.privacy_tip_outlined, color: primaryColor),
+              leading: const Icon(Icons.privacy_tip_outlined),
               title: const Text("Privacy Policy"),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Privacy policy page coming soon"),
+                  ),
+                );
+              },
             ),
 
             const Divider(),
 
             /// TERMS
             ListTile(
-              leading: Icon(Icons.description_outlined, color: primaryColor),
+              leading: const Icon(Icons.description_outlined),
               title: const Text("Terms & Conditions"),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Terms & Conditions page coming soon"),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 25),
 
             /// ABOUT
-            Text(
-              "About",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            _sectionTitle(context, "About"),
 
             const SizedBox(height: 10),
 
             ListTile(
-              leading: Icon(Icons.info_outline, color: primaryColor),
+              leading: const Icon(Icons.info_outline),
               title: const Text("About Kindora"),
               subtitle: const Text("Version 1.0.0"),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
+              onTap: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: "Kindora",
+                  applicationVersion: "1.0.0",
+                  applicationLegalese: "© 2026 Kindora Team",
+                );
+              },
             ),
 
             const SizedBox(height: 30),
           ],
         ),
       ),
+    );
+  }
+
+  /// SECTION TITLE WIDGET
+  Widget _sectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 }
