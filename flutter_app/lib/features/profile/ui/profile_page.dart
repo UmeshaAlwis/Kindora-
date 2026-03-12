@@ -3,9 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../settings/settings_page.dart';
-import 'edit_profile_page.dart';
-
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -22,18 +19,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
 
-    /// Redirect to login
     context.go('/login');
   }
 
+  /// GET PROFILE FROM SUPABASE
   Future<Map<String, dynamic>?> getProfile(String uid) async {
-    final data = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', uid)
-        .maybeSingle();
+    try {
+      final data = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', uid)
+          .maybeSingle();
 
-    return data;
+      return data;
+    } catch (e) {
+      debugPrint("Supabase profile error: $e");
+      return null;
+    }
   }
 
   @override
@@ -42,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
     const primaryColor = Color(0xFF0C0C79);
 
-    /// If user not logged in → redirect
+    /// If user not logged in
     if (user == null) {
       Future.microtask(() => context.go('/login'));
       return const SizedBox();
@@ -74,12 +76,14 @@ class _ProfilePageState extends State<ProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
 
+            /// Don't crash UI if Supabase fails
             if (snapshot.hasError) {
-              return const Center(child: Text("Failed to load profile"));
+              debugPrint("Profile error: ${snapshot.error}");
             }
 
             final profile = snapshot.data;
 
+            /// fallback to Firebase
             final name = profile?['name'] ?? "User";
             final email = user.email ?? "";
 
@@ -222,28 +226,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 35),
-
-                /// ACHIEVEMENTS
-                const Text(
-                  "Achievements",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _badge(Icons.emoji_events, "Top Donor", Colors.orange),
-                    _badge(Icons.local_fire_department, "Streak Week", Colors.blueGrey),
-                    _badge(Icons.eco, "Eco Warrior", Colors.green),
                   ],
                 ),
 

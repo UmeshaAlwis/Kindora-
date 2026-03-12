@@ -5,28 +5,35 @@ import '../../core/layouts/app_shell.dart';
 
 import '../../features/home/ui/home_screen.dart';
 import '../../features/auth/ui/login_screen.dart';
+import '../../features/auth/ui/signup_screen.dart'; // ADD
 import '../../features/dashboard/ui/dashboard_screen.dart';
 import '../../features/profile/ui/profile_page.dart';
 import '../../features/settings/settings_page.dart';
 
 final router = GoRouter(
-  initialLocation: '/',   // 👈 Start at Home
+  initialLocation: '/',
 
   routes: [
 
-    /// HOME PAGE
+    /// HOME
     GoRoute(
       path: '/',
       builder: (context, state) => const HomeScreen(),
     ),
 
-    /// LOGIN PAGE
+    /// LOGIN
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
 
-    /// MAIN APP (with bottom navigation)
+    /// SIGNUP
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => const SignupScreen(),
+    ),
+
+    /// MAIN APP
     ShellRoute(
       builder: (context, state, child) {
         return AppShell(child: child);
@@ -34,13 +41,11 @@ final router = GoRouter(
 
       routes: [
 
-        /// DASHBOARD
         GoRoute(
           path: '/dashboard',
           builder: (context, state) => const DashboardScreen(),
         ),
 
-        /// FEED
         GoRoute(
           path: '/feed',
           builder: (context, state) => const Scaffold(
@@ -48,7 +53,6 @@ final router = GoRouter(
           ),
         ),
 
-        /// MESSAGES
         GoRoute(
           path: '/messages',
           builder: (context, state) => const Scaffold(
@@ -56,7 +60,6 @@ final router = GoRouter(
           ),
         ),
 
-        /// MERCH
         GoRoute(
           path: '/merch',
           builder: (context, state) => const Scaffold(
@@ -64,13 +67,11 @@ final router = GoRouter(
           ),
         ),
 
-        /// PROFILE
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfilePage(),
         ),
 
-        /// SETTINGS
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsPage(),

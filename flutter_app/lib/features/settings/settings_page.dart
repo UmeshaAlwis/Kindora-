@@ -12,11 +12,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
   bool notificationsEnabled = true;
-
   final Color primaryColor = const Color(0xFF0C0C79);
 
   @override
   Widget build(BuildContext context) {
+
+    final themeController = context.watch<ThemeController>();
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -65,7 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
               activeTrackColor: primaryColor.withOpacity(0.4),
               title: const Text("Dark Mode"),
               subtitle: const Text("Enable dark theme"),
-              value: context.watch<ThemeController>().isDarkMode,
+              value: themeController.isDarkMode,
               onChanged: (value) {
                 context.read<ThemeController>().toggleTheme(value);
               },

@@ -22,35 +22,33 @@ class CampaignCard extends StatelessWidget {
 
     return Card(
       elevation: 3,
-
-      /// Remove extra margin (GridView already adds spacing)
       margin: EdgeInsets.zero,
-
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
 
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-
           children: [
 
-            /// Campaign Image (reduced height)
+            /// Campaign Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               child: Image.network(
                 "https://picsum.photos/400/200",
-                height: 90,
+                height: 110,   // reduced from 140
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
 
             /// Title
             Text(
@@ -59,7 +57,7 @@ class CampaignCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 15,
               ),
             ),
 
@@ -70,14 +68,17 @@ class CampaignCard extends StatelessWidget {
               campaign.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black87,
+              ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             /// Progress Bar
             ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
@@ -88,7 +89,7 @@ class CampaignCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
 
             /// Raised info
             Row(
@@ -96,7 +97,10 @@ class CampaignCard extends StatelessWidget {
               children: [
                 Text(
                   "Raised \$${campaign.raisedAmount}",
-                  style: const TextStyle(fontSize: 11),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black87,
+                  ),
                 ),
                 Text(
                   "$percent%",
@@ -108,23 +112,26 @@ class CampaignCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             /// Donate Button
             SizedBox(
               width: double.infinity,
+              height: 36,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0C0C79),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 onPressed: () {
                   context.push('/campaigns');
                 },
                 child: const Text(
                   "Donate",
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 13),
                 ),
               ),
             ),
