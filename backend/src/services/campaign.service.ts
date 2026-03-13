@@ -82,10 +82,11 @@ export class CampaignService {
   /**
    * Create campaign
    */
-  static async createCampaign(charityId: string, data: any) {
+  static async createCampaign(userId: string, data: any) {
     try {
       const campaignData = {
         id: uuidv4(),
+        user_id: userId,
         title: data.title,
         campaigner_name: data.campaigner_name,
         category: data.category,
@@ -94,6 +95,7 @@ export class CampaignService {
         image_url: data.image_url || null,
       };
 
+      console.log('[CampaignService] Inserting campaign:', campaignData);
       const campaign = await supabase.insert<Campaign>('campaigns', campaignData);
 
       return campaign;

@@ -2,11 +2,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/wallet_model.dart';
+import '../config/app_env.dart';
 
 class WalletService {
-  static const String baseUrl =
-      'http://localhost:5001'; // Backend server port (from .env PORT=5001)
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Get current user's wallet balance
@@ -18,7 +16,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.get(
-        Uri.parse('$baseUrl/wallet/balance'),
+        Uri.parse('${AppEnv.apiBaseUrl}/wallet/balance'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -50,7 +48,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.post(
-        Uri.parse('$baseUrl/wallet/initialize'),
+        Uri.parse('${AppEnv.apiBaseUrl}/wallet/initialize'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -83,7 +81,8 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.get(
-        Uri.parse('$baseUrl/wallet/transactions?page=$page&limit=$limit'),
+        Uri.parse(
+            '${AppEnv.apiBaseUrl}/wallet/transactions?page=$page&limit=$limit'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -114,7 +113,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.post(
-        Uri.parse('$baseUrl/wallet/topup'),
+        Uri.parse('${AppEnv.apiBaseUrl}/wallet/topup'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -147,7 +146,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.post(
-        Uri.parse('$baseUrl/donation/create'),
+        Uri.parse('${AppEnv.apiBaseUrl}/donation/create'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
@@ -181,7 +180,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.get(
-        Uri.parse('$baseUrl/wallet/details'),
+        Uri.parse('${AppEnv.apiBaseUrl}/wallet/details'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
