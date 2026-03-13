@@ -1,204 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'news_detail_screen.dart'; // Ensure this import is here
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const Color primaryBlue = Color(0xFF0C0C79);
+    const Color primaryOrange = Color(0xFFFF751F);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: primaryBlue,
+        title: Text('Kindora News Feed',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+        centerTitle: true,
         elevation: 0,
-        centerTitle: false,
-        title: Text(
-          'Kindora Updates',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF1A1A40),
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.bell, color: Color(0xFF1A1A40)),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // 1. WATER PROJECT NEWS
           _buildNewsCard(
             context,
-            title: "Clean Water Project: Phase 1 Done!",
-            description: "We successfully installed 5 filtration systems in rural villages. See the impact your donations made.",
-            imageUrl: "https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?q=80&w=2070",
-            tag: "Completed",
-            tagColor: Colors.green,
-            time: "2 hours ago",
+            title: 'Ongoing: Jaffna Water Project',
+            subtitle: 'Phase 2 is now 70% complete. Clean water for 50 more families.',
+            status: 'ONGOING',
+            color: primaryBlue,
+            icon: LucideIcons.loader,
           ),
-
-          // 2. MEDICAL SUPPLIES NEWS
+          const SizedBox(height: 16),
           _buildNewsCard(
             context,
-            title: "Medical Supplies Delivered",
-            description: "First-aid kits reached three clinics this morning. 50 more kits are currently being packed for transport.",
-            imageUrl: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=2000",
-            tag: "Ongoing",
-            tagColor: Colors.orange,
-            time: "5 hours ago",
+            title: 'Success: Kandy School Drive',
+            subtitle: 'Campaign completed! 200 kids received new school bags and books.',
+            status: 'COMPLETED',
+            color: Colors.green[700]!,
+            icon: LucideIcons.checkCircle,
           ),
-
-          // 3. EDUCATION KITS NEWS (NEW)
+          const SizedBox(height: 16),
           _buildNewsCard(
             context,
-            title: "School Kits Distribution",
-            description: "New stationery and bags delivered to 150 students in the mountain region. Education is the best gift!",
-            imageUrl: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2070",
-            tag: "Success",
-            tagColor: Colors.blue,
-            time: "Yesterday",
+            title: 'Urgent: Flood Relief Galle',
+            subtitle: 'Emergency dry rations needed for 20 families affected by heavy rain.',
+            status: 'URGENT',
+            color: Colors.red[700]!,
+            icon: LucideIcons.alertTriangle,
           ),
-
-          // 4. COMMUNITY SUPPORT NEWS (NEW)
+          const SizedBox(height: 16),
           _buildNewsCard(
             context,
-            title: "Community Kitchen Support",
-            description: "Our volunteers served over 300 meals today. Thank you to everyone who supported this initiative.",
-            imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070",
-            tag: "Ongoing",
-            tagColor: Colors.orange,
-            time: "2 days ago",
+            title: 'Kindora Milestone: 1000 Donors',
+            subtitle: 'We just reached 1,000 active donors on the platform. Thank you!',
+            status: 'MILESTONE',
+            color: primaryOrange,
+            icon: LucideIcons.award,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNewsCard(
-      BuildContext context, {
-        required String title,
-        required String description,
-        required String imageUrl,
-        required String tag,
-        required Color tagColor,
-        required String time,
-      }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          )
-        ],
+  Widget _buildNewsCard(BuildContext context, {
+    required String title,
+    required String subtitle,
+    required String status,
+    required Color color,
+    required IconData icon
+  }) {
+    return Card(
+      elevation: 2,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: color.withOpacity(0.1)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Section
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    height: 200,
-                    color: Colors.grey[200],
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.error),
-                  ),
-                ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(15),
+        onTap: () {
+          // Navigates to the details page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NewsDetailScreen(
+                title: title,
+                subtitle: subtitle,
+                status: status,
+                color: color,
               ),
-              Positioned(
-                top: 15,
-                right: 15,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: tagColor,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    tag,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(20)
+                    ),
+                    child: Text(
+                        status,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold
+                        )
                     ),
                   ),
+                  Icon(icon, color: color, size: 20),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                  title,
+                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)
+              ),
+              const SizedBox(height: 4),
+              Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.4)
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 12),
+                child: Row(
+                  children: [
+                    Text(
+                        "Read more",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)
+                    ),
+                    SizedBox(width: 4),
+                    Icon(LucideIcons.arrowRight, size: 14),
+                  ],
                 ),
               ),
             ],
           ),
-          // Content Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  time,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A40),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    height: 1.5,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(LucideIcons.bookOpen, size: 18),
-                      label: const Text(
-                        "Read Full Update",
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(LucideIcons.share2, size: 20, color: Colors.grey),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
