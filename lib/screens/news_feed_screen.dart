@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'news_detail_screen.dart'; // Ensure this import is here
+import 'news_detail_screen.dart';
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Brand Colors
     const Color primaryBlue = Color(0xFF0C0C79);
     const Color primaryOrange = Color(0xFFFF751F);
 
@@ -80,7 +81,6 @@ class FeedScreen extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
-          // Navigates to the details page
           Navigator.push(
             context,
             MaterialPageRoute(
