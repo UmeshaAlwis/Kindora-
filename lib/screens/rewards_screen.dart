@@ -8,6 +8,10 @@ class RewardsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Leader's Official Brand Colors
+    const Color primaryBlue = Color(0xFF0C0C79);
+    const Color primaryOrange = Color(0xFFFF751F);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -18,7 +22,7 @@ class RewardsScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(top: 60, bottom: 40),
               decoration: const BoxDecoration(
-                color: Color(0xFF1A4789),
+                color: primaryBlue, // Updated
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
@@ -59,12 +63,12 @@ class RewardsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // 🏆 THE FIX: Using Wrap ensures they look like Squares, not Pills
+                  // FIX: Removed 'const' from children list to prevent compilation error
                   Center(
                     child: Wrap(
-                      spacing: 20, // Horizontal space
-                      runSpacing: 20, // Vertical space
-                      children: const [
+                      spacing: 20,
+                      runSpacing: 20,
+                      children: [
                         FlippingBadge(label: 'First Gift', icon: LucideIcons.gift, color: Colors.orange, desc: 'First donation award!'),
                         FlippingBadge(label: 'Eco Warrior', icon: LucideIcons.leaf, color: Colors.green, desc: 'Saved the planet!'),
                         FlippingBadge(label: 'Top 10%', icon: LucideIcons.medal, color: Colors.blue, desc: 'Top monthly donor!'),
@@ -82,7 +86,7 @@ class RewardsScreen extends StatelessWidget {
                     percent: 0.75,
                     center: const Text("75%", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
                     barRadius: const Radius.circular(10),
-                    progressColor: const Color(0xFFF77F43),
+                    progressColor: primaryOrange, // Updated
                     backgroundColor: Colors.grey[100],
                   ),
                 ],
@@ -111,8 +115,8 @@ class _FlippingBadgeState extends State<FlippingBadge> {
         duration: const Duration(milliseconds: 300),
         child: Container(
           key: ValueKey(_showFront),
-          width: MediaQuery.of(context).size.width * 0.4, // Forces a nice square width
-          height: 150, // Forces a fixed height to prevent "Pill" shape
+          width: MediaQuery.of(context).size.width * 0.4,
+          height: 150,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
