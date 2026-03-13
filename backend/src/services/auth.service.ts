@@ -12,44 +12,65 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '7d';
 export class AuthService {
   /**
    * Register a new user
-   * Flow: Firebase Auth → Supabase users table → Local database (for backward compatibility)
+   * Flow: Firebase Auth → Supabase users table + wallet creation
    */
   static async register(data: RegisterRequest): Promise<AuthResponse> {
-    const db = getDatabase();
+    // Always generate a UUID for the database ID
     const userId = uuidv4();
+    
+    // Use Firebase UID if provided, otherwise will be created by backend
+    let firebaseUID = data.firebase_uid;
 
-    // Step 1: Check if email exists in Supabase
+    // Step 1: Check if email exists in Firebase first
+    console.log('[AuthService] Checking if email exists in Firebase:', data.email);
+    const firebaseAuth = getFirebaseAuth();
+    
+    // Only check/create Firebase user if not provided by Flutter
+    if (!data.firebase_uid) {
+      try {
+        const existingFirebaseUser = await firebaseAuth.getUserByEmail(data.email);
+        if (existingFirebaseUser) {
+          console.log('[AuthService] Email already exists in Firebase');
+          throw new Error('Email already registered');
+        }
+      } catch (error: any) {
+        if (error.code !== 'auth/user-not-found') {
+          // Any error other than "not found" is a real error
+          console.error('[AuthService] Firebase check failed:', error);
+          throw error;
+        }
+        // 'auth/user-not-found' is expected and means we can proceed
+      }
+
+      // Step 2: Create Firebase user only if not provided
+      try {
+        const firebaseUser = await firebaseAuth.createUser({
+          uid: userId,
+          email: data.email,
+          password: data.password,
+          displayName: data.full_name,
+        });
+        firebaseUID = firebaseUser.uid;
+        console.log('[AuthService] Firebase user created:', firebaseUID);
+      } catch (error) {
+        console.error('[AuthService] Firebase creation failed:', error);
+        throw error;
+      }
+    } else {
+      console.log('[AuthService] Using provided Firebase UID:', firebaseUID);
+    }
+
+    // Step 3: Check if email exists in Supabase
+    console.log('[AuthService] Checking if email exists in Supabase:', data.email);
     const existingSupabaseUser = await SupabaseUserService.userExists(data.email);
     if (existingSupabaseUser) {
       throw new Error('Email already registered');
     }
 
-    // Step 2: Check if email exists in local database
-    const existingUser = await db('users').where('email', data.email).first();
-    if (existingUser) {
-      throw new Error('Email already registered');
-    }
-
-    // Step 3: Create Firebase user first
-    let firebaseUID = '';
-    try {
-      const firebaseAuth = getFirebaseAuth();
-      const firebaseUser = await firebaseAuth.createUser({
-        uid: userId,
-        email: data.email,
-        password: data.password,
-        displayName: data.full_name,
-      });
-      firebaseUID = firebaseUser.uid;
-      console.log('[AuthService] Firebase user created:', firebaseUID);
-    } catch (error) {
-      console.error('[AuthService] Firebase creation failed:', error);
-      throw error;
-    }
-
     // Step 4: Sync user to Supabase (public.users table)
+    let supabaseUser;
     try {
-      await SupabaseUserService.createUser(firebaseUID, data, userId);
+      supabaseUser = await SupabaseUserService.createUser(firebaseUID, data, userId);
       console.log('[AuthService] User synced to Supabase:', userId);
 
       // Step 5: Create wallet for new user in Supabase
@@ -60,52 +81,26 @@ export class AuthService {
       throw new Error(`User registration failed: ${error.message}`);
     }
 
-    // Step 6: Hash password for local database (backward compatibility)
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    // Step 7: Create user in local database
-    let user;
-    try {
-      user = await db('users').insert({
-        user_id: userId,
-        email: data.email,
-        password_hash: hashedPassword,
-        full_name: data.full_name,
-        role: data.role,
-        phone_number: data.phone_number,
-        email_verified: false,
-        is_active: true,
-      }).returning('*');
-      console.log('[AuthService] User created in local database:', userId);
-    } catch (error) {
-      console.error('[AuthService] Local database creation failed:', error);
-      // Note: User already exists in Firebase and Supabase, but not in local DB
-      // This is acceptable - user can still authenticate via Firebase
-      throw error;
-    }
-
-    // Step 8: Initialize gamification for donors
-    if (data.role === 'donor') {
-      try {
-        await db('gamification').insert({
-          user_id: userId,
-          donor_level: 'bronze',
-          total_points: 0,
-        });
-        console.log('[AuthService] Gamification initialized for donor:', userId);
-      } catch (error) {
-        console.error('[AuthService] Gamification init failed:', error);
-        // Don't fail registration if gamification fails
-      }
-    }
-
-    // Step 9: Generate tokens
-    const tokens = this.generateTokens(user[0]);
+    // Step 6: Generate tokens
+    const tokens = this.generateTokens({
+      id: userId,
+      email: data.email,
+      full_name: data.full_name,
+      role: data.role,
+    });
 
     return {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      user: this.formatUser(user[0]),
+      user: {
+        id: userId,
+        email: data.email,
+        full_name: data.full_name,
+        role: data.role,
+        verified: false,
+        email_verified: false,
+        is_active: true,
+      },
     };
   }
 

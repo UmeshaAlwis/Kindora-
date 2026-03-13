@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/supabase_models.dart';
 import '../services/supabase_service.dart';
 import '../config/app_env.dart';
@@ -104,12 +105,20 @@ class CampaignRepository {
       };
       print('[CampaignRepository] Request payload: $data');
 
+      // Get Firebase ID token for authentication
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+      final idToken = await user.getIdToken();
+
       final response = await dio.post(
         apiUrl,
         data: data,
         options: Options(
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer $idToken',
           },
         ),
       );

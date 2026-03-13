@@ -26,11 +26,19 @@ export async function initializeFirebase() {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     };
 
+    console.log('[Firebase] Configuration:');
+    console.log('  Project ID:', firebaseConfig.projectId);
+    console.log('  Client Email:', firebaseConfig.clientEmail);
+    console.log('  Private Key length:', firebaseConfig.privateKey?.length);
+
     if (admin.apps.length === 0) {
       admin.initializeApp({
         credential: admin.credential.cert(firebaseConfig as any),
         databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`,
       });
+      console.log('[Firebase] ✓ Initialized successfully');
+    } else {
+      console.log('[Firebase] ⚠️  Already initialized (using existing instance)');
     }
 
     return admin;
