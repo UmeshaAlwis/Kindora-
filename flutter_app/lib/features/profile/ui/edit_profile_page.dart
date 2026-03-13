@@ -18,6 +18,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final supabase = Supabase.instance.client;
 
   bool isLoading = false;
+  bool notificationsEnabled = true;
+
+  String language = "en";
+  String role = "donor";
 
   static const primaryColor = Color(0xFF0C0C79);
 
@@ -27,11 +31,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     loadProfile();
   }
 
-  /// LOAD PROFILE DATA
+  /// LOAD PROFILE FROM SUPABASE
   Future<void> loadProfile() async {
 
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) return;
 
     try {
@@ -47,6 +50,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         nameController.text = data['name'] ?? "";
         bioController.text = data['bio'] ?? "";
 
+        notificationsEnabled = data['notifications_enabled'] ?? true;
+        language = data['language'] ?? "en";
+        role = data['role'] ?? "donor";
+
         setState(() {});
       }
 
@@ -59,22 +66,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> saveProfile() async {
 
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) return;
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
 
-      await supabase
+      final existing = await supabase
           .from('profiles')
-          .update({
-            'name': nameController.text.trim(),
-            'bio': bioController.text.trim(),
-          })
-          .eq('id', user.uid);
+          .select()
+          .eq('id', user.uid)
+          .maybeSingle();
+
+      if (existing != null) {
+
+        /// UPDATE EXISTING PROFILE
+        await supabase
+            .from('profiles')
+            .update({
+              'name': nameController.text.trim(),
+              'bio': bioController.text.trim(),
+              'language': language,
+              'notifications_enabled': notificationsEnabled,
+              'role': role,
+            })
+            .eq('id', user.uid);
+
+      } else {
+
+        /// INSERT NEW PROFILE
+        await supabase
+            .from('profiles')
+            .insert({
+              'id': user.uid,
+              'email': user.email,
+              'name': nameController.text.trim(),
+              'bio': bioController.text.trim(),
+              'language': language,
+              'notifications_enabled': notificationsEnabled,
+              'role': role,
+            });
+      }
 
       if (!mounted) return;
 
@@ -99,13 +131,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
           backgroundColor: Colors.red,
         ),
       );
-
     }
 
     if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
@@ -119,6 +148,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
 
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
 
       appBar: AppBar(
@@ -128,16 +159,60 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       body: Padding(
         padding: const EdgeInsets.all(20),
+
         child: ListView(
           children: [
 
             /// PROFILE IMAGE
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(Icons.person, size: 40),
+            Center(
+              child: Stack(
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    child: Icon(Icons.person, size: 40),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: primaryColor,
+                      child: const Icon(Icons.edit,size:16,color:Colors.white),
+                    ),
+                  )
+                ],
+              ),
             ),
 
             const SizedBox(height: 25),
+
+            /// EMAIL (READ ONLY)
+            TextField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Email",
+                hintText: user?.email ?? "",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            /// ROLE (DISPLAY ONLY)
+            TextField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Account Type",
+                hintText: role,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
 
             /// NAME
             TextField(
@@ -164,12 +239,62 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            /// LANGUAGE SELECTOR
+            DropdownButtonFormField<String>(
+              value: language,
+              decoration: InputDecoration(
+                labelText: "Language",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              items: const [
+
+                DropdownMenuItem(
+                  value: "en",
+                  child: Text("English"),
+                ),
+
+                DropdownMenuItem(
+                  value: "si",
+                  child: Text("සිංහල"),
+                ),
+
+                DropdownMenuItem(
+                  value: "ta",
+                  child: Text("தமிழ்"),
+                ),
+
+              ],
+              onChanged: (value) {
+                setState(() {
+                  language = value!;
+                });
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            /// NOTIFICATIONS
+            SwitchListTile(
+              title: const Text("Enable Notifications"),
+              value: notificationsEnabled,
+              onChanged: (value) {
+                setState(() {
+                  notificationsEnabled = value;
+                });
+              },
+            ),
+
             const SizedBox(height: 25),
 
             /// SAVE BUTTON
             SizedBox(
               width: double.infinity,
               height: 50,
+
               child: ElevatedButton(
 
                 style: ElevatedButton.styleFrom(
@@ -189,7 +314,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
               ),
             ),
-
           ],
         ),
       ),
