@@ -4,25 +4,11 @@ import 'package:share_plus/share_plus.dart';
 import 'start_campaign_page.dart';
 import 'donation_sheet.dart';
 import 'progresstracker.dart';
-import 'package:flutter/services.dart';
 import 'services/campaign_services.dart';
 
 class CampaignHomePage extends StatelessWidget {
   const CampaignHomePage({super.key});
-void showDonationSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
-      ),
-    ),
-    builder: (context) {
-      return const DonationSheet();
-    },
-  );
-}
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -41,9 +27,8 @@ void showDonationSheet(BuildContext context) {
             indicatorColor: const Color(0xFFFF751F),
             labelStyle: GoogleFonts.poppins(
               fontWeight: FontWeight.w500,
-              color: const Color.fromARGB(255, 255, 255, 255),
+              color: Colors.white,
             ),
-            
             tabs: const [
               Tab(text: "All"),
               Tab(text: "Ongoing"),
@@ -64,15 +49,25 @@ void showDonationSheet(BuildContext context) {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const StartCampaignPage(),
-              ),
+              MaterialPageRoute(builder: (_) => const StartCampaignPage()),
             );
           },
         ),
       ),
     );
   }
+}
+
+// ✅ Single global showDonationSheet
+void showDonationSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) => const DonationSheet(),
+  );
 }
 
 class CampaignList extends StatefulWidget {
@@ -83,175 +78,188 @@ class CampaignList extends StatefulWidget {
 }
 
 class _CampaignListState extends State<CampaignList> {
-  
   late Future<List<dynamic>> campaigns;
+
   @override
   void initState() {
-      super.initState();
+    super.initState();
+    _loadCampaigns();
+  }
+
+  void _loadCampaigns() {
+    setState(() {
       campaigns = CampaignService().getCampaigns();
-    }
-  
-      @override
-Widget build(BuildContext context) {
-  return FutureBuilder(
-    future: campaigns,
-    builder: (context, snapshot) {
+    });
+  }
 
-      if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
-      }
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: campaigns,
+      builder: (context, snapshot) {
 
-      final data = snapshot.data as List;
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
 
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: data.length,
-        itemBuilder: (context, index) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          final campaign = data[index];
+        final data = snapshot.data as List;
 
-          double raised = campaign['raised_amount'] ?? 0;
-          double target = campaign['target_amount'] ?? 1;
+        if (data.isEmpty) {
+          return const Center(child: Text("No campaigns yet. Start one!"));
+        }
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            final campaign = data[index];
+            double raised = (campaign['raised_amount'] ?? 0).toDouble();
+            double target = (campaign['target_amount'] ?? 1).toDouble();
+            String priority = campaign['priority'] ?? 'Normal';
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      campaign['image_url'] ??
-                          "https://images.unsplash.com/photo-1593113630400-ea4288922497",
-                      height: 80,
-                      width: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        Text(
-                          campaign['title'] ?? "Campaign",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF0C0C79),
-                          ),
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        ProgressTracker(
-                          raisedAmount: raised,
-                          targetAmount: target,
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: raised / target,
-                            minHeight: 8,
-                            backgroundColor: Colors.grey[200],
-                            color: const Color(0xFFFF751F),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0C0C79),
-                            ),
-                            onPressed: () {
-                              showDonationSheet(context);
-                            },
-                            child: const Text("Donate"),
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                size: 20,
-                                color: Color(0xFF0C0C79),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const StartCampaignPage(),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.share,
-                                size: 20,
-                                color: Color(0xFF0C0C79),
-                              ),
-                              onPressed: () {
-                                Share.share(
-                                  "Support my campaign: ${campaign['title']}",
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-  }
-  }
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-void showDonationSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
-      ),
-    ),
-    builder: (context) {
-      return const DonationSheet();
-    },
-  );
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        campaign['image_url'] ??
+                            "https://images.unsplash.com/photo-1593113630400-ea4288922497",
+                        height: 80,
+                        width: 80,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          // ✅ Show priority badge if Urgent or High
+                          if (priority == 'Urgent' || priority == 'High')
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: priority == 'Urgent'
+                                    ? Colors.red[50]
+                                    : Colors.orange[50],
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: priority == 'Urgent'
+                                      ? Colors.red
+                                      : Colors.orange,
+                                ),
+                              ),
+                              child: Text(
+                                priority == 'Urgent'
+                                    ? '🔴 Urgent'
+                                    : '🟠 High Priority',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: priority == 'Urgent'
+                                      ? Colors.red
+                                      : Colors.orange,
+                                ),
+                              ),
+                            ),
+
+                          Text(
+                            campaign['title'] ?? "Campaign",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF0C0C79),
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          ProgressTracker(
+                            raisedAmount: raised,
+                            targetAmount: target,
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0C0C79),
+                              ),
+                              onPressed: () => showDonationSheet(context),
+                              child: Text(
+                                "Donate",
+                                style: GoogleFonts.poppins(color: Colors.white),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit,
+                                    size: 20, color: Color(0xFF0C0C79)),
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const StartCampaignPage(),
+                                    ),
+                                  );
+                                  _loadCampaigns(); // ✅ Refresh after edit
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.share,
+                                    size: 20, color: Color(0xFF0C0C79)),
+                                onPressed: () {
+                                  Share.share(
+                                    "Support my campaign: ${campaign['title']}",
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
