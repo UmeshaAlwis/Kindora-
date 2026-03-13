@@ -15,11 +15,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final supabase = Supabase.instance.client;
 
+  static const primaryColor = Color(0xFF0C0C79);
+
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
-
     if (!mounted) return;
-
     context.go('/login');
   }
 
@@ -43,11 +43,8 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
 
     final user = FirebaseAuth.instance.currentUser;
-    const primaryColor = Color(0xFF0C0C79);
-
     final t = AppLocalizations.of(context)!;
 
-    /// If user not logged in
     if (user == null) {
       Future.microtask(() => context.go('/login'));
       return const SizedBox();
@@ -55,7 +52,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
 
-      /// APP BAR
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(t.profile),
@@ -79,14 +75,8 @@ class _ProfilePageState extends State<ProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.hasError) {
-              debugPrint("Profile error: ${snapshot.error}");
-            }
-
             final profile = snapshot.data;
 
-            /// SAFE FALLBACK
-            final t = AppLocalizations.of(context)!;
             final name = profile?['name'] ?? t.user;
             final email = user.email ?? "";
 
@@ -94,167 +84,165 @@ class _ProfilePageState extends State<ProfilePage> {
                 name.isNotEmpty ? name[0].toUpperCase() : "?";
 
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
               children: [
 
-                /// PROFILE IMAGE
-                Center(
-                  child: CircleAvatar(
-                    radius: 55,
-                    backgroundColor: primaryColor,
-                    child: Text(
-                      firstLetter,
+                /// PROFILE IMAGE + NAME
+                Column(
+                  children: [
+
+                    Stack(
+                      children: [
+
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: primaryColor,
+                          child: Text(
+                            firstLetter,
+                            style: const TextStyle(
+                              fontSize: 34,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        /// EDIT ICON (NAVIGATES TO EDIT PROFILE)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              context.push('/edit-profile');
+                            },
+                            child: CircleAvatar(
+                              radius: 16,
+                              backgroundColor: primaryColor,
+                              child: const Icon(
+                                Icons.edit,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    Text(
+                      name,
                       style: const TextStyle(
-                        fontSize: 34,
-                        color: Colors.white,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 18),
+                    const SizedBox(height: 6),
 
-                /// NAME
-                Center(
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                /// EMAIL
-                Center(
-                  child: Text(
-                    email,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Center(
-                  child: Text(
-                    t.activeDonorSince,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                /// VERIFIED BADGE
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      t.verifiedHumanitarian,
+                    Text(
+                      email,
                       style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 35),
-
-                /// STATS
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            children: [
-                              const Text(
-                                "LKR 45K",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(t.totalDonated),
-                            ],
-                          ),
-                        ),
+                        color: Colors.grey,
+                        fontSize: 14,
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 6),
 
-                    Expanded(
-                      child: Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            children: [
-                              const Text(
-                                "23",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(t.campaignsSupported),
-                            ],
-                          ),
+                    Text(
+                      t.activeDonorSince,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        t.verifiedHumanitarian,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 35),
+                const SizedBox(height: 28),
 
-                /// EDIT PROFILE
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  onPressed: () {
-                    context.push('/edit-profile');
-                  },
-                  child: Text(
-                    t.editProfile,
-                    style: const TextStyle(color: Colors.white),
-                  ),
+                /// STATS
+                Row(
+                  children: [
+
+                    Expanded(
+                      child: _statCard(
+                        icon: Icons.volunteer_activism,
+                        iconColor: Colors.green,
+                        value: "LKR 45K",
+                        label: t.totalDonated,
+                      ),
+                    ),
+
+                    const SizedBox(width: 14),
+
+                    Expanded(
+                      child: _statCard(
+                        icon: Icons.campaign,
+                        iconColor: Colors.blue,
+                        value: "23",
+                        label: t.campaignsSupported,
+                      ),
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
+
+                /// BADGES
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+
+                    _badge(
+                      icon: Icons.emoji_events,
+                      color: Colors.amber,
+                      label: "Top Donor",
+                    ),
+
+                    _badge(
+                      icon: Icons.local_fire_department,
+                      color: Colors.blueGrey,
+                      label: "Streak Week",
+                    ),
+
+                    _badge(
+                      icon: Icons.park,
+                      color: Colors.green,
+                      label: "Eco Warrior",
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 35),
 
                 /// LOGOUT
                 OutlinedButton.icon(
                   icon: const Icon(Icons.logout),
                   label: Text(t.logout),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
                   onPressed: logout,
                 ),
 
@@ -264,6 +252,75 @@ class _ProfilePageState extends State<ProfilePage> {
           },
         ),
       ),
+    );
+  }
+
+  /// STAT CARD
+  Widget _statCard({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          children: [
+
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: iconColor.withOpacity(0.15),
+              child: Icon(icon, size: 18, color: iconColor),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(label),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// BADGE
+  Widget _badge({
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
+
+    return Column(
+      children: [
+
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: color.withOpacity(0.2),
+          child: Icon(icon, color: color),
+        ),
+
+        const SizedBox(height: 6),
+
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12),
+        ),
+      ],
     );
   }
 }

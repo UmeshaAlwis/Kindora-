@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -12,7 +13,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final nameController = TextEditingController();
   final bioController = TextEditingController();
 
-  final Color primaryColor = const Color(0xFF0C0C79);
+  static const primaryColor = Color(0xFF0C0C79);
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +22,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       appBar: AppBar(
         title: const Text("Edit Profile"),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        centerTitle: true,
       ),
 
       body: Padding(
         padding: const EdgeInsets.all(20),
-
-        child: Column(
+        child: ListView(
           children: [
 
             /// PROFILE IMAGE
@@ -37,7 +36,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Icon(Icons.person, size: 40),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
             /// NAME
             TextField(
@@ -64,13 +63,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 25),
 
             /// SAVE BUTTON
             SizedBox(
               width: double.infinity,
               height: 50,
-
               child: ElevatedButton(
 
                 style: ElevatedButton.styleFrom(
@@ -81,7 +79,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
 
                 onPressed: () {
-                  Navigator.pop(context);
+
+                  /// For now just go back
+                  context.pop();
+
                 },
 
                 child: const Text(
