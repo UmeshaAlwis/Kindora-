@@ -10,6 +10,7 @@ const registerSchema = Joi.object({
   full_name: Joi.string().required(),
   role: Joi.string().valid('donor', 'charity', 'admin', 'beneficiary').required(),
   phone_number: Joi.string().optional(),
+  firebase_uid: Joi.string().optional(),
 });
 
 const loginSchema = Joi.object({
@@ -22,19 +23,27 @@ export class AuthController {
    * Register endpoint
    */
   static async register(req: Request, res: Response, next: NextFunction) {
+    console.log('[AuthController.register] Request received');
+    console.log('[AuthController.register] Body:', req.body);
     try {
+      console.log('[AuthController.register] Validating schema...');
       const { error, value } = registerSchema.validate(req.body);
       if (error) {
+        console.log('[AuthController.register] Validation error:', error.message);
         return res.status(400).json({ error: error.message });
       }
 
+      console.log('[AuthController.register] Calling AuthService.register...');
       const result = await AuthService.register(value as RegisterRequest);
+      console.log('[AuthController.register] Registration successful');
       res.status(201).json({
         success: true,
         data: result,
         message: 'User registered successfully',
       });
     } catch (error: any) {
+      console.error('[AuthController.register] Error:', error.message);
+      console.error('[AuthController.register] Full error:', error);
       res.status(400).json({
         success: false,
         error: error.message,

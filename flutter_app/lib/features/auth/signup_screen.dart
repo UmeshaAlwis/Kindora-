@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../config/app_env.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -42,9 +45,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // EMAIL SIGNUP
   Future<void> signup() async {
+    print('===== SIGNUP STARTED =====');
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
+
+    print('Email: $email');
+    print('Password length: ${password.length}');
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       _showSnackBar("Please fill all fields", Colors.orange);
@@ -59,18 +66,31 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => isLoading = true);
 
     try {
+      print('About to create Firebase user...');
+      // Step 1: Create user in Firebase
       final userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      print('Firebase user created: ${userCredential.user?.uid}');
+
       final user = userCredential.user;
 
       if (user != null) {
+        print('Sending verification email...');
         await user.sendEmailVerification();
+
+        // Step 2: Call backend API to sync user to Supabase
+        print('===== NOW CALLING BACKEND API =====');
+        print(
+            '[Signup] Backend URL will be: ${AppEnv.apiBaseUrl}/auth/register');
+        await _registerWithBackend(email, password, user.uid);
+        print('===== BACKEND CALL COMPLETED =====');
       }
 
+      print('Signing out Firebase user...');
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
@@ -81,15 +101,55 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       Navigator.pop(context);
-
     } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException: ${e.message}');
       _showSnackBar(e.message ?? "Signup failed.", Colors.red);
-    } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+    } catch (e) {
+      print('[Signup] ERROR CAUGHT: $e');
+      print('[Signup] Error type: ${e.runtimeType}');
+      _showSnackBar("Something went wrong: $e", Colors.red);
     }
 
     if (mounted) {
       setState(() => isLoading = false);
+    }
+    print('===== SIGNUP ENDED =====');
+  }
+
+  /// Call backend API to register user and sync to Supabase
+  Future<void> _registerWithBackend(
+      String email, String password, String firebaseUid) async {
+    try {
+      final backendUrl = '${AppEnv.apiBaseUrl}/auth/register';
+      print('[Signup] Backend URL: $backendUrl');
+
+      final response = await http.post(
+        Uri.parse(backendUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'full_name': email.split('@')[0],
+          'role': 'donor',
+          'phone_number': null,
+        }),
+      );
+
+      print('[Signup] Backend response: ${response.statusCode}');
+      print('[Signup] Backend body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('[Signup] User registered successfully in backend');
+      } else {
+        print(
+            '[Signup] Backend returned ${response.statusCode}: ${response.body}');
+        throw Exception('Backend registration failed: ${response.body}');
+      }
+    } catch (e) {
+      print('[Signup] Backend registration error: $e');
+      throw Exception('Failed to sync with backend: $e');
     }
   }
 
@@ -103,16 +163,13 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
-
     } on FirebaseAuthException catch (e) {
-
       if (e.code == 'popup-closed-by-user' ||
           e.code == 'cancelled-popup-request') {
         return;
       }
 
       _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
-
     } catch (_) {
       _showSnackBar("Something went wrong.", Colors.red);
     }
@@ -152,14 +209,11 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(24),
-
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               Text(
                 'Join Kindora',
                 style: TextStyle(
@@ -201,9 +255,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      obscurePassword ? Icons.visibility : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -248,8 +300,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     onPressed: () {
                       setState(() {
-                        obscureConfirmPassword =
-                            !obscureConfirmPassword;
+                        obscureConfirmPassword = !obscureConfirmPassword;
                       });
                     },
                   ),
@@ -266,8 +317,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ? "Passwords match ✓"
                         : "Passwords do not match",
                     style: TextStyle(
-                      color:
-                          passwordsMatch ? Colors.green : Colors.red,
+                      color: passwordsMatch ? Colors.green : Colors.red,
                     ),
                   ),
                 ),
@@ -279,16 +329,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   onPressed: isLoading ? null : signup,
-
                   child: isLoading
                       ? const SizedBox(
                           height: 20,
@@ -316,21 +363,17 @@ class _SignupScreenState extends State<SignupScreen> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton.icon(
-
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: primaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   icon: Icon(Icons.login, color: primaryColor),
-
                   label: Text(
                     "Sign up with Google",
                     style: TextStyle(color: primaryColor),
                   ),
-
                   onPressed: signUpWithGoogle,
                 ),
               ),

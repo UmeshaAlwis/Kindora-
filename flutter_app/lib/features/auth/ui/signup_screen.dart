@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../../config/app_env.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -43,6 +46,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // EMAIL SIGNUP
   Future<void> signup() async {
+    print('===== SIGNUP STARTED =====');
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
@@ -60,18 +64,28 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => isLoading = true);
 
     try {
+      print('About to create Firebase user...');
       final userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      print('Firebase user created: ${userCredential.user?.uid}');
       final user = userCredential.user;
 
       if (user != null) {
+        print('Sending verification email...');
         await user.sendEmailVerification();
+
+        // Call backend API to sync user to Supabase
+        print('===== NOW CALLING BACKEND API =====');
+        print('[Signup] Backend URL: ${AppEnv.apiBaseUrl}/auth/register');
+        await _registerWithBackend(email, password, user.uid);
+        print('===== BACKEND CALL COMPLETED =====');
       }
 
+      print('Signing out Firebase user...');
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
@@ -83,13 +97,55 @@ class _SignupScreenState extends State<SignupScreen> {
 
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException: ${e.message}');
       _showSnackBar(e.message ?? "Signup failed.", Colors.red);
-    } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+    } catch (e) {
+      print('[Signup] ERROR CAUGHT: $e');
+      _showSnackBar("Something went wrong: $e", Colors.red);
     }
 
     if (mounted) {
       setState(() => isLoading = false);
+    }
+    print('===== SIGNUP ENDED =====');
+  }
+
+  /// Call backend API to register user
+  Future<void> _registerWithBackend(
+      String email, String password, String firebaseUid) async {
+    try {
+      final backendUrl = '${AppEnv.apiBaseUrl}/auth/register';
+      print('[Backend] POST $backendUrl');
+
+      final payload = {
+        'email': email,
+        'password': password,
+        'full_name': email.split('@')[0],
+        'role': 'donor',
+        'firebase_uid': firebaseUid,
+      };
+
+      final response = await http
+          .post(
+            Uri.parse(backendUrl),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(payload),
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('[Backend] Response status: ${response.statusCode}');
+      print('[Backend] Response body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('[Backend] ✓ User registered successfully');
+      } else {
+        throw Exception('Backend returned ${response.statusCode}');
+      }
+    } catch (e) {
+      print('[Backend] ✗ Error: $e');
+      rethrow;
     }
   }
 
