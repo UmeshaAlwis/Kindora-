@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -11,22 +12,59 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
 
-List<Map<String, dynamic>> messages = [
-  {"text": "Hello! Thank you for supporting our campaign.", "isMe": false, "time": "5m ago"},
-  {"text": "Happy to help! Keep up the great work.", "isMe": true, "time": "4m ago"},
-  {"text": "We truly appreciate your generosity.", "isMe": false, "time": "3m ago"},
-  {"text": "It's our pleasure! Let us know if there are other ways we can assist.", "isMe": true, "time": "2m ago"},
-  {"text": "Will do! Thanks again for your support.", "isMe": false, "time": "1m ago"},
-  {"text": "You're very welcome! We're here to help anytime.", "isMe": true, "time": "Just now"},
-  {"text": "We truly appreciate your generosity.", "isMe": false, "time": "10:20 AM"},
-];
+  final TextEditingController controller = TextEditingController();
+
+  late final RealtimeChannel channel;
+
+  Future loadMessages() async {
+
+  final data = await supabase
+      .from('messages')
+      .select()
+      .order('created_at');
+
+  setState(() {
+    messages = List<Map<String, dynamic>>.from(data);
+  });
+
+}
+
+@override
+void initState() {
+  super.initState();
+  loadMessages();
+
+  channel = supabase.channel ('message_channel')
+    ..onPostgresChanges(
+      event: PostgresChangeEvent.insert,
+      schema: 'public',
+      table: 'messages',
+      callback: (payload){
+        loadMessages();
+      }
+   )
+    ..subscribe();
+
+}
+
+  final supabase = Supabase.instance.client;
+
+List<Map<String, dynamic>> messages = [];
 
 
-final TextEditingController controller = TextEditingController();
 
-
-void sendMessage() {
+void sendMessage() async {
   if (controller.text.trim().isEmpty) return;
+
+  await supabase.from('messages').insert({
+    "content": controller.text,
+    "sender_id": "0e29b-41d4-a716-44665544000",
+    "receiver_id": "0e29b-41d4-a716-44665544001",
+  });
+
+  controller.clear();
+
+  loadMessages();
 
   setState(() {
     messages.add({
@@ -37,6 +75,15 @@ void sendMessage() {
 
   controller.clear();
 }
+
+@override
+void dispose() {
+  supabase.removeChannel(channel);
+  controller.dispose();
+  super.dispose();
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +119,13 @@ void sendMessage() {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: messages
-                  .map((msg) => MessageBubble(
-                        message: msg["text"],
-                        isMe: msg["isMe"],
-                        time: msg["time"],
-                      ))
+                  .map((msg){
+                    return MessageBubble(
+                      message: msg["content"],
+                      isMe: false,
+                      time: msg["created_at"].toString(),
+                    );
+                  })
                   .toList(),
             ),
           ),
@@ -171,6 +220,7 @@ class MessageInputBar extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
+              controller: controller,
               decoration: InputDecoration(
                 hintText: "Type a message...",
                 border: OutlineInputBorder(
