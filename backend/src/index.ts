@@ -18,6 +18,7 @@ import userRoutes from './routes/user.routes';
 import messageRoutes from './routes/message.routes';
 import paymentRoutes from './routes/payment.routes';
 import chatRoutes from './routes/chat.routes';
+import walletRoutes from './routes/wallet.routes';
 
 // Load environment variables
 dotenv.config();
@@ -105,6 +106,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/campaigns', campaignRoutes);
 apiRouter.use('/donations', donationRoutes);
+apiRouter.use('/wallet', walletRoutes);
 apiRouter.use('/charities', charityRoutes);
 apiRouter.use('/users', userRoutes);
 apiRouter.use('/messages', messageRoutes);

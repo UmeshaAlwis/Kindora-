@@ -399,4 +399,89 @@ export class DonationController {
       next(error);
     }
   }
+
+  /**
+   * Initialize wallet for new user
+   */
+  static async initializeWallet(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId || req.body.user_id;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      // Wallet is auto-created during registration, just return existing or create if missing
+      const balance = await WalletService.getWalletBalance(userId);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          user_id: userId,
+          balance,
+          message: 'Wallet initialized or already exists',
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get wallet details
+   */
+  static async getWalletDetails(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const balance = await WalletService.getWalletBalance(userId);
+
+      res.json({
+        success: true,
+        data: {
+          user_id: userId,
+          balance,
+          currency: 'LKR',
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Top up wallet balance
+   */
+  static async topUpWallet(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const { amount, payment_method } = req.body;
+
+      if (!amount || amount <= 0) {
+        throw new ValidationError('Valid amount is required');
+      }
+
+      // TODO: Process payment based on payment_method
+      // For now, just return success
+      const newBalance = await WalletService.getWalletBalance(userId);
+
+      res.json({
+        success: true,
+        data: {
+          user_id: userId,
+          amount_added: amount,
+          new_balance: newBalance,
+        },
+        message: 'Wallet top-up successful',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

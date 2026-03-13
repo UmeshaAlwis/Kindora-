@@ -87,10 +87,14 @@ export class CampaignController {
         throw new ValidationError(`Validation failed: ${error.details.map(e => e.message).join('; ')}`);
       }
 
-      // TODO: Get charity ID from user
-      const charityId = req.body.charity_id;
+      // Get user ID from authenticated request
+      const userId = req.userId;
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
-      const campaign = await CampaignService.createCampaign(charityId, value);
+      console.log('[CampaignController] Creating campaign for user:', userId);
+      const campaign = await CampaignService.createCampaign(userId, value);
 
       res.status(201).json({
         success: true,
