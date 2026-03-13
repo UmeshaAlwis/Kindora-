@@ -5,9 +5,10 @@ import '../../core/layouts/app_shell.dart';
 
 import '../../features/home/ui/home_screen.dart';
 import '../../features/auth/ui/login_screen.dart';
-import '../../features/auth/ui/signup_screen.dart'; // ADD
+import '../../features/auth/ui/signup_screen.dart';
 import '../../features/dashboard/ui/dashboard_screen.dart';
 import '../../features/profile/ui/profile_page.dart';
+import '../../features/profile/ui/edit_profile_page.dart'; // NEW
 import '../../features/settings/settings_page.dart';
 
 final router = GoRouter(
@@ -67,11 +68,19 @@ final router = GoRouter(
           ),
         ),
 
+        /// PROFILE
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfilePage(),
         ),
 
+        /// EDIT PROFILE (NEW)
+        GoRoute(
+          path: '/edit-profile',
+          builder: (context, state) => const EditProfilePage(),
+        ),
+
+        /// SETTINGS
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsPage(),
