@@ -13,13 +13,11 @@ class ProgressTracker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double progress = raisedAmount / targetAmount;
+    double progress = targetAmount > 0 ? raisedAmount / targetAmount : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-        /// Amount Text
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -31,7 +29,6 @@ class ProgressTracker extends StatelessWidget {
                 color: const Color(0xFF0C0C79),
               ),
             ),
-
             Text(
               "Goal LKR ${targetAmount.toStringAsFixed(0)}",
               style: GoogleFonts.poppins(
@@ -44,11 +41,10 @@ class ProgressTracker extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        /// Progress Bar
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
-            value: progress,
+            value: progress.clamp(0.0, 1.0),
             minHeight: 10,
             backgroundColor: Colors.grey[200],
             color: const Color(0xFFFF751F),
@@ -57,7 +53,6 @@ class ProgressTracker extends StatelessWidget {
 
         const SizedBox(height: 6),
 
-        /// Percentage Text
         Align(
           alignment: Alignment.centerRight,
           child: Text(
