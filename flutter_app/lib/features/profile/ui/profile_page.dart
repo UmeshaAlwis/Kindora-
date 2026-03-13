@@ -79,9 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             final name = profile?['name'] ?? t.user;
             final email = user.email ?? "";
-
-            final firstLetter =
-                name.isNotEmpty ? name[0].toUpperCase() : "?";
+            final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : "?";
 
             return ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
@@ -210,9 +208,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 30),
 
                 /// ACHIEVEMENTS TITLE
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: const Text(
+                const Padding(
+                  padding: EdgeInsets.only(left: 4),
+                  child: Text(
                     "Achievements",
                     style: TextStyle(
                       fontSize: 18,
@@ -250,14 +248,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 35),
 
-                /// LOGOUT
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.logout),
-                  label: Text(t.logout),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                /// SMALL LOGOUT BUTTON
+                Center(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: Text(
+                      t.logout,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
+                      minimumSize: const Size(0, 36),
+                    ),
+                    onPressed: logout,
                   ),
-                  onPressed: logout,
                 ),
 
                 const SizedBox(height: 20),
