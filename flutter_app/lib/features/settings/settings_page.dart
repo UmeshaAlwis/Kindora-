@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+
 import 'package:kindora/l10n/app_localizations.dart';
 
 import '../../../core/theme/theme_controller.dart';
