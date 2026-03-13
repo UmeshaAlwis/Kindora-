@@ -107,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
 
-                        /// EDIT ICON (NAVIGATES TO EDIT PROFILE)
+                        /// EDIT ICON
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -209,6 +209,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 30),
 
+                /// ACHIEVEMENTS TITLE
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: const Text(
+                    "Achievements",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
                 /// BADGES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -246,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: logout,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
               ],
             );
           },
