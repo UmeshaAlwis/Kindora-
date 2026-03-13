@@ -4,11 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 import 'package:kindora/l10n/app_localizations.dart';
 
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/language/language_controller.dart';
+
+import 'ui/privacy_policy_page.dart';
+import 'ui/terms_conditions_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -33,11 +35,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// LOAD NOTIFICATION SETTING FROM SUPABASE
   Future<void> loadNotificationSetting() async {
-
     try {
 
       final user = FirebaseAuth.instance.currentUser;
-
       if (user == null) return;
 
       final data = await supabase
@@ -46,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
           .eq('id', user.uid)
           .maybeSingle();
 
-      if (data != null) {
+      if (data != null && mounted) {
         setState(() {
           notificationsEnabled = data['notifications_enabled'] ?? true;
         });
@@ -59,18 +59,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// SAVE NOTIFICATION SETTING
   Future<void> updateNotificationSetting(bool value) async {
-
     try {
 
       final user = FirebaseAuth.instance.currentUser;
-
       if (user == null) return;
 
       await supabase
           .from('profiles')
-          .update({
-            'notifications_enabled': value,
-          })
+          .update({'notifications_enabled': value})
           .eq('id', user.uid);
 
     } catch (e) {
@@ -95,17 +91,14 @@ class _SettingsPageState extends State<SettingsPage> {
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-
           children: [
 
             const SizedBox(height: 20),
 
             /// GENERAL
             _sectionTitle(context, t.general),
-
             const SizedBox(height: 10),
 
-            /// NOTIFICATIONS
             SwitchListTile(
               activeThumbColor: primaryColor,
               activeTrackColor: primaryColor.withOpacity(0.4),
@@ -113,7 +106,6 @@ class _SettingsPageState extends State<SettingsPage> {
               subtitle: Text(t.receiveCampaignUpdates),
               value: notificationsEnabled,
               onChanged: (value) async {
-
                 setState(() {
                   notificationsEnabled = value;
                 });
@@ -139,10 +131,10 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(),
 
             /// LANGUAGE
-            ListTile(
-              leading: const Icon(Icons.language),
-              title: Text(t.language),
-              subtitle: Text(_currentLanguage(context)),
+            _settingsTile(
+              icon: Icons.language,
+              title: t.language,
+              subtitle: _currentLanguage(context),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
 
@@ -188,13 +180,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// SECURITY
             _sectionTitle(context, t.security),
-
             const SizedBox(height: 10),
 
-            /// CHANGE PASSWORD
-            ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: Text(t.changePassword),
+            _settingsTile(
+              icon: Icons.lock_outline,
+              title: t.changePassword,
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
                 _showChangePasswordDialog(context);
@@ -203,10 +193,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const Divider(),
 
-            /// DELETE ACCOUNT
-            ListTile(
-              leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: Text(t.deleteAccount),
+            _settingsTile(
+              icon: Icons.delete_forever,
+              iconColor: Colors.red,
+              title: t.deleteAccount,
               onTap: () async {
 
                 final confirm = await showDialog(
@@ -233,10 +223,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
 
                 if (confirm == true) {
+
                   try {
 
                     final user = FirebaseAuth.instance.currentUser;
-
                     await user?.delete();
 
                     if (!mounted) return;
@@ -259,18 +249,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// LEGAL
             _sectionTitle(context, t.legal),
-
             const SizedBox(height: 10),
 
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined),
-              title: Text(t.privacyPolicy),
+            _settingsTile(
+              icon: Icons.privacy_tip_outlined,
+              title: t.privacyPolicy,
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const AlertDialog(
-                    title: Text("Privacy Policy"),
-                    content: Text("Privacy policy page coming soon."),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyPage(),
                   ),
                 );
               },
@@ -278,15 +266,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const Divider(),
 
-            ListTile(
-              leading: const Icon(Icons.description_outlined),
-              title: Text(t.termsConditions),
+            _settingsTile(
+              icon: Icons.description_outlined,
+              title: t.termsConditions,
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const AlertDialog(
-                    title: Text("Terms & Conditions"),
-                    content: Text("Terms page coming soon."),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TermsConditionsPage(),
                   ),
                 );
               },
@@ -296,13 +283,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
             /// ABOUT
             _sectionTitle(context, t.about),
-
             const SizedBox(height: 10),
 
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(t.aboutKindora),
-              subtitle: const Text("Version 1.0.0"),
+            _settingsTile(
+              icon: Icons.info_outline,
+              title: t.aboutKindora,
+              subtitle: "Version 1.0.0",
               onTap: () {
                 showAboutDialog(
                   context: context,
@@ -316,9 +302,10 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 20),
 
             /// LOGOUT
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: Text(t.logout),
+            _settingsTile(
+              icon: Icons.logout,
+              iconColor: Colors.red,
+              title: t.logout,
               onTap: () async {
 
                 await FirebaseAuth.instance.signOut();
@@ -343,7 +330,6 @@ class _SettingsPageState extends State<SettingsPage> {
     final newPasswordController = TextEditingController();
 
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) return;
 
     showDialog(
@@ -403,14 +389,22 @@ class _SettingsPageState extends State<SettingsPage> {
           actions: [
 
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               child: const Text("Cancel"),
             ),
 
             TextButton(
               onPressed: () async {
+
+                if (currentPasswordController.text.isEmpty ||
+                    newPasswordController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Please fill all fields"),
+                    ),
+                  );
+                  return;
+                }
 
                 try {
 
@@ -420,7 +414,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
 
                   await user.reauthenticateWithCredential(credential);
-
                   await user.updatePassword(newPasswordController.text);
 
                   if (!mounted) return;
@@ -433,12 +426,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   );
 
-                } catch (e) {
+                } on FirebaseAuthException catch (e) {
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Password update failed"),
-                    ),
+                    SnackBar(content: Text(e.message ?? "Password update failed")),
                   );
                 }
               },
@@ -447,6 +438,24 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         );
       },
+    );
+  }
+
+  /// REUSABLE SETTINGS TILE
+  Widget _settingsTile({
+    IconData? icon,
+    required String title,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+    Color? iconColor,
+  }) {
+    return ListTile(
+      leading: icon != null ? Icon(icon, color: iconColor) : null,
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      trailing: trailing,
+      onTap: onTap,
     );
   }
 
