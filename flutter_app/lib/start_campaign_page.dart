@@ -15,7 +15,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
   String category = "Campaign";
   String campaignCategory = "Personal";
-  String priority = "Normal"; // ✅ Priority field
+  String priority = "Standard"; // ✅ updated default
   DateTime selectedDate = DateTime.now();
   bool _isLoading = false;
 
@@ -120,8 +120,9 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
               // Title
               TextFormField(
                 controller: titleController,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter a title' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter a title'
+                    : null,
                 decoration: const InputDecoration(
                   labelText: "Title",
                   border: OutlineInputBorder(),
@@ -133,8 +134,9 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
               // Campaigner Name
               TextFormField(
                 controller: nameController,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter your name' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter your name'
+                    : null,
                 decoration: const InputDecoration(
                   labelText: "Campaigner Name",
                   border: OutlineInputBorder(),
@@ -221,7 +223,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
 
               const SizedBox(height: 16),
 
-              // ✅ Priority Dropdown
+              // ✅ Priority Dropdown — Standard, Elevated, Urgent
               DropdownButtonFormField<String>(
                 value: priority,
                 decoration: const InputDecoration(
@@ -230,22 +232,22 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                 ),
                 items: [
                   DropdownMenuItem(
-                    value: "Normal",
+                    value: "Standard",
                     child: Row(
                       children: const [
                         Icon(Icons.flag, color: Colors.green, size: 18),
                         SizedBox(width: 8),
-                        Text("Normal"),
+                        Text("🟢 Standard"),
                       ],
                     ),
                   ),
                   DropdownMenuItem(
-                    value: "High",
+                    value: "Elevated",
                     child: Row(
                       children: const [
                         Icon(Icons.flag, color: Colors.orange, size: 18),
                         SizedBox(width: 8),
-                        Text("High"),
+                        Text("🟠 Elevated"),
                       ],
                     ),
                   ),
@@ -255,7 +257,7 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                       children: const [
                         Icon(Icons.flag, color: Colors.red, size: 18),
                         SizedBox(width: 8),
-                        Text("Urgent 🔴"),
+                        Text("🔴 Urgent"),
                       ],
                     ),
                   ),
@@ -273,7 +275,8 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                     child: DropdownButtonFormField<String>(
                       value: "LKR",
                       items: ["LKR", "USD"]
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
                       onChanged: (_) {},
                       decoration: const InputDecoration(
@@ -286,13 +289,17 @@ class _StartCampaignPageState extends State<StartCampaignPage> {
                     flex: 4,
                     child: TextFormField(
                       controller: amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d{0,2}')),
                       ],
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Enter an amount';
-                        if ((double.tryParse(value) ?? 0) <= 0) return 'Enter a valid amount';
+                        if (value == null || value.isEmpty)
+                          return 'Enter an amount';
+                        if ((double.tryParse(value) ?? 0) <= 0)
+                          return 'Enter a valid amount';
                         return null;
                       },
                       decoration: const InputDecoration(
