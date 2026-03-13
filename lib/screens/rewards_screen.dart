@@ -8,7 +8,7 @@ class RewardsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Leader's Official Brand Colors
+    // Defined Brand Colors
     const Color primaryBlue = Color(0xFF0C0C79);
     const Color primaryOrange = Color(0xFFFF751F);
 
@@ -17,12 +17,12 @@ class RewardsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Blue Header
+            // Header Section
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 60, bottom: 40),
               decoration: const BoxDecoration(
-                color: primaryBlue, // Updated
+                color: primaryBlue,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
@@ -63,7 +63,7 @@ class RewardsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // FIX: Removed 'const' from children list to prevent compilation error
+                  // FIX: Removed 'const' to allow dynamic FlippingBadge widgets
                   Center(
                     child: Wrap(
                       spacing: 20,
@@ -86,7 +86,7 @@ class RewardsScreen extends StatelessWidget {
                     percent: 0.75,
                     center: const Text("75%", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
                     barRadius: const Radius.circular(10),
-                    progressColor: primaryOrange, // Updated
+                    progressColor: primaryOrange,
                     backgroundColor: Colors.grey[100],
                   ),
                 ],
@@ -100,13 +100,26 @@ class RewardsScreen extends StatelessWidget {
 }
 
 class FlippingBadge extends StatefulWidget {
-  final String label; final IconData icon; final Color color; final String desc;
-  const FlippingBadge({super.key, required this.label, required this.icon, required this.color, required this.desc});
-  @override State<FlippingBadge> createState() => _FlippingBadgeState();
+  final String label;
+  final IconData icon;
+  final Color color;
+  final String desc;
+
+  const FlippingBadge({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.desc
+  });
+
+  @override
+  State<FlippingBadge> createState() => _FlippingBadgeState();
 }
 
 class _FlippingBadgeState extends State<FlippingBadge> {
   bool _showFront = true;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -121,7 +134,13 @@ class _FlippingBadgeState extends State<FlippingBadge> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: widget.color.withOpacity(0.3), width: 1.5),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4)
+              )
+            ],
           ),
           child: _showFront ? _buildFront() : _buildBack(),
         ),
@@ -135,11 +154,17 @@ class _FlippingBadgeState extends State<FlippingBadge> {
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: widget.color.withOpacity(0.1), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+              color: widget.color.withOpacity(0.1),
+              shape: BoxShape.circle
+          ),
           child: Icon(widget.icon, color: widget.color, size: 28),
         ),
         const SizedBox(height: 12),
-        Text(widget.label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(
+            widget.label,
+            style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold)
+        ),
       ],
     );
   }
@@ -148,7 +173,11 @@ class _FlippingBadgeState extends State<FlippingBadge> {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Center(
-        child: Text(widget.desc, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500)),
+        child: Text(
+            widget.desc,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500)
+        ),
       ),
     );
   }
