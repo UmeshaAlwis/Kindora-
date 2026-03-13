@@ -59,7 +59,7 @@ class CampaignHomePage extends StatelessWidget {
   }
 }
 
-//  showDonationSheet
+// ✅ Single global showDonationSheet
 void showDonationSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
@@ -80,12 +80,11 @@ class CampaignList extends StatefulWidget {
 
 class _CampaignListState extends State<CampaignList> {
 
-  // stateful list instead of Future
+  // ✅ Stateful list for real-time
   List<dynamic> campaigns = [];
   bool _isLoading = true;
   late final RealtimeChannel _subscription;
 
-  //  initState calls both load and subscribe
   @override
   void initState() {
     super.initState();
@@ -107,7 +106,7 @@ class _CampaignListState extends State<CampaignList> {
     }
   }
 
-  // real-time listener
+  // ✅ Real-time listener
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
     _subscription = supabase
@@ -117,7 +116,7 @@ class _CampaignListState extends State<CampaignList> {
           schema: 'public',
           table: 'campaigns',
           callback: (payload) {
-            _loadCampaigns(); // auto refresh on any change
+            _loadCampaigns();
           },
         )
         .subscribe();
@@ -125,11 +124,10 @@ class _CampaignListState extends State<CampaignList> {
 
   @override
   void dispose() {
-    _subscription.unsubscribe(); // ✅ clean up on exit
+    _subscription.unsubscribe();
     super.dispose();
   }
 
-  // FutureBuilder changed to direct ListView with loading state
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -147,7 +145,7 @@ class _CampaignListState extends State<CampaignList> {
         final campaign = campaigns[index];
         double raised = (campaign['raised_amount'] ?? 0).toDouble();
         double target = (campaign['target_amount'] ?? 1).toDouble();
-        String priority = campaign['priority'] ?? 'Normal';
+        String priority = campaign['priority'] ?? 'Standard'; // ✅ updated default
 
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -193,8 +191,8 @@ class _CampaignListState extends State<CampaignList> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      // Priority badge
-                      if (priority == 'Urgent' || priority == 'High')
+                      // ✅ Priority badge — Elevated or Urgent only
+                      if (priority == 'Urgent' || priority == 'Elevated')
                         Container(
                           margin: const EdgeInsets.only(bottom: 6),
                           padding: const EdgeInsets.symmetric(
@@ -213,7 +211,7 @@ class _CampaignListState extends State<CampaignList> {
                           child: Text(
                             priority == 'Urgent'
                                 ? '🔴 Urgent'
-                                : '🟠 High Priority',
+                                : '🟠 Elevated',
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
