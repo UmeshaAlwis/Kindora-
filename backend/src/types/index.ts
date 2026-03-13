@@ -140,6 +140,7 @@ export interface RegisterRequest {
   full_name: string;
   role: 'donor' | 'charity' | 'admin' | 'beneficiary';
   phone_number?: string;
+  firebase_uid?: string;
 }
 
 export interface AuthResponse {

@@ -18,6 +18,7 @@ import userRoutes from './routes/user.routes';
 import messageRoutes from './routes/message.routes';
 import paymentRoutes from './routes/payment.routes';
 import chatRoutes from './routes/chat.routes';
+import walletRoutes from './routes/wallet.routes';
 
 // Load environment variables
 dotenv.config();
@@ -38,11 +39,25 @@ app.use(cors({
   credentials: true,
 }));
 
-// Body Parser Middleware
+// Body Parser Middleware (MUST come before logging middleware that accesses body)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Request Logging Middleware
+// Request Logging Middleware - Log all incoming requests
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(`\n[${new Date().toISOString()}] 🔵 INCOMING: ${req.method} ${req.path}`);
+  console.log('Body:', JSON.stringify(req.body));
+  
+  // Log response when sent
+  const originalSend = res.send;
+  res.send = function(data: any) {
+    console.log(`[${new Date().toISOString()}] 🟢 RESPONSE: ${req.method} ${req.path} - ${res.statusCode}`);
+    return originalSend.call(this, data);
+  };
+  next();
+});
+
+// Logger info middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   logger.info(`${req.method} ${req.path}`);
   next();
@@ -91,6 +106,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/campaigns', campaignRoutes);
 apiRouter.use('/donations', donationRoutes);
+apiRouter.use('/wallet', walletRoutes);
 apiRouter.use('/charities', charityRoutes);
 apiRouter.use('/users', userRoutes);
 apiRouter.use('/messages', messageRoutes);

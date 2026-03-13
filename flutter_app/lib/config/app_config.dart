@@ -1,7 +1,8 @@
 /// Application configuration constants
 class AppConfig {
   // API Configuration
-  static const String apiBaseUrl = 'http://localhost:5000/api';
+  // Note: Use AppEnv.apiBaseUrl for the actual API base URL with env support
+  static const String apiBaseUrl = 'http://localhost:5001/api';
   static const int apiTimeoutSeconds = 30;
 
   // Firebase Configuration

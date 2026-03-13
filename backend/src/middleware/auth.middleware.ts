@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getFirebaseAuth } from '../services/firebase.service';
+import { SupabaseUserService } from '../services/supabase-user.service';
 import Logger from '../utils/logger';
-
-const logger = new Logger('AuthMiddleware');
 
 declare global {
   namespace Express {
@@ -22,7 +21,7 @@ export async function authenticateToken(
   try {
     // Skip authentication in development if SKIP_AUTH is enabled
     if (process.env.SKIP_AUTH === 'true' && process.env.NODE_ENV === 'development') {
-      logger.warn('⚠️  Authentication skipped (SKIP_AUTH=true)');
+      Logger.warn('⚠️  Authentication skipped (SKIP_AUTH=true)');
       
       // Mock user for testing
       req.user = {
@@ -61,8 +60,18 @@ export async function authenticateToken(
     // Get user details from Firebase
     const firebaseUser = await firebaseAuth.getUser(decodedToken.uid);
 
+    // Look up Supabase user by Firebase UID to get the actual UUID
+    const supabaseUser = await SupabaseUserService.getUserByFirebaseUid(decodedToken.uid);
+    if (!supabaseUser) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found in database',
+      });
+    }
+
     req.user = {
       firebaseUid: decodedToken.uid,
+      userId: supabaseUser.id,
       email: firebaseUser.email,
       displayName: firebaseUser.displayName,
       photoURL: firebaseUser.photoURL,
@@ -70,13 +79,14 @@ export async function authenticateToken(
       customClaims: decodedToken.custom_claims,
     };
 
-    req.userId = decodedToken.uid;
+    // Set both firebaseUid and userId (Supabase UUID)
+    req.userId = supabaseUser.id;
     req.firebaseUid = decodedToken.uid;
 
-    logger.info(`User authenticated: ${decodedToken.uid}`);
+    console.log(`[AuthMiddleware] User authenticated: ${decodedToken.uid} -> ${supabaseUser.id}`);
     next();
   } catch (error: any) {
-    logger.error('Authentication error:', error.message);
+    console.error('[AuthMiddleware] Authentication error:', error.message);
     return res.status(403).json({
       success: false,
       error: error.message || 'Invalid or expired token',
