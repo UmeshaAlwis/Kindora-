@@ -248,29 +248,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 35),
 
-                /// SMALL LOGOUT BUTTON
-                /// SMALL FILLED LOGOUT BUTTON
-Center(
-  child: ElevatedButton.icon(
-    icon: const Icon(Icons.logout, size: 18, color: Colors.white),
-    label: Text(
-      t.logout,
-      style: const TextStyle(
-        fontSize: 14,
-        color: Colors.white,
-      ),
-    ),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: primaryColor,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-      minimumSize: const Size(0, 36),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-    ),
-    onPressed: logout,
-  ),
-),
+                /// FILLED LOGOUT BUTTON
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.logout,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      t.logout,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
+                      minimumSize: const Size(0, 36),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: logout,
+                  ),
+                ),
 
                 const SizedBox(height: 20),
               ],

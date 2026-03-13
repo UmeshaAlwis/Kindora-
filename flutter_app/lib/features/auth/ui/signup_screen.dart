@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -21,49 +22,46 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final Color primaryColor = const Color(0xFF0C0C79);
 
+  final supabase = Supabase.instance.client;
+
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
 
+  /// NEW: USER ROLE
+  String selectedRole = "donor";
+
   /// PASSWORD STRENGTH CHECK
-void checkPasswordStrength(String password) {
+  void checkPasswordStrength(String password) {
 
-  if (password.isEmpty) {
-    passwordStrength = "";
-    strengthColor = Colors.grey;
-    return;
+    if (password.isEmpty) {
+      passwordStrength = "";
+      strengthColor = Colors.grey;
+      return;
+    }
+
+    int score = 0;
+
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+
+    if (RegExp(r'[a-z]').hasMatch(password)) score++;
+    if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+    if (RegExp(r'[0-9]').hasMatch(password)) score++;
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]~`]').hasMatch(password)) score++;
+
+    if (score <= 2) {
+      passwordStrength = "Weak";
+      strengthColor = Colors.red;
+    } 
+    else if (score <= 4) {
+      passwordStrength = "Medium";
+      strengthColor = Colors.orange;
+    } 
+    else {
+      passwordStrength = "Strong";
+      strengthColor = Colors.green;
+    }
   }
-
-  int score = 0;
-
-  // length score
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-
-  // lowercase
-  if (RegExp(r'[a-z]').hasMatch(password)) score++;
-
-  // uppercase
-  if (RegExp(r'[A-Z]').hasMatch(password)) score++;
-
-  // numbers
-  if (RegExp(r'[0-9]').hasMatch(password)) score++;
-
-  // symbols (ANY special character)
-  if (RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]~`]').hasMatch(password)) score++;
-
-  if (score <= 2) {
-    passwordStrength = "Weak";
-    strengthColor = Colors.red;
-  } 
-  else if (score <= 4) {
-    passwordStrength = "Medium";
-    strengthColor = Colors.orange;
-  } 
-  else {
-    passwordStrength = "Strong";
-    strengthColor = Colors.green;
-  }
-}
 
   /// SIGNUP
   Future<void> signup() async {
@@ -94,6 +92,7 @@ void checkPasswordStrength(String password) {
 
     try {
 
+      /// CREATE FIREBASE USER
       final userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -103,9 +102,38 @@ void checkPasswordStrength(String password) {
       final user = userCredential.user;
 
       if (user != null) {
+
+        /// CHECK IF PROFILE ALREADY EXISTS
+        final existing = await supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.uid)
+            .maybeSingle();
+
+        /// INSERT PROFILE ONLY IF NOT EXISTS
+        if (existing == null) {
+          try {
+
+            await supabase.from('profiles').insert({
+              'id': user.uid,
+              'email': user.email,
+              'name': 'User',
+              'role': selectedRole,   // UPDATED
+              'language': 'en',
+            });
+
+            print("Supabase profile created");
+
+          } catch (e) {
+            print("Supabase insert error: $e");
+          }
+        }
+
+        /// SEND EMAIL VERIFICATION
         await user.sendEmailVerification();
       }
 
+      /// SIGN OUT USER
       await FirebaseAuth.instance.signOut();
 
       if (!mounted) return;
@@ -145,7 +173,10 @@ void checkPasswordStrength(String password) {
 
       _showSnackBar(message, Colors.red);
 
-    } catch (_) {
+    } catch (e) {
+
+      print("Unexpected signup error: $e");
+
       _showSnackBar("Unexpected error occurred.", Colors.red);
     }
 
@@ -221,6 +252,38 @@ void checkPasswordStrength(String password) {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// ROLE SELECTOR (NEW)
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                decoration: InputDecoration(
+                  labelText: "Account Type",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'donor',
+                    child: Text('Donor'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'beneficiary',
+                    child: Text('Beneficiary'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'volunteer',
+                    child: Text('Volunteer'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRole = value!;
+                  });
+                },
               ),
 
               const SizedBox(height: 16),

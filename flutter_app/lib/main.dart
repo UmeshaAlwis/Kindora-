@@ -24,7 +24,7 @@ Future<void> main() async {
   /// SUPABASE (profile database)
   await Supabase.initialize(
     url: 'https://ucxqakixdpqqmbbpeptm.supabase.co',
-    anonKey: 'sb_publishable_frgCObr7FwO2W_Egb6EH-Q_slJAljVEY',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjeHFha2l4ZHBxcW1iYnBlcHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzY1NDcsImV4cCI6MjA4NjExMjU0N30.lqbexF_zdeKXtcwpG-Ou0rw1IaBhYsMIgWa2yHfxDBY',
   );
 
   runApp(
