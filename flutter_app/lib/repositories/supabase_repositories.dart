@@ -481,3 +481,260 @@ class UserProfileRepository {
     }
   }
 }
+
+class MerchandiseRepository {
+  final SupabaseClient _supabase;
+
+  MerchandiseRepository({SupabaseClient? supabase})
+      : _supabase = supabase ?? SupabaseService.supabaseClient;
+
+  /// Fetch all merchandise products
+  Future<List<Merchandise>> getAllMerchandise() async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .select()
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((data) => Merchandise.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch merchandise: $e');
+    }
+  }
+
+  /// Fetch merchandise by ID
+  Future<Merchandise?> getMerchandiseById(String productId) async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .select()
+          .eq('id', productId)
+          .single();
+      return Merchandise.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to fetch product: $e');
+    }
+  }
+
+  /// Fetch merchandise by category
+  Future<List<Merchandise>> getMerchandiseByCategory(String category) async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .select()
+          .eq('category', category)
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((data) => Merchandise.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch merchandise by category: $e');
+    }
+  }
+
+  /// Search merchandise by name
+  Future<List<Merchandise>> searchMerchandise(String query) async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .select()
+          .ilike('name', '%$query%')
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((data) => Merchandise.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to search merchandise: $e');
+    }
+  }
+
+  /// Fetch bestsellers (products with highest sales or ratings)
+  Future<List<Merchandise>> getBestsellers({int limit = 5}) async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .select()
+          .order('average_rating', ascending: false)
+          .order('review_count', ascending: false)
+          .limit(limit);
+      return (response as List)
+          .map((data) => Merchandise.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch bestsellers: $e');
+    }
+  }
+
+  /// Create new merchandise product
+  Future<Merchandise> createMerchandise({
+    required String name,
+    required double price,
+    int stock = 0,
+    String? imageUrl,
+    String? description,
+    String? category,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('merchandise')
+          .insert({
+            'name': name,
+            'price': price,
+            'stock': stock,
+            'image_url': imageUrl,
+            'description': description,
+            'category': category,
+            'average_rating': 0.0,
+            'review_count': 0,
+          })
+          .select()
+          .single();
+      return Merchandise.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to create merchandise: $e');
+    }
+  }
+
+  /// Update merchandise
+  Future<Merchandise> updateMerchandise({
+    required String productId,
+    String? name,
+    double? price,
+    int? stock,
+    String? imageUrl,
+    String? description,
+    String? category,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{};
+      if (name != null) {
+        updateData['name'] = name;
+      }
+      if (price != null) {
+        updateData['price'] = price;
+      }
+      if (stock != null) {
+        updateData['stock'] = stock;
+      }
+      if (imageUrl != null) {
+        updateData['image_url'] = imageUrl;
+      }
+      if (description != null) {
+        updateData['description'] = description;
+      }
+      if (category != null) {
+        updateData['category'] = category;
+      }
+
+      final response = await _supabase
+          .from('merchandise')
+          .update(updateData)
+          .eq('id', productId)
+          .select()
+          .single();
+      return Merchandise.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update merchandise: $e');
+    }
+  }
+}
+
+class ProductReviewRepository {
+  final SupabaseClient _supabase;
+
+  ProductReviewRepository({SupabaseClient? supabase})
+      : _supabase = supabase ?? SupabaseService.supabaseClient;
+
+  /// Fetch all reviews for a product
+  Future<List<ProductReview>> getProductReviews(String productId) async {
+    try {
+      final response = await _supabase
+          .from('product_reviews')
+          .select()
+          .eq('product_id', productId)
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((data) => ProductReview.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch product reviews: $e');
+    }
+  }
+
+  /// Fetch review by ID
+  Future<ProductReview?> getReviewById(String reviewId) async {
+    try {
+      final response = await _supabase
+          .from('product_reviews')
+          .select()
+          .eq('id', reviewId)
+          .single();
+      return ProductReview.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to fetch review: $e');
+    }
+  }
+
+  /// Create new review
+  Future<ProductReview> createReview({
+    required String productId,
+    String? userId,
+    String? reviewerName,
+    required double rating,
+    String? reviewText,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('product_reviews')
+          .insert({
+            'product_id': productId,
+            'user_id': userId,
+            'reviewer_name': reviewerName,
+            'rating': rating,
+            'review_text': reviewText,
+          })
+          .select()
+          .single();
+      return ProductReview.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to create review: $e');
+    }
+  }
+
+  /// Update review
+  Future<ProductReview> updateReview({
+    required String reviewId,
+    double? rating,
+    String? reviewText,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{};
+      if (rating != null) {
+        updateData['rating'] = rating;
+      }
+      if (reviewText != null) {
+        updateData['review_text'] = reviewText;
+      }
+
+      final response = await _supabase
+          .from('product_reviews')
+          .update(updateData)
+          .eq('id', reviewId)
+          .select()
+          .single();
+      return ProductReview.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update review: $e');
+    }
+  }
+
+  /// Delete review
+  Future<void> deleteReview(String reviewId) async {
+    try {
+      await _supabase.from('product_reviews').delete().eq('id', reviewId);
+    } catch (e) {
+      throw Exception('Failed to delete review: $e');
+    }
+  }
+}

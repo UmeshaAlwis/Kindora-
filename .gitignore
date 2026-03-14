@@ -1,2 +1,8 @@
 .DS_Store
 .vscode/
+
+# Claude temporary working directories/files
+tmpclaude-*/
+**/tmpclaude-*/
+tmpclaude-*
+**/tmpclaude-*

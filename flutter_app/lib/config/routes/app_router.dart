@@ -9,6 +9,7 @@ import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
 import '../../features/merch/ui/merch_page.dart';
+import '../../features/merch/ui/product_detail_page.dart';
 import '../../core/widgets/auth_gate.dart';
 import '../../core/widgets/main_layout.dart';
 
@@ -63,6 +64,14 @@ class AppRouter {
             path: '/merch',
             name: 'merch',
             builder: (context, state) => const MerchPage(),
+          ),
+          GoRoute(
+            path: '/product-detail/:productId',
+            name: 'product-detail',
+            builder: (context, state) {
+              final productId = state.pathParameters['productId']!;
+              return ProductDetailPage(productId: productId);
+            },
           ),
           GoRoute(
             path: '/campaigns',

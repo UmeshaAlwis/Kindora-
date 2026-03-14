@@ -19,6 +19,14 @@ final userProfileRepositoryProvider = Provider((ref) {
   return UserProfileRepository();
 });
 
+final merchandiseRepositoryProvider = Provider((ref) {
+  return MerchandiseRepository();
+});
+
+final productReviewRepositoryProvider = Provider((ref) {
+  return ProductReviewRepository();
+});
+
 // Campaign providers
 final allCampaignsProvider = FutureProvider((ref) async {
   print('[allCampaignsProvider] Starting to fetch campaigns...');
@@ -100,3 +108,63 @@ final userProfileProvider =
 final campaignRefreshProvider = StateProvider((ref) => DateTime.now());
 final charityRefreshProvider = StateProvider((ref) => DateTime.now());
 final donationRefreshProvider = StateProvider((ref) => DateTime.now());
+
+// Merchandise providers
+final allMerchandiseProvider = FutureProvider((ref) async {
+  print('[allMerchandiseProvider] Starting to fetch merchandise...');
+  try {
+    final repository = ref.watch(merchandiseRepositoryProvider);
+    final products = await repository.getAllMerchandise();
+    print(
+        '[allMerchandiseProvider] Successfully fetched ${products.length} products');
+    return products;
+  } catch (error, stackTrace) {
+    print('[allMerchandiseProvider] ERROR: $error');
+    print('[allMerchandiseProvider] STACK: $stackTrace');
+    rethrow;
+  }
+});
+
+final merchandiseByIdProvider =
+    FutureProvider.family<Merchandise?, String>((ref, productId) async {
+  final repository = ref.watch(merchandiseRepositoryProvider);
+  return repository.getMerchandiseById(productId);
+});
+
+final merchandiseByCategoryProvider =
+    FutureProvider.family<List<Merchandise>, String>((ref, category) async {
+  final repository = ref.watch(merchandiseRepositoryProvider);
+  return repository.getMerchandiseByCategory(category);
+});
+
+final searchMerchandiseProvider =
+    FutureProvider.family<List<Merchandise>, String>((ref, query) async {
+  if (query.isEmpty) {
+    return [];
+  }
+  final repository = ref.watch(merchandiseRepositoryProvider);
+  return repository.searchMerchandise(query);
+});
+
+final bestsellersProvider = FutureProvider((ref) async {
+  final repository = ref.watch(merchandiseRepositoryProvider);
+  return repository.getBestsellers(limit: 6);
+});
+
+// Product Review providers
+final productReviewsProvider =
+    FutureProvider.family<List<ProductReview>, String>((ref, productId) async {
+  final repository = ref.watch(productReviewRepositoryProvider);
+  return repository.getProductReviews(productId);
+});
+
+final reviewByIdProvider =
+    FutureProvider.family<ProductReview?, String>((ref, reviewId) async {
+  final repository = ref.watch(productReviewRepositoryProvider);
+  return repository.getReviewById(reviewId);
+});
+
+// State notifiers for user interactions
+final merchandiseRefreshProvider = StateProvider((ref) => DateTime.now());
+final cartItemsProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) => []);

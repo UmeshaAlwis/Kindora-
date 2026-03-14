@@ -269,6 +269,10 @@ class Merchandise extends Equatable {
   final double? price;
   final int? stock;
   final String? imageUrl;
+  final String? description;
+  final String? category;
+  final double? averageRating;
+  final int? reviewCount;
   final DateTime createdAt;
 
   const Merchandise({
@@ -277,6 +281,10 @@ class Merchandise extends Equatable {
     this.price,
     this.stock,
     this.imageUrl,
+    this.description,
+    this.category,
+    this.averageRating = 0.0,
+    this.reviewCount = 0,
     required this.createdAt,
   });
 
@@ -289,6 +297,12 @@ class Merchandise extends Equatable {
           : null,
       stock: json['stock'],
       imageUrl: json['image_url'],
+      description: json['description'],
+      category: json['category'],
+      averageRating: json['average_rating'] != null
+          ? double.tryParse(json['average_rating'].toString()) ?? 0.0
+          : 0.0,
+      reviewCount: json['review_count'] ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
@@ -302,12 +316,80 @@ class Merchandise extends Equatable {
       'price': price,
       'stock': stock,
       'image_url': imageUrl,
+      'description': description,
+      'category': category,
+      'average_rating': averageRating,
+      'review_count': reviewCount,
       'created_at': createdAt.toIso8601String(),
     };
   }
 
   @override
-  List<Object?> get props => [id, name, price, stock, imageUrl, createdAt];
+  List<Object?> get props => [
+        id,
+        name,
+        price,
+        stock,
+        imageUrl,
+        description,
+        category,
+        averageRating,
+        reviewCount,
+        createdAt,
+      ];
+}
+
+/// Product Review model for ratings and customer feedback
+class ProductReview extends Equatable {
+  final String id;
+  final String productId;
+  final String? userId;
+  final String? reviewerName;
+  final double rating;
+  final String? reviewText;
+  final DateTime createdAt;
+
+  const ProductReview({
+    required this.id,
+    required this.productId,
+    this.userId,
+    this.reviewerName,
+    required this.rating,
+    this.reviewText,
+    required this.createdAt,
+  });
+
+  factory ProductReview.fromJson(Map<String, dynamic> json) {
+    return ProductReview(
+      id: json['id'] ?? '',
+      productId: json['product_id'] ?? '',
+      userId: json['user_id'],
+      reviewerName: json['reviewer_name'],
+      rating: json['rating'] != null
+          ? double.tryParse(json['rating'].toString()) ?? 0.0
+          : 0.0,
+      reviewText: json['review_text'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'product_id': productId,
+      'user_id': userId,
+      'reviewer_name': reviewerName,
+      'rating': rating,
+      'review_text': reviewText,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props =>
+      [id, productId, userId, reviewerName, rating, reviewText, createdAt];
 }
 
 /// Message model matching Supabase schema
