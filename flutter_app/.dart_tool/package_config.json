@@ -147,7 +147,7 @@
     },
     {
       "name": "characters",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.4.0",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -419,7 +419,7 @@
       "name": "flutter",
       "rootUri": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "flutter_cache_manager",
@@ -443,7 +443,7 @@
       "name": "flutter_localizations",
       "rootUri": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter/packages/flutter_localizations",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "flutter_plugin_android_lifecycle",
@@ -467,13 +467,13 @@
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "flutter_web_plugins",
       "rootUri": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "freezed_annotation",
@@ -741,15 +741,15 @@
     },
     {
       "name": "matcher",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.17",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.19",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.7"
     },
     {
       "name": "material_color_utilities",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.11.1",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.13.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.5"
     },
     {
       "name": "meta",
@@ -983,7 +983,7 @@
       "name": "sky_engine",
       "rootUri": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "smooth_page_indicator",
@@ -1083,9 +1083,9 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.7",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.10",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.7"
     },
     {
       "name": "timing",
@@ -1179,8 +1179,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.10.8",
+  "generatorVersion": "3.11.1",
   "flutterRoot": "file:///C:/Users/Asus/develop/flutter_windows_3.38.9-stable/flutter",
-  "flutterVersion": "3.38.9",
+  "flutterVersion": "3.41.4",
   "pubCache": "file:///C:/Users/Asus/AppData/Local/Pub/Cache"
 }

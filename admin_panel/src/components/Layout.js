@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Box,
@@ -20,96 +20,91 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout';
-import PersonIcon from '@mui/icons-material/Person';
+import {
+  Dashboard as DashboardIcon,
+  Campaign as CampaignIcon,
+  Approval as ApprovalIcon,
+  ShoppingBag as MerchandiseIcon,
+  Message as MessageIcon,
+  Menu as MenuIcon,
+  Logout as LogoutIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
+import { supabase } from '../supabaseClient';
 
-const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 280;
 
-const navItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-  { text: 'Users', icon: <PeopleIcon />, path: '/users' },
-  { text: 'Charities', icon: <VolunteerActivismIcon />, path: '/charities' },
-  { text: 'Donations', icon: <MonetizationOnIcon />, path: '/donations' },
-  { text: 'Campaigns', icon: <CampaignIcon />, path: '/campaigns' },
+const menuItems = [
+  { label: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
+  { label: 'Campaigns', icon: CampaignIcon, path: '/campaigns' },
+  { label: 'Approvals', icon: ApprovalIcon, path: '/approvals' },
+  { label: 'Merchandise', icon: MerchandiseIcon, path: '/merchandise' },
+  { label: 'Messages', icon: MessageIcon, path: '/messages' },
 ];
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-
-  const handleProfileMenu = (e) => setAnchorEl(e.currentTarget);
-  const handleCloseMenu = () => setAnchorEl(null);
-
-  const handleSignOut = async () => {
-    handleCloseMenu();
-    await signOut();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setAnchorEl(null);
     navigate('/login');
   };
 
-  const drawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #6C63FF 0%, #FF6584 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 0.5,
-          }}
-        >
-          Kindora
+  const isActive = (path) => location.pathname === path;
+
+  const drawer = (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Box sx={{ p: 2.5, background: 'linear-gradient(135deg, #0C0C79 0%, #1a1a9a 100%)' }}>
+        <Typography variant="h6" fontWeight={800} color="white" sx={{ mb: 0.5 }}>
+          KINDORA
         </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Admin Panel
+        <Typography variant="caption" color="rgba(255,255,255,0.7)">
+          Admin Control
         </Typography>
       </Box>
       <Divider />
-      <List sx={{ flex: 1, px: 1.5, py: 2 }}>
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+      <List sx={{ flex: 1, py: 2 }}>
+        {menuItems.map((item) => {
+          const Icon = item.icon;
           return (
-            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={item.path} disablePadding sx={{ mb: 0.5, px: 1 }}>
               <ListItemButton
                 onClick={() => {
                   navigate(item.path);
-                  if (isMobile) setMobileOpen(false);
+                  setMobileOpen(false);
                 }}
                 sx={{
                   borderRadius: 2,
-                  py: 1.2,
-                  backgroundColor: isActive
-                    ? 'primary.main'
-                    : 'transparent',
-                  color: isActive ? '#fff' : 'text.primary',
+                  backgroundColor: isActive(item.path) ? 'rgba(12, 12, 121, 0.1)' : 'transparent',
+                  borderLeft: isActive(item.path)
+                    ? '4px solid #0C0C79'
+                    : '4px solid transparent',
                   '&:hover': {
-                    backgroundColor: isActive
-                      ? 'primary.dark'
-                      : 'rgba(108,99,255,0.08)',
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: isActive ? '#fff' : 'text.secondary',
+                    backgroundColor: 'rgba(12, 12, 121, 0.05)',
                   },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                <ListItemIcon
+                  sx={{
+                    color: isActive(item.path) ? '#0C0C79' : 'text.secondary',
+                    minWidth: 40,
+                  }}
+                >
+                  <Icon />
+                </ListItemIcon>
                 <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{ fontWeight: isActive ? 700 : 500 }}
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontWeight: isActive(item.path) ? 700 : 500,
+                    color: isActive(item.path) ? '#0C0C79' : 'inherit',
+                  }}
                 />
               </ListItemButton>
             </ListItem>
@@ -117,9 +112,12 @@ const Layout = () => {
         })}
       </List>
       <Divider />
-      <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography variant="caption" color="text.secondary">
-          © 2026 Kindora
+      <Box sx={{ p: 2 }}>
+        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+          Logged in as
+        </Typography>
+        <Typography variant="body2" fontWeight={600} noWrap>
+          {profile?.name || user?.email || 'Admin'}
         </Typography>
       </Box>
     </Box>
@@ -127,104 +125,118 @@ const Layout = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* AppBar */}
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { md: `${DRAWER_WIDTH}px` },
-          backgroundColor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' }, color: 'text.primary' }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" color="text.primary" sx={{ flexGrow: 1 }}>
-            {navItems.find((i) => i.path === location.pathname)?.text || 'Dashboard'}
-          </Typography>
-          <IconButton onClick={handleProfileMenu}>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
-              <PersonIcon fontSize="small" />
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          >
-            <MenuItem disabled>
-              <Typography variant="body2">
-                {profile?.name || profile?.email || 'Admin'}
-              </Typography>
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleSignOut}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Sign Out
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar */}
-      <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: DRAWER_WIDTH,
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
+      {/* Desktop Sidebar */}
+      {!isMobile && (
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', md: 'block' },
+            width: DRAWER_WIDTH,
+            flexShrink: 0,
             '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
               width: DRAWER_WIDTH,
-              borderRight: '1px solid',
-              borderColor: 'divider',
+              boxSizing: 'border-box',
+              backgroundColor: '#f5f5f5',
+              border: 'none',
             },
           }}
-          open
         >
-          {drawerContent}
+          {drawer}
         </Drawer>
-      </Box>
+      )}
 
-      {/* Main content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          mt: '64px',
-          backgroundColor: 'background.default',
-          minHeight: 'calc(100vh - 64px)',
-        }}
-      >
-        <Outlet />
+      {/* Mobile Drawer */}
+      {isMobile && (
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              backgroundColor: '#f5f5f5',
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      )}
+
+      {/* Main Content */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Top AppBar */}
+        <AppBar
+          position="sticky"
+          elevation={0}
+          sx={{
+            backgroundColor: '#fff',
+            borderBottom: '1px solid #e0e0e0',
+            ml: isMobile ? 0 : `${DRAWER_WIDTH}px`,
+          }}
+        >
+          <Toolbar>
+            {isMobile && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={() => setMobileOpen(true)}
+                sx={{ mr: 2, color: '#0C0C79' }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Box sx={{ flex: 1 }} />
+            <IconButton
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              sx={{ p: 0 }}
+            >
+              <Avatar
+                sx={{
+                  width: 40,
+                  height: 40,
+                  background: 'linear-gradient(135deg, #FF751F 0%, #FFB84D 100%)',
+                  fontWeight: 700,
+                  color: '#fff',
+                }}
+              >
+                {(profile?.name || user?.email || 'A').charAt(0).toUpperCase()}
+              </Avatar>
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={() => setAnchorEl(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem disabled>
+                <Typography variant="body2">
+                  {profile?.name || user?.email}
+                </Typography>
+              </MenuItem>
+              <Divider />
+              <MenuItem>
+                <SettingsIcon fontSize="small" sx={{ mr: 1 }} />
+                Settings
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                Logout
+              </MenuItem>
+            </Menu>
+          </Toolbar>
+        </AppBar>
+
+        {/* Page Content */}
+        <Box
+          sx={{
+            flex: 1,
+            p: 3,
+            backgroundColor: '#fff',
+            overflow: 'auto',
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );
