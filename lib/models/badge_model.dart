@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+// Badge model for Kindora
+// import 'package:flutter/material.dart';
 
 class BadgeModel {
   final String name;
