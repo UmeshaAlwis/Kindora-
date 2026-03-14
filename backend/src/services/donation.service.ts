@@ -1,5 +1,5 @@
-import { getDatabase } from './database.service';
 import { WalletService } from './wallet.service';
+import { supabase } from './supabase.service';
 import { Donation } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,8 +8,6 @@ export class DonationService {
    * Create donation record
    */
   static async createDonation(donorId: string, data: any) {
-    const db = getDatabase();
-
     const donationId = uuidv4();
     const isWalletPayment = data.payment_method === 'wallet';
     const status = isWalletPayment ? 'success' : 'pending';
@@ -19,21 +17,21 @@ export class DonationService {
       await WalletService.deductFromWallet(donorId, data.amount, donationId);
     }
 
-    const donation = await db('donations')
-      .insert({
-        donation_id: donationId,
-        donor_id: donorId,
-        campaign_id: data.campaign_id,
-        amount: data.amount,
-        payment_method: data.payment_method,
-        donation_type: data.donation_type || 'one-time',
-        recurring_frequency: data.recurring_frequency,
-        message: data.message,
-        is_anonymous: data.is_anonymous || false,
-        status,
-        timestamp: new Date(),
-      })
-      .returning('*');
+    // Create donation record in Supabase
+    const donation = await supabase.insert('donations', {
+      id: donationId,
+      user_id: donorId,
+      campaign_id: data.campaign_id,
+      amount: data.amount,
+      currency: 'LKR',
+      payment_method: data.payment_method,
+      status,
+      donor_name: data.donor_name,
+      donor_email: data.donor_email,
+      donor_phone: data.donor_phone,
+      transaction_id: null,
+      created_at: new Date().toISOString(),
+    });
 
     // If wallet payment, immediately update campaign and points
     if (isWalletPayment) {
@@ -41,60 +39,68 @@ export class DonationService {
       await this.awardDonationPoints(donorId, data.amount);
     }
 
-    return donation[0];
+    return donation;
   }
 
   /**
    * Update donation status
    */
   static async updateDonationStatus(donationId: string, status: string, transactionId?: string) {
-    const db = getDatabase();
-
-    const donation = await db('donations')
-      .where('donation_id', donationId)
-      .update({
+    const donation = await supabase.update<any>(
+      'donations',
+      {
         status,
         transaction_id: transactionId,
-        updated_at: new Date(),
-      })
-      .returning('*');
+        updated_at: new Date().toISOString(),
+      },
+      { id: donationId }
+    );
 
-    if (status === 'success') {
+    if (status === 'success' && donation?.[0]) {
       // Update campaign current amount
       await this.updateCampaignAmount(donation[0].campaign_id, donation[0].amount);
 
       // Award points to donor (gamification)
-      await this.awardDonationPoints(donation[0].donor_id, donation[0].amount);
+      await this.awardDonationPoints(donation[0].user_id, donation[0].amount);
     }
 
-    return donation[0];
+    return donation?.[0];
   }
 
   /**
    * Update campaign amount after successful donation
    */
   private static async updateCampaignAmount(campaignId: string, amount: number) {
-    const db = getDatabase();
+    try {
+      // Get current campaign
+      const campaigns = await supabase.select<any>('campaigns', {
+        select: 'raised_amount,id',
+        filters: { id: campaignId },
+      });
 
-    await db('campaigns')
-      .where('campaign_id', campaignId)
-      .increment('current_amount', amount)
-      .increment('donor_count', 1);
+      if (campaigns?.[0]) {
+        const currentAmount = (campaigns[0].raised_amount as number) || 0;
+        await supabase.update<any>(
+          'campaigns',
+          {
+            raised_amount: currentAmount + amount,
+            updated_at: new Date().toISOString(),
+          },
+          { id: campaignId }
+        );
+      }
+    } catch (error) {
+      console.error('[DonationService] Failed to update campaign amount:', error);
+    }
   }
 
   /**
    * Award points for donation (gamification)
    */
   private static async awardDonationPoints(userId: string, amount: number) {
-    const db = getDatabase();
-
-    // Calculate points: 1 LKR = 1 point
-    const points = Math.floor(amount);
-
-    await db('gamification')
-      .where('user_id', userId)
-      .increment('total_points', points)
-      .increment('total_donations', 1);
+    // This can be implemented later for gamification
+    // For now, just log it
+    console.log(`[DonationService] Award points: ${Math.floor(amount)} points to user ${userId}`);
   }
 
   /**
@@ -105,159 +111,159 @@ export class DonationService {
     page: number = 1,
     limit: number = 20
   ) {
-    const db = getDatabase();
+    try {
+      // Get total count
+      const allDonations = await supabase.select<any>('donations', {
+        select: 'id',
+        filters: { user_id: userId },
+      });
 
-    const total = await db('donations')
-      .where('donor_id', userId)
-      .count('* as count')
-      .first();
+      const total = allDonations?.length || 0;
 
-    const donations = await db('donations')
-      .where('donor_id', userId)
-      .join('campaigns', 'donations.campaign_id', 'campaigns.campaign_id')
-      .select(
-        'donations.*',
-        'campaigns.title as campaign_title',
-        'campaigns.image_url'
-      )
-      .offset((page - 1) * limit)
-      .limit(limit)
-      .orderBy('donations.timestamp', 'desc');
+      // Get paginated donations
+      const donations = await supabase.select<any>('donations', {
+        filters: { user_id: userId },
+        limit,
+        offset: (page - 1) * limit,
+        orderBy: { column: 'created_at', ascending: false },
+      });
 
-    return {
-      donations,
-      total: total?.count || 0,
-      page,
-      limit,
-      pages: Math.ceil((total?.count || 0) / limit),
-    };
+      return {
+        donations: donations || [],
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      console.error('[DonationService] Failed to get donation history:', error);
+      throw error;
+    }
   }
 
   /**
    * Get donation analytics
    */
   static async getDonationAnalytics(startDate?: Date, endDate?: Date) {
-    const db = getDatabase();
+    try {
+      // Get successful donations
+      const donations = await supabase.select<any>('donations', {
+        filters: { status: 'success' },
+      });
 
-    let query = db('donations').where('status', 'success');
+      // Basic analytics
+      const stats = {
+        total_donations: donations?.length || 0,
+        total_amount: donations?.reduce((sum, d) => sum + (d.amount || 0), 0) || 0,
+        average_amount: donations?.length ? donations.reduce((sum, d) => sum + (d.amount || 0), 0) / donations.length : 0,
+        largest_donation: Math.max(...(donations?.map((d: any) => d.amount) || [0])) || 0,
+        smallest_donation: Math.min(...(donations?.map((d: any) => d.amount) || [0])) || 0,
+        unique_donors: new Set(donations?.map((d: any) => d.user_id)).size || 0,
+      };
 
-    if (startDate) {
-      query = query.where('timestamp', '>=', startDate);
+      // Group by payment method
+      const byPaymentMethod: any = {};
+      donations?.forEach((d: any) => {
+        if (!byPaymentMethod[d.payment_method]) {
+          byPaymentMethod[d.payment_method] = { count: 0, total: 0 };
+        }
+        byPaymentMethod[d.payment_method].count += 1;
+        byPaymentMethod[d.payment_method].total += d.amount || 0;
+      });
+
+      return {
+        stats,
+        byPaymentMethod,
+      };
+    } catch (error) {
+      console.error('[DonationService] Failed to get analytics:', error);
+      throw error;
     }
-    if (endDate) {
-      query = query.where('timestamp', '<=', endDate);
-    }
-
-    const stats = await query.first().select(
-      db.raw('COUNT(*) as total_donations'),
-      db.raw('SUM(amount) as total_amount'),
-      db.raw('AVG(amount) as average_amount'),
-      db.raw('MAX(amount) as largest_donation'),
-      db.raw('MIN(amount) as smallest_donation'),
-      db.raw('COUNT(DISTINCT donor_id) as unique_donors')
-    );
-
-    // Get donations by payment method
-    const byPaymentMethod = await query.groupBy('payment_method').select(
-      'payment_method',
-      db.raw('COUNT(*) as count'),
-      db.raw('SUM(amount) as total')
-    );
-
-    // Get donations by day
-    const byDay = await query.groupBy(db.raw('DATE(timestamp)')).select(
-      db.raw('DATE(timestamp) as date'),
-      db.raw('COUNT(*) as count'),
-      db.raw('SUM(amount) as total')
-    );
-
-    return {
-      stats: stats[0],
-      byPaymentMethod,
-      byDay,
-    };
   }
 
   /**
    * Set up recurring donation
    */
   static async setupRecurringDonation(userId: string, data: any) {
-    const db = getDatabase();
-
-    const donation = await db('donations')
-      .insert({
-        donation_id: uuidv4(),
-        donor_id: userId,
+    try {
+      const donation = await supabase.insert('donations', {
+        id: uuidv4(),
+        user_id: userId,
         campaign_id: data.campaign_id,
         amount: data.amount,
+        currency: 'LKR',
         payment_method: data.payment_method || 'card',
-        donation_type: 'recurring',
-        recurring_frequency: data.frequency,
-        next_donation_date: data.start_date,
         status: 'pending',
-        timestamp: new Date(),
-      })
-      .returning('*');
+        created_at: new Date().toISOString(),
+      });
 
-    return donation[0];
+      return donation;
+    } catch (error) {
+      console.error('[DonationService] Failed to setup recurring donation:', error);
+      throw error;
+    }
   }
 
   /**
    * Cancel recurring donation
    */
   static async cancelRecurringDonation(donationId: string) {
-    const db = getDatabase();
-
-    await db('donations')
-      .where('donation_id', donationId)
-      .where('donation_type', 'recurring')
-      .update({
-        status: 'cancelled',
-      });
+    try {
+      await supabase.update(
+        'donations',
+        { status: 'cancelled' },
+        { id: donationId }
+      );
+    } catch (error) {
+      console.error('[DonationService] Failed to cancel donation:', error);
+      throw error;
+    }
   }
 
   /**
    * Get total donated by user
    */
   static async getTotalDonatedByUser(userId: string): Promise<number> {
-    const db = getDatabase();
+    try {
+      const donations = await supabase.select<any>('donations', {
+        filters: { user_id: userId, status: 'success' },
+      });
 
-    const result = await db('donations')
-      .where('donor_id', userId)
-      .where('status', 'success')
-      .sum('amount as total')
-      .first();
-
-    return result?.total || 0;
+      return donations?.reduce((sum: number, d: any) => sum + (d.amount || 0), 0) || 0;
+    } catch (error) {
+      console.error('[DonationService] Failed to get total donations:', error);
+      return 0;
+    }
   }
 
   /**
    * Get campaign donation stats
    */
   static async getCampaignDonationStats(campaignId: string) {
-    const db = getDatabase();
+    try {
+      const campaigns = await supabase.select<any>('campaigns', {
+        select: 'raised_amount,id',
+        filters: { id: campaignId },
+      });
 
-    const campaign = await db('campaigns')
-      .where('campaign_id', campaignId)
-      .select('target_amount', 'current_amount', 'donor_count')
-      .first();
+      if (!campaigns?.[0]) {
+        return null;
+      }
 
-    if (!campaign) {
+      const campaign = campaigns[0];
+      const donations = await supabase.select<any>('donations', {
+        filters: { campaign_id: campaignId, status: 'success' },
+      });
+
+      return {
+        campaign_id: campaignId,
+        raised_amount: campaign.raised_amount,
+        donation_count: donations?.length || 0,
+        unique_donors: new Set(donations?.map((d: any) => d.user_id)).size || 0,
+      };
+    } catch (error) {
+      console.error('[DonationService] Failed to get campaign stats:', error);
       return null;
     }
-
-    const topDonors = await db('donations')
-      .where('campaign_id', campaignId)
-      .where('status', 'success')
-      .where('is_anonymous', false)
-      .join('users', 'donations.donor_id', 'users.user_id')
-      .select('users.full_name', 'donations.amount', 'donations.timestamp')
-      .orderBy('donations.amount', 'desc')
-      .limit(10);
-
-    return {
-      ...campaign,
-      topDonors,
-    };
   }
 }

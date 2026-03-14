@@ -25,7 +25,12 @@ class WalletService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return (data['balance'] as num?)?.toDouble() ?? 0.0;
+        print('[WalletService] Response: $data');
+
+        // Backend returns: { success: true, data: { balance } }
+        final balance = (data['data']?['balance'] as num?)?.toDouble() ?? 0.0;
+        print('[WalletService] Parsed balance: $balance');
+        return balance;
       } else if (response.statusCode == 404) {
         // Wallet doesn't exist, initialize it
         await initializeWallet();
@@ -60,7 +65,8 @@ class WalletService {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return Wallet.fromJson(data['wallet'] ?? data);
+        // Backend returns: { success: true, data: { ... wallet data ... } }
+        return Wallet.fromJson(data['data'] ?? data);
       } else {
         throw Exception('Failed to initialize wallet: ${response.statusCode}');
       }
@@ -91,7 +97,8 @@ class WalletService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List<dynamic> transactions = data['transactions'] ?? [];
+        // Backend returns: { success: true, data: [ transactions ], total, page, limit, pages }
+        final List<dynamic> transactions = data['data'] ?? [];
         return transactions.map((t) => WalletTransaction.fromJson(t)).toList();
       } else {
         throw Exception('Failed to fetch transactions: ${response.statusCode}');
@@ -101,8 +108,8 @@ class WalletService {
     }
   }
 
-  /// Top-up wallet balance (Stripe/Card payment)
-  Future<void> topUpWallet({
+  /// Top-up wallet balance (Demo/Mock implementation)
+  Future<Map<String, dynamic>> topUpWallet({
     required double amount,
     required String paymentMethodId,
   }) async {
@@ -120,13 +127,18 @@ class WalletService {
         },
         body: jsonEncode({
           'amount': amount,
-          'payment_method_id': paymentMethodId,
+          'payment_method': paymentMethodId,
         }),
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to top-up wallet: ${response.statusCode}');
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['message'] ??
+            'Failed to top-up wallet: ${response.statusCode}');
       }
+
+      final data = jsonDecode(response.body);
+      return data['data'] ?? data;
     } catch (e) {
       throw Exception('Error topping up wallet: $e');
     }
@@ -146,7 +158,7 @@ class WalletService {
       final idToken = await user.getIdToken();
 
       final response = await http.post(
-        Uri.parse('${AppEnv.apiBaseUrl}/donation/create'),
+        Uri.parse('${AppEnv.apiBaseUrl}/donations'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',

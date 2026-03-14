@@ -3,9 +3,46 @@ import 'package:go_router/go_router.dart';
 import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
 import 'package:kindora/features/wallet/ui/wallet_topup_page.dart';
 import 'package:kindora/features/wallet/ui/wallet_transaction_history_page.dart';
+import 'package:kindora/services/wallet_service.dart';
 
-class DashboardHome extends StatelessWidget {
+class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
+
+  @override
+  State<DashboardHome> createState() => _DashboardHomeState();
+}
+
+class _DashboardHomeState extends State<DashboardHome> {
+  late WalletService _walletService;
+  double _walletBalance = 0.0;
+  bool _loadingWallet = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _walletService = WalletService();
+    _fetchWalletBalance();
+  }
+
+  Future<void> _fetchWalletBalance() async {
+    try {
+      final balance = await _walletService.getWalletBalance();
+      setState(() {
+        _walletBalance = balance;
+        _loadingWallet = false;
+      });
+    } catch (e) {
+      setState(() => _loadingWallet = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load wallet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +83,24 @@ class DashboardHome extends StatelessWidget {
 
                   const SizedBox(height: 6),
 
-                  const Text(
-                    "\$200",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  _loadingWallet
+                      ? const SizedBox(
+                          height: 28,
+                          width: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'LKR ${_walletBalance.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
 
                   const SizedBox(height: 20),
 
@@ -64,13 +111,17 @@ class DashboardHome extends StatelessWidget {
                       _HeaderAction(
                         icon: Icons.add_circle_outline,
                         label: "Top up",
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push<bool>(
                             context,
                             MaterialPageRoute(
                               builder: (_) => const WalletTopUpPage(),
                             ),
                           );
+                          // Refresh wallet balance if topup was successful
+                          if (result == true) {
+                            await _fetchWalletBalance();
+                          }
                         },
                       ),
                       _HeaderAction(

@@ -15,6 +15,9 @@ const createDonationSchema = Joi.object({
   recurring_frequency: Joi.string().valid('daily', 'weekly', 'monthly', 'yearly'),
   message: Joi.string().max(500),
   is_anonymous: Joi.boolean(),
+  donor_name: Joi.string().max(255),
+  donor_email: Joi.string().email().max(255),
+  donor_phone: Joi.string().max(20),
 });
 
 export class DonationController {
@@ -467,16 +470,21 @@ export class DonationController {
         throw new ValidationError('Valid amount is required');
       }
 
-      // TODO: Process payment based on payment_method
-      // For now, just return success
-      const newBalance = await WalletService.getWalletBalance(userId);
+      // Add amount to wallet (dummy/mock implementation until Stripe is ready)
+      const updatedWallet = await WalletService.addToWallet(
+        userId,
+        amount,
+        `topup_${Date.now()}`
+      );
 
       res.json({
         success: true,
         data: {
           user_id: userId,
           amount_added: amount,
-          new_balance: newBalance,
+          new_balance: updatedWallet.balance ?? 0,
+          total_recharged: updatedWallet.total_recharged ?? amount,
+          message: 'Wallet top-up successful (Demo mode)',
         },
         message: 'Wallet top-up successful',
       });
