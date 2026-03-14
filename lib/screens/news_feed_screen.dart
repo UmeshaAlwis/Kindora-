@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'news_detail_screen.dart'; // Ensure this import is here
+import 'news_detail_screen.dart'; // This import will now work!
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
@@ -80,7 +80,7 @@ class FeedScreen extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
-          // Navigates to the details page
+          // NAVIGATE to the details page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -129,16 +129,16 @@ class FeedScreen extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.4)
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 12),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
                 child: Row(
                   children: [
                     Text(
                         "Read more",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)
                     ),
-                    SizedBox(width: 4),
-                    Icon(LucideIcons.arrowRight, size: 14),
+                    const SizedBox(width: 4),
+                    Icon(LucideIcons.arrowRight, size: 14, color: color),
                   ],
                 ),
               ),
