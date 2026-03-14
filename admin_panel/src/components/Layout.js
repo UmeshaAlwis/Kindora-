@@ -23,9 +23,9 @@ import {
 import {
   Dashboard as DashboardIcon,
   Campaign as CampaignIcon,
-  Approval as ApprovalIcon,
+  Approval as FeedApprovalsIcon,
   ShoppingBag as MerchandiseIcon,
-  Message as MessageIcon,
+  Mail as AlertsIcon,
   Menu as MenuIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
@@ -37,9 +37,9 @@ const DRAWER_WIDTH = 280;
 const menuItems = [
   { label: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
   { label: 'Campaigns', icon: CampaignIcon, path: '/campaigns' },
-  { label: 'Approvals', icon: ApprovalIcon, path: '/approvals' },
+  { label: 'Feed Approvals', icon: FeedApprovalsIcon, path: '/feed-approvals' },
   { label: 'Merchandise', icon: MerchandiseIcon, path: '/merchandise' },
-  { label: 'Messages', icon: MessageIcon, path: '/messages' },
+  { label: 'Alerts', icon: AlertsIcon, path: '/alerts' },
 ];
 
 const Layout = ({ children }) => {

@@ -10,9 +10,9 @@ import SplashScreen from './components/SplashScreen';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import Campaigns from './pages/Campaigns';
-import Approvals from './pages/Approvals';
+import FeedApprovals from './pages/FeedApprovals';
 import Merchandise from './pages/Merchandise';
-import Messages from './pages/Messages';
+import Alerts from './pages/Alerts';
 
 // Wrapper component for protected routes with layout
 const ProtectedLayoutRoute = ({ children }) => (
@@ -62,10 +62,10 @@ function App() {
               }
             />
             <Route
-              path="/approvals"
+              path="/feed-approvals"
               element={
                 <ProtectedLayoutRoute>
-                  <Approvals />
+                  <FeedApprovals />
                 </ProtectedLayoutRoute>
               }
             />
@@ -78,10 +78,10 @@ function App() {
               }
             />
             <Route
-              path="/messages"
+              path="/alerts"
               element={
                 <ProtectedLayoutRoute>
-                  <Messages />
+                  <Alerts />
                 </ProtectedLayoutRoute>
               }
             />
