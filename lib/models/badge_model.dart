@@ -1,4 +1,3 @@
-// Badge model for Kindora
 // import 'package:flutter/material.dart';
 
 class BadgeModel {
