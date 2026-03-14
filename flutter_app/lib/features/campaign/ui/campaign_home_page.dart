@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kindora/providers/supabase_providers.dart';
-import 'package:kindora/features/payment/ui/payment_page.dart';
+import 'package:kindora/features/payment/ui/donation_amount_selection_page.dart';
 import 'package:kindora/features/payment/models/payment_model.dart'
     as payment_model;
 import 'start_campaign_page.dart';
@@ -251,11 +251,19 @@ class CampaignList extends ConsumerWidget {
                                     description: campaign.description ?? '',
                                   );
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => PaymentPage(
-                                          campaign: paymentCampaign),
+                                  // Show donation amount selection as bottom sheet modal
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(24),
+                                        topRight: Radius.circular(24),
+                                      ),
+                                    ),
+                                    builder: (context) =>
+                                        DonationAmountSelectionModal(
+                                      campaign: paymentCampaign,
                                     ),
                                   );
                                 },

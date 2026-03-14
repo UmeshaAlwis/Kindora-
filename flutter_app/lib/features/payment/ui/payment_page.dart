@@ -7,10 +7,12 @@ import 'bank_transfer_page.dart';
 
 class PaymentPage extends StatefulWidget {
   final Campaign campaign;
+  final double? preSelectedAmount;
 
   const PaymentPage({
     super.key,
     required this.campaign,
+    this.preSelectedAmount,
   });
 
   @override
@@ -22,8 +24,10 @@ class _PaymentPageState extends State<PaymentPage> {
   late TextEditingController _donorNameController;
   late TextEditingController _donorEmailController;
   late TextEditingController _donorPhoneController;
+  late TextEditingController _wishController;
   String _selectedPaymentMethod = 'stripe';
   bool _isProcessing = false;
+  bool _isAnonymous = false;
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
   late StripeService _stripeService;
@@ -57,8 +61,15 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorNameController = TextEditingController();
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
+    _wishController = TextEditingController();
     _stripeService = StripeService();
     _walletService = WalletService();
+
+    // Set pre-selected amount if provided
+    if (widget.preSelectedAmount != null) {
+      _amountController.text = widget.preSelectedAmount!.toStringAsFixed(0);
+    }
+
     _fetchWalletBalance();
   }
 
@@ -89,6 +100,7 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorNameController.dispose();
     _donorEmailController.dispose();
     _donorPhoneController.dispose();
+    _wishController.dispose();
     super.dispose();
   }
 
@@ -270,19 +282,37 @@ class _PaymentPageState extends State<PaymentPage> {
       if (mounted) {
         setState(() => _isProcessing = false);
 
+        final errorMessage = e.toString();
+
         // Check if user cancelled
-        if (e.toString().contains('cancelled')) {
+        if (errorMessage.contains('cancelled')) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Payment cancelled'),
               backgroundColor: Colors.orange,
             ),
           );
+        } else if (errorMessage.contains('401') ||
+            errorMessage.contains('Unauthorized') ||
+            errorMessage.contains('authentication')) {
+          // Stripe authentication issue - suggest alternative payment method
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Card payment temporarily unavailable. Please use Bank Transfer or Wallet.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+          // Reset to stripe but user should switch method
+          setState(() => _selectedPaymentMethod = 'bank_transfer');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Stripe Error: $e'),
+              content: Text(
+                  'Payment failed: Unable to process. Try another method.'),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -314,81 +344,40 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Support Campaign'),
-        centerTitle: true,
+        title: Text(widget.campaign.title),
+        centerTitle: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Campaign Summary Card
+            // Information Banner
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: const Color(0xFF4CAF50),
+                borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.campaign.image,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 80,
-                          height: 80,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image),
-                        );
-                      },
-                    ),
+                  const Icon(
+                    Icons.info,
+                    color: Colors.white,
+                    size: 20,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.campaign.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                    child: Text(
+                      'Transaction only via application!',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Target: LKR ${widget.campaign.targetAmount.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: widget.campaign.raisedAmount /
-                                widget.campaign.targetAmount,
-                            minHeight: 4,
-                            backgroundColor: Colors.grey[200],
-                            color: const Color(0xFFFF751F),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -396,7 +385,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const SizedBox(height: 24),
 
-            // Donation Amount Section
+            // Donation Amount Section (Simplified)
             const Text(
               'Donation Amount',
               style: TextStyle(
@@ -405,26 +394,48 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                prefixText: 'LKR ',
-                hintText: 'Enter amount',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _quickAmountButton(500),
-                _quickAmountButton(1000),
-                _quickAmountButton(5000),
-                _quickAmountButton(10000),
-              ],
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: Colors.grey[300]!),
+                        ),
+                      ),
+                      child: DropdownButton<String>(
+                        value: 'LKR',
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        items: const [
+                          DropdownMenuItem(value: 'LKR', child: Text(' LKR')),
+                        ],
+                        onChanged: (value) {},
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Enter amount',
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        hintStyle: TextStyle(color: Colors.grey[400]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -472,6 +483,47 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                 ),
               ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Checkbox(
+                  value: _isAnonymous,
+                  onChanged: (value) {
+                    setState(() => _isAnonymous = value ?? false);
+                  },
+                ),
+                const Expanded(
+                  child: Text(
+                    'Hide your name as anonym',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Write your wish and encouragement',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _wishController,
+              maxLines: 4,
+              maxLength: 200,
+              decoration: InputDecoration(
+                hintText: 'Share your thoughts...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                counterText: '${_wishController.text.length}/200',
+              ),
+              onChanged: (value) {
+                setState(() {});
+              },
+            ),
             const SizedBox(height: 24),
 
             // Payment Method Section
@@ -606,13 +658,13 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             const SizedBox(height: 24),
 
-            // Pay Button
+            // Donate Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _isProcessing ? null : _processPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: const Color(0xFF001A4D),
                   disabledBackgroundColor: Colors.grey[400],
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -631,7 +683,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       )
                     : const Icon(Icons.payment),
                 label: Text(
-                  _isProcessing ? 'Processing...' : 'Complete Payment',
+                  _isProcessing ? 'Processing...' : 'Donate Now',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -668,26 +720,6 @@ class _PaymentPageState extends State<PaymentPage> {
             const SizedBox(height: 24),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _quickAmountButton(double amount) {
-    return ElevatedButton(
-      onPressed: () {
-        _amountController.text = amount.toStringAsFixed(0);
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _donationAmount == amount
-            ? const Color(0xFFFF751F)
-            : Colors.grey[200],
-        foregroundColor:
-            _donationAmount == amount ? Colors.white : Colors.black,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      child: Text(
-        'LKR ${amount.toStringAsFixed(0)}',
-        style: const TextStyle(fontSize: 12),
       ),
     );
   }
