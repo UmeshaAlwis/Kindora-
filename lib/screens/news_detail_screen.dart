@@ -117,3 +117,4 @@ class NewsDetailScreen extends StatelessWidget {
     );
   }
 }
+// News Detail UI - Final Version
