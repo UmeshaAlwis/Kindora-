@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
+import '../notifications/notifications_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
@@ -11,7 +12,7 @@ class ChatListScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             _buildSearchBar(),
             _buildCategoryChips(),
             Expanded(child: _buildChatList()),
@@ -23,19 +24,56 @@ class ChatListScreen extends StatelessWidget {
   }
 
   // HEADER
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          "Messages",
+  Widget _buildHeader(context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            "Message",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.indigo,
+            ),
+          ),
+         Stack(
+  children: [
+    IconButton(
+      icon: const Icon(Icons.notifications, color: Colors.indigo),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const NotificationsScreen(),
+          ),
+        );
+      },
+    ),
+
+    // notification badge
+    Positioned(
+      right: 6,
+      top: 6,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: Colors.red,
+          shape: BoxShape.circle,
+        ),
+        child: const Text(
+          "3",
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.indigo,
+            color: Colors.white,
+            fontSize: 10,
           ),
         ),
+      ),
+    ),
+  ],
+),
+        ],
       ),
     );
   }
