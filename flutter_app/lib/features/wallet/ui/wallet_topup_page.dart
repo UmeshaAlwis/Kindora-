@@ -35,20 +35,30 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
     setState(() => _isProcessing = true);
 
     try {
-      // TODO: Integrate with Stripe for payment
-      // For now, just show success message
-      await Future.delayed(const Duration(seconds: 2));
+      // Call wallet service to process top-up
+      await _walletService.topUpWallet(
+        amount: amount,
+        paymentMethodId: 'demo', // Demo payment method
+      );
 
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Successfully added LKR $amount to wallet!'),
+            content: Text(
+                'Successfully added LKR ${amount.toStringAsFixed(0)} to wallet! (Demo Mode)'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           ),
         );
         _amountController.clear();
-        Navigator.pop(context);
+
+        // Pop back to wallet page
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          Navigator.pop(
+              context, true); // Return true to indicate refresh needed
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -57,6 +67,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
           SnackBar(
             content: Text('Top-up failed: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }

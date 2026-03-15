@@ -70,6 +70,7 @@ class SupabaseClient {
       console.log(`[Supabase] SELECT from ${table}:`, { params });
       const response = await this.client.get(url, { params });
       console.log(`[Supabase] SELECT response: ${response.data.length} rows`);
+      console.log(`[Supabase] SELECT response data:`, JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message;
@@ -116,9 +117,17 @@ class SupabaseClient {
         params[key] = `eq.${value}`;
       });
 
+      console.log(`[Supabase] UPDATE ${table}:`, { params, data });
       const response = await this.client.patch(url, data, { params });
+      console.log(`[Supabase] UPDATE ${table} response:`, response.data);
       return response.data[0] || response.data;
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`[Supabase] UPDATE ${table} error:`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
       throw new Error(`UPDATE ${table} failed: ${error instanceof Error ? error.message : error}`);
     }
   }

@@ -12,7 +12,13 @@ export class WalletService {
         filters: { user_id: userId },
       });
 
-      return wallets?.[0]?.balance || 0;
+      console.log('[WalletService] Raw Supabase response:', { wallets, firstWallet: wallets?.[0] });
+
+      const balance = wallets?.[0]?.balance || 0;
+      console.log('[WalletService] Extracted balance:', balance, 'Type:', typeof balance);
+
+      // Handle balance as string (Supabase returns DECIMAL as string)
+      return typeof balance === 'string' ? parseFloat(balance) : balance;
     } catch (error) {
       console.error('[WalletService] Error fetching wallet balance:', error);
       throw error;
@@ -71,15 +77,24 @@ export class WalletService {
       });
 
       // Update wallet balance
+      // IMPORTANT: DECIMAL columns must be sent as strings to Supabase REST API
+      // Handle null values from database
+      const currentTotalSpent = wallet.total_spent || 0;
+      const newBalance = (wallet.balance - amount).toFixed(2);
+      const newTotalSpent = (currentTotalSpent + amount).toFixed(2);
+      
+      console.log('[WalletService] UPDATE request - newBalance:', newBalance, 'newTotalSpent:', newTotalSpent, 'currentTotalSpent:', currentTotalSpent);
+      
       const updated = await supabase.update<any>('wallets', 
         { 
-          balance: wallet.balance - amount,
-          total_spent: wallet.total_spent + amount,
+          balance: parseFloat(newBalance),
+          total_spent: parseFloat(newTotalSpent),
           updated_at: new Date().toISOString(),
         },
         { user_id: userId }
       );
 
+      console.log('[WalletService] Wallet updated successfully:', updated);
       return updated;
     } catch (error) {
       console.error('[WalletService] Error deducting from wallet:', error);
