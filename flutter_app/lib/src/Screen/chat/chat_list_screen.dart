@@ -241,8 +241,9 @@ class _ChatTile extends StatelessWidget {
             CircleAvatar(
               radius: 26,
               backgroundColor: Colors.indigo.shade100,
-              child: Icon(Icons.volunteer_activism, color: Colors.indigo),
+              child: const Icon(Icons.volunteer_activism, color: Colors.indigo),
             ),
+            
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -273,7 +274,7 @@ class _ChatTile extends StatelessWidget {
                         child: Text(
                           message,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.black87,),
+                          style: TextStyle(color: Colors.black87, fontWeight: unread > 0 ? FontWeight.bold : FontWeight.normal),
                         ),
                       ),
                       if (unread > 0)
