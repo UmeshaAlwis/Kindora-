@@ -19,12 +19,20 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isLoading = false;
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  String selectedRole = 'donor';
 
   final Color primaryColor = const Color(0xFF0C0C79);
   final Color accentColor = const Color(0xFFFF751F);
 
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
+
+  // Role options for display and mapping
+  final Map<String, String> roleOptions = {
+    'donor': 'Donor - Support Causes',
+    'charity': 'Charity/Volunteer - Manage Programs',
+    'beneficiary': 'Beneficiary - Receive Support',
+  };
 
   void checkPasswordStrength(String password) {
     if (password.length < 6) {
@@ -53,7 +61,10 @@ class _SignupScreenState extends State<SignupScreen> {
     print('Email: $email');
     print('Password length: ${password.length}');
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty ||
+        selectedRole.isEmpty) {
       _showSnackBar("Please fill all fields", Colors.orange);
       return;
     }
@@ -86,7 +97,7 @@ class _SignupScreenState extends State<SignupScreen> {
         print('===== NOW CALLING BACKEND API =====');
         print(
             '[Signup] Backend URL will be: ${AppEnv.apiBaseUrl}/auth/register');
-        await _registerWithBackend(email, password, user.uid);
+        await _registerWithBackend(email, password, user.uid, selectedRole);
         print('===== BACKEND CALL COMPLETED =====');
       }
 
@@ -118,7 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   /// Call backend API to register user and sync to Supabase
   Future<void> _registerWithBackend(
-      String email, String password, String firebaseUid) async {
+      String email, String password, String firebaseUid, String role) async {
     try {
       final backendUrl = '${AppEnv.apiBaseUrl}/auth/register';
       print('[Signup] Backend URL: $backendUrl');
@@ -132,7 +143,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'email': email,
           'password': password,
           'full_name': email.split('@')[0],
-          'role': 'donor',
+          'role': role,
           'phone_number': null,
         }),
       );
@@ -209,176 +220,205 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Text(
-                'Join Kindora',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
+        child: Column(
+          children: [
+            Text(
+              'Join Kindora',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: primaryColor,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // EMAIL
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 30),
+            const SizedBox(height: 16),
 
-              // EMAIL
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // PASSWORD
+            TextField(
+              controller: passwordController,
+              obscureText: obscurePassword,
+              onChanged: (value) {
+                setState(() {
+                  checkPasswordStrength(value);
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      obscurePassword = !obscurePassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            if (passwordController.text.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Strength: $passwordStrength",
+                  style: TextStyle(
+                    color: strengthColor,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // PASSWORD
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
+            // CONFIRM PASSWORD
+            TextField(
+              controller: confirmPasswordController,
+              obscureText: obscureConfirmPassword,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      obscureConfirmPassword = !obscureConfirmPassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            if (confirmPasswordController.text.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  passwordsMatch
+                      ? "Passwords match ✓"
+                      : "Passwords do not match",
+                  style: TextStyle(
+                    color: passwordsMatch ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 24),
+
+            // ROLE DROPDOWN
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButton<String>(
+                value: selectedRole,
+                isExpanded: true,
+                underline: const SizedBox(),
+                hint: const Text('Select your role'),
+                items: roleOptions.entries
+                    .map((entry) => DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ))
+                    .toList(),
                 onChanged: (value) {
-                  setState(() {
-                    checkPasswordStrength(value);
-                  });
+                  if (value != null) {
+                    setState(() {
+                      selectedRole = value;
+                    });
+                  }
                 },
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // SIGNUP BUTTON
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
                 ),
-              ),
-
-              const SizedBox(height: 6),
-
-              if (passwordController.text.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Strength: $passwordStrength",
-                    style: TextStyle(
-                      color: strengthColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-
-              // CONFIRM PASSWORD
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: obscureConfirmPassword,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscureConfirmPassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscureConfirmPassword = !obscureConfirmPassword;
-                      });
-                    },
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              if (confirmPasswordController.text.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    passwordsMatch
-                        ? "Passwords match ✓"
-                        : "Passwords do not match",
-                    style: TextStyle(
-                      color: passwordsMatch ? Colors.green : Colors.red,
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 24),
-
-              // SIGNUP BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: isLoading ? null : signup,
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                onPressed: isLoading ? null : signup,
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
                         ),
-                ),
+                      )
+                    : const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
+            ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // GOOGLE SIGNUP
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primaryColor),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            // GOOGLE SIGNUP
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  icon: Icon(Icons.login, color: primaryColor),
-                  label: Text(
-                    "Sign up with Google",
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  onPressed: signUpWithGoogle,
                 ),
+                icon: Icon(Icons.login, color: primaryColor),
+                label: Text(
+                  "Sign up with Google",
+                  style: TextStyle(color: primaryColor),
+                ),
+                onPressed: signUpWithGoogle,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

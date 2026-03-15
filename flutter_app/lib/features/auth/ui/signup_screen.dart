@@ -20,12 +20,19 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isLoading = false;
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  String selectedRole = 'donor';
 
   final Color primaryColor = const Color(0xFF0C0C79);
   final Color accentColor = const Color(0xFFFF751F);
 
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
+
+  final Map<String, String> roleOptions = {
+    'donor': 'Donor - Support Causes',
+    'charity': 'Charity/Volunteer - Manage Programs',
+    'beneficiary': 'Beneficiary - Receive Support',
+  };
 
   void checkPasswordStrength(String password) {
     if (password.length < 6) {
@@ -51,7 +58,10 @@ class _SignupScreenState extends State<SignupScreen> {
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty ||
+        selectedRole.isEmpty) {
       _showSnackBar("Please fill all fields", Colors.orange);
       return;
     }
@@ -81,7 +91,7 @@ class _SignupScreenState extends State<SignupScreen> {
         // Call backend API to sync user to Supabase
         print('===== NOW CALLING BACKEND API =====');
         print('[Signup] Backend URL: ${AppEnv.apiBaseUrl}/auth/register');
-        await _registerWithBackend(email, password, user.uid);
+        await _registerWithBackend(email, password, user.uid, selectedRole);
         print('===== BACKEND CALL COMPLETED =====');
       }
 
@@ -112,7 +122,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   /// Call backend API to register user
   Future<void> _registerWithBackend(
-      String email, String password, String firebaseUid) async {
+      String email, String password, String firebaseUid, String role) async {
     try {
       final backendUrl = '${AppEnv.apiBaseUrl}/auth/register';
       print('[Backend] POST $backendUrl');
@@ -121,7 +131,7 @@ class _SignupScreenState extends State<SignupScreen> {
         'email': email,
         'password': password,
         'full_name': email.split('@')[0],
-        'role': 'donor',
+        'role': role,
         'firebase_uid': firebaseUid,
       };
 
@@ -317,6 +327,38 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 24),
+
+              // ROLE DROPDOWN
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButton<String>(
+                  value: selectedRole,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  hint: const Text('Select your role'),
+                  items: roleOptions.entries
+                      .map((entry) => DropdownMenuItem(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedRole = value;
+                      });
+                    }
+                  },
+                ),
+              ),
 
               const SizedBox(height: 24),
 
