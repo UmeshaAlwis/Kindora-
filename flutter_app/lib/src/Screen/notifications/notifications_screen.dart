@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../widgets/notification_card.dart';
+import '../../widgets/notification_icon.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -12,6 +13,12 @@ class NotificationsScreen extends StatelessWidget {
         title: const Text("Notifications"),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: NotificationIcon(count: 3),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
