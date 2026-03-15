@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// RENAMED TO RecommendationScreen to fix the conflict with RewardsScreen
 class RecommendationScreen extends StatelessWidget {
   const RecommendationScreen({super.key});
 
@@ -64,7 +63,7 @@ class RecommendationScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Placeholder for AI-generated cards
+            // Now these cards are fully functional buttons
             _buildRecommendationCard(
               context,
               "Clean Water Initiative",
@@ -79,17 +78,23 @@ class RecommendationScreen extends StatelessWidget {
               LucideIcons.utensils,
               Colors.orange,
             ),
+            _buildRecommendationCard(
+              context,
+              "Rural School Library",
+              "80% funded - Help them reach the goal",
+              LucideIcons.bookOpen,
+              Colors.purple,
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Helper widget for AI Cards
+  // UPDATED: Helper widget with Navigation logic
   Widget _buildRecommendationCard(BuildContext context, String title, String reason, IconData icon, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -102,13 +107,97 @@ class RecommendationScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        onTap: () {
+          // NAVIGATE to the detail screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CauseDetailScreen(
+                title: title,
+                reason: reason,
+                icon: icon,
+                color: color,
+              ),
+            ),
+          );
+        },
         leading: CircleAvatar(
           backgroundColor: color.withOpacity(0.1),
           child: Icon(icon, color: color, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(reason, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        title: Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1A1A40),
+            )
+        ),
+        subtitle: Text(
+            reason,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      ),
+    );
+  }
+}
+
+// NEW: A simple Detail Screen to "go inside"
+class CauseDetailScreen extends StatelessWidget {
+  final String title;
+  final String reason;
+  final IconData icon;
+  final Color color;
+
+  const CauseDetailScreen({
+    super.key,
+    required this.title,
+    required this.reason,
+    required this.icon,
+    required this.color
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1A40),
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Center(
+              child: Icon(icon, size: 80, color: color),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              reason,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1A1A40),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text("Donate Now", style: TextStyle(color: Colors.white)),
+            )
+          ],
+        ),
       ),
     );
   }
