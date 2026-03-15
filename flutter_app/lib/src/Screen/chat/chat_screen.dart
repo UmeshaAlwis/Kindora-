@@ -54,23 +54,13 @@ List<Map<String, dynamic>> messages = [];
 
 
 void sendMessage() async {
-  if (controller.text.trim().isEmpty) return;
+  final text = controller.text.trim();
+  if (text.isEmpty) return;
 
   await supabase.from('messages').insert({
-    "content": controller.text,
+    "content": text,
     "sender_id": "0e29b-41d4-a716-44665544000",
     "receiver_id": "0e29b-41d4-a716-44665544001",
-  });
-
-  controller.clear();
-
-  loadMessages();
-
-  setState(() {
-    messages.add({
-      "text": controller.text,
-      "isMe": true,
-    });
   });
 
   controller.clear();
@@ -116,17 +106,20 @@ void dispose() {
 
           // CHAT MESSAGES
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: messages
-                  .map((msg){
-                    return MessageBubble(
-                      message: msg["content"],
-                      isMe: false,
-                      time: msg["created_at"].toString(),
-                    );
-                  })
-                  .toList(),
+              itemCount: messages.length,
+              itemBuilder:(context, index) {
+                final msg = messages[index];
+
+                final isMe = msg["sender_id"] == "0e29b-41d4-a716-44665544000";
+
+                return MessageBubble(
+                  message: msg["content"],
+                  isMe: isMe,
+                  time: msg["created_at"].toString(),
+                );
+              }
             ),
           ),
 
