@@ -1,3 +1,4 @@
+// Badge Widget
 import 'package:flutter/material.dart';
 import '../models/badge_model.dart';
 

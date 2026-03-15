@@ -1,3 +1,4 @@
+// Badge Data Model
 import 'package:flutter/material.dart';
 
 class BadgeModel {
