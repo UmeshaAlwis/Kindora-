@@ -26,3 +26,4 @@ void main() {
     expect(find.text('Share this Update'), findsOneWidget);
   });
 }
+// Navigation tests
