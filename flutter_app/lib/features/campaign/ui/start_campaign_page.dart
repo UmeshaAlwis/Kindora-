@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kindora/providers/supabase_providers.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StartCampaignPage extends ConsumerStatefulWidget {
   const StartCampaignPage({super.key});
@@ -18,12 +24,14 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
   String campaignCategory = "Personal";
   DateTime selectedDate = DateTime.now();
 
+  XFile? selectedImageFile;
+  String? uploadedImageUrl;
+
   late TextEditingController dateController;
   late TextEditingController titleController;
   late TextEditingController campaignerNameController;
   late TextEditingController targetAmountController;
   late TextEditingController descriptionController;
-  late TextEditingController imageUrlController;
 
   @override
   void initState() {
@@ -33,7 +41,6 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
     campaignerNameController = TextEditingController();
     targetAmountController = TextEditingController();
     descriptionController = TextEditingController();
-    imageUrlController = TextEditingController();
   }
 
   @override
@@ -43,8 +50,80 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
     campaignerNameController.dispose();
     targetAmountController.dispose();
     descriptionController.dispose();
-    imageUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        setState(() {
+          selectedImageFile = image;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  Future<String?> _uploadImageToSupabase(XFile imageFile) async {
+    try {
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final idToken = await firebaseUser.getIdToken();
+
+      // Create multipart request
+      const String apiBaseUrl = 'http://10.0.2.2:5001/api';
+      final uri = Uri.parse('$apiBaseUrl/storage/upload');
+
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $idToken'
+        ..fields['bucket'] = 'Kindora'
+        ..fields['folder'] = 'campaigns'
+        ..files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+
+      print('[Campaign] Uploading image to backend: ${uri.toString()}');
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      print('[Campaign] Upload response: ${response.statusCode}');
+      print('[Campaign] Response body: $responseBody');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(responseBody);
+        final imageUrl = jsonResponse['url'] as String?;
+
+        if (imageUrl != null) {
+          print('[Campaign] Image uploaded successfully: $imageUrl');
+          return imageUrl;
+        }
+      } else {
+        throw Exception(
+            'Upload failed: ${response.statusCode} - $responseBody');
+      }
+    } catch (e) {
+      debugPrint('Error uploading image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading image: $e')),
+        );
+      }
+    }
+    return null;
   }
 
   Future<void> _submitCampaign() async {
@@ -52,6 +131,16 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
       setState(() {
         _isLoading = true;
       });
+
+      String? imageUrl;
+
+      // Upload image if selected
+      if (selectedImageFile != null) {
+        imageUrl = await _uploadImageToSupabase(selectedImageFile!);
+        if (imageUrl == null) {
+          throw Exception('Failed to upload image');
+        }
+      }
 
       final repository = ref.read(campaignRepositoryProvider);
       final targetAmount =
@@ -68,8 +157,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
         category: category,
         campaignCategory: campaignCategory,
         targetAmount: targetAmount,
-        image:
-            imageUrlController.text.isNotEmpty ? imageUrlController.text : null,
+        image: imageUrl,
         description: descriptionController.text.isNotEmpty
             ? descriptionController.text
             : null,
@@ -131,14 +219,33 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Image Section
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1593113630400-ea4288922497",
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+              /// Image Section with Preview
+              GestureDetector(
+                onTap: _pickImage,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    height: 180,
+                    width: double.infinity,
+                    color: Colors.grey[200],
+                    child: selectedImageFile != null
+                        ? Image.file(
+                            File(selectedImageFile!.path),
+                            fit: BoxFit.cover,
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.image,
+                                  size: 48, color: Colors.grey[400]),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap to select image',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
 
@@ -301,26 +408,23 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
               const SizedBox(height: 16),
 
-              /// Image URL (Optional)
-              TextFormField(
-                controller: imageUrlController,
-                decoration: const InputDecoration(
-                  labelText: "Campaign Image URL (Optional)",
-                  hintText: "https://example.com/image.jpg",
-                  border: OutlineInputBorder(),
+              /// Image Selection Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: Text(
+                    selectedImageFile != null
+                        ? 'Change Image (${selectedImageFile!.name})'
+                        : 'Choose Campaign Image',
+                  ),
                 ),
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    final uri = Uri.tryParse(value);
-                    if (uri == null || !uri.hasAbsolutePath) {
-                      return "Please enter a valid URL";
-                    }
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 16),
+
+              /// Currency and Amount
               Row(
                 children: [
                   Expanded(

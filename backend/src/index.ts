@@ -3,8 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
-import { initializeFirebase } from './services/firebase.service';
+import { initializeFirebase, getFirebaseAuth } from './services/firebase.service';
 import { initializeDatabase } from './services/database.service';
+import { SupabaseClient } from './services/supabase.service';
 import { validateConfig } from './config';
 import Logger from './utils/logger';
 import { KindoraError } from './utils/errors';
@@ -19,6 +20,7 @@ import messageRoutes from './routes/message.routes';
 import paymentRoutes from './routes/payment.routes';
 import chatRoutes from './routes/chat.routes';
 import walletRoutes from './routes/wallet.routes';
+import storageRoutes from './routes/storage.routes';
 
 // Load environment variables
 dotenv.config();
@@ -81,6 +83,82 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Diagnostic Endpoint - Check all connections
+app.get('/diagnostic', async (req: Request, res: Response) => {
+  try {
+    const diagnostics: any = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      checks: {
+        firebase: 'pending',
+        supabase: 'pending',
+        storage: 'pending',
+      },
+    };
+
+    // Check Firebase
+    try {
+      const firebaseAuth = getFirebaseAuth();
+      const testUser = await firebaseAuth.getUser('test-uid').catch(() => null);
+      diagnostics.checks.firebase = 'connected';
+      diagnostics.firebase = {
+        status: 'connected',
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        message: 'Firebase Admin SDK initialized successfully',
+      };
+    } catch (error: any) {
+      diagnostics.checks.firebase = 'error';
+      diagnostics.firebase = {
+        status: 'error',
+        message: error.message,
+      };
+    }
+
+    // Check Supabase REST API
+    try {
+      const supabase = new SupabaseClient();
+      const testData = await supabase.select('users', { limit: 1 });
+      diagnostics.checks.supabase = 'connected';
+      diagnostics.supabase = {
+        status: 'connected',
+        url: process.env.SUPABASE_URL,
+        message: `Supabase REST API connected. Found ${testData ? 'users table' : 'no data'}`,
+      };
+    } catch (error: any) {
+      diagnostics.checks.supabase = 'error';
+      diagnostics.supabase = {
+        status: 'error',
+        url: process.env.SUPABASE_URL,
+        message: error.message,
+      };
+    }
+
+    // Check Environment Variables
+    diagnostics.environment_vars = {
+      SUPABASE_URL: process.env.SUPABASE_URL ? '✓ Set' : '✗ Missing',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? '✓ Set' : '✗ Missing',
+      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? '✓ Set' : '✗ Missing',
+      FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? '✓ Set' : '✗ Missing',
+      FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? '✓ Set' : '✗ Missing',
+      DATABASE_URL: process.env.DATABASE_URL ? '✓ Set' : '✗ Missing',
+      JWT_SECRET: process.env.JWT_SECRET ? '✓ Set' : '✗ Missing',
+    };
+
+    const allConnected = Object.values(diagnostics.checks).every(v => v === 'connected');
+    res.json({
+      success: allConnected,
+      overall_status: allConnected ? 'healthy' : 'degraded',
+      ...diagnostics,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Diagnostic check failed',
+      message: error.message,
+    });
+  }
+});
+
 // API Routes
 const apiRouter = express.Router();
 
@@ -99,6 +177,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       messages: '/api/messages',
       payments: '/api/payments',
       chat: '/api/chat',
+      storage: '/api/storage',
     },
   });
 });
@@ -112,6 +191,7 @@ apiRouter.use('/users', userRoutes);
 apiRouter.use('/messages', messageRoutes);
 apiRouter.use('/payments', paymentRoutes);
 apiRouter.use('/chat', chatRoutes);
+apiRouter.use('/storage', storageRoutes);
 
 app.use('/api', apiRouter);
 
