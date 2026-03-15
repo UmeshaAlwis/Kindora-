@@ -27,7 +27,6 @@ class RecommendationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // AI Suggestion Banner
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -51,7 +50,6 @@ class RecommendationScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
             Text(
               'Recommended for You',
@@ -62,8 +60,6 @@ class RecommendationScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Now these cards are fully functional buttons
             _buildRecommendationCard(
               context,
               "Clean Water Initiative",
@@ -91,7 +87,6 @@ class RecommendationScreen extends StatelessWidget {
     );
   }
 
-  // UPDATED: Helper widget with Navigation logic
   Widget _buildRecommendationCard(BuildContext context, String title, String reason, IconData icon, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -110,7 +105,6 @@ class RecommendationScreen extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         onTap: () {
-          // NAVIGATE to the detail screen
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -144,7 +138,6 @@ class RecommendationScreen extends StatelessWidget {
   }
 }
 
-// NEW: A simple Detail Screen to "go inside"
 class CauseDetailScreen extends StatelessWidget {
   final String title;
   final String reason;
@@ -172,29 +165,81 @@ class CauseDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Center(
-              child: Icon(icon, size: 80, color: color),
-            ),
+            Center(child: Icon(icon, size: 80, color: color)),
             const SizedBox(height: 20),
-            Text(
-              title,
-              style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text(
-              reason,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey),
-            ),
+            Text(reason, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey)),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // NAVIGATION: Go to Amount Selection
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DonationAmountScreen(campaignTitle: title),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A1A40),
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text("Donate Now", style: TextStyle(color: Colors.white)),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// NEW: Donation Amount Screen
+class DonationAmountScreen extends StatelessWidget {
+  final String campaignTitle;
+  const DonationAmountScreen({super.key, required this.campaignTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Choose Amount"),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1A40),
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Donating to:", style: GoogleFonts.poppins(color: Colors.grey)),
+            Text(campaignTitle, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 30),
+            const TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Enter Amount",
+                prefixText: "\$ ",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                // Success message or payment logic
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Thank you for your donation!")),
+                );
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1A1A40),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text("Confirm Donation", style: TextStyle(color: Colors.white)),
             )
           ],
         ),
