@@ -283,8 +283,18 @@ class _BeneficiaryCampaignsList extends ConsumerWidget {
     final campaignsAsync =
         ref.watch(beneficiaryCampaignsByUserProvider(userId));
 
+    print('[CampaignsList] Fetching campaigns for user: $userId');
+
     return campaignsAsync.when(
       data: (campaigns) {
+        print('[CampaignsList] ✓ Fetched ${campaigns.length} campaigns');
+        if (campaigns.isNotEmpty) {
+          for (var c in campaigns) {
+            print(
+                '[CampaignsList]   - Campaign: ${c.id}, Title: ${c.title}, User ID: ${c.beneficiaryUserId}');
+          }
+        }
+
         if (campaigns.isEmpty) {
           return Center(
             child: Padding(
