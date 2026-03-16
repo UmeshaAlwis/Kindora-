@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../widgets/typing_indicator.dart';
 
 
 class ChatScreen extends StatefulWidget {
@@ -15,6 +14,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
 
   final TextEditingController controller = TextEditingController();
+  final ScrollController scrollController = ScrollController();
 
   late final RealtimeChannel channel;
 
@@ -27,6 +27,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   setState(() {
     messages = List<Map<String, dynamic>>.from(data);
+  });
+  Future.delayed(const Duration(milliseconds: 100), () {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    }
   });
 
 }
@@ -90,6 +95,8 @@ void dispose() {
             const CircleAvatar(
               backgroundColor: Colors.indigo,
               child: Icon(Icons.volunteer_activism, color: Colors.white),
+              
+              
             ),
             const SizedBox(width: 10),
             Text(
@@ -109,6 +116,7 @@ void dispose() {
           // CHAT MESSAGES
           Expanded(
             child: ListView.builder(
+              controller: scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: messages.length,
               itemBuilder:(context, index) {
