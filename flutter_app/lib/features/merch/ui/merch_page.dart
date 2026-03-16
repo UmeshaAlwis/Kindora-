@@ -68,11 +68,11 @@ class _MerchPageState extends ConsumerState<MerchPage>
   Widget _buildBannerSection(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF0C0C79),
-            const Color(0xFF1a1a99),
+            Color(0xFF0C0C79),
+            Color(0xFF1a1a99),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

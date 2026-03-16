@@ -36,12 +36,12 @@ class MessagesPage extends StatelessWidget {
                 trailing: const Text('Now'),
                 onTap: () {},
               ),
-            Padding(
-              padding: const EdgeInsets.all(32),
+            const Padding(
+              padding: EdgeInsets.all(32),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(
                       Icons.mail,
                       size: 64,

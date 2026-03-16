@@ -38,12 +38,12 @@ class CampaignHomePage extends ConsumerWidget {
         ),
         body: Column(
           children: [
-            Expanded(
+            const Expanded(
               child: TabBarView(
                 children: [
-                  const CampaignList(),
-                  const Center(child: Text("No ongoing campaigns")),
-                  const Center(child: Text("No successful campaigns")),
+                  CampaignList(),
+                  Center(child: Text("No ongoing campaigns")),
+                  Center(child: Text("No successful campaigns")),
                 ],
               ),
             ),
