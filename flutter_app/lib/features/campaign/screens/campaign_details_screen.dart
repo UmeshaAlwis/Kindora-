@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/campaign.dart';
+import '../../../models/supabase_models.dart';
 import '../../campaign/ui/campaign_home_page.dart';
 
 class CampaignDetailsScreen extends StatelessWidget {
@@ -12,7 +12,9 @@ class CampaignDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = campaign.raisedAmount / campaign.goalAmount;
+    final targetAmount = campaign.targetAmount ?? 1000.0;
+    final raisedAmount = campaign.raisedAmount ?? 0.0;
+    final progress = (raisedAmount / targetAmount).clamp(0.0, 1.0);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,14 +34,14 @@ class CampaignDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              campaign.description,
+              campaign.description ?? 'No description',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
             LinearProgressIndicator(value: progress),
             const SizedBox(height: 10),
             Text(
-              "Raised \$${campaign.raisedAmount} of \$${campaign.goalAmount}",
+              "Raised LKR ${raisedAmount.toStringAsFixed(0)} of LKR ${targetAmount.toStringAsFixed(0)}",
               style: const TextStyle(fontSize: 14),
             ),
             const Spacer(),

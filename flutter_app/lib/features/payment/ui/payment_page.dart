@@ -308,11 +308,11 @@ class _PaymentPageState extends State<PaymentPage> {
           setState(() => _selectedPaymentMethod = 'bank_transfer');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                   'Payment failed: Unable to process. Try another method.'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
+              duration: Duration(seconds: 3),
             ),
           );
         }

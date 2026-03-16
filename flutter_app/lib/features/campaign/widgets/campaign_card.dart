@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/campaign.dart';
+import '../../../models/supabase_models.dart';
 import '../ui/campaign_home_page.dart';
 
 class CampaignCard extends StatelessWidget {
@@ -12,7 +12,10 @@ class CampaignCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = campaign.raisedAmount / campaign.goalAmount;
+    // Calculate progress with safety checks
+    final targetAmount = campaign.targetAmount ?? 1000.0;
+    final raisedAmount = campaign.raisedAmount ?? 0.0;
+    final progress = (raisedAmount / targetAmount).clamp(0.0, 1.0);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -27,12 +30,29 @@ class CampaignCard extends StatelessWidget {
             /// Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                "https://picsum.photos/400/200",
-                height: 140,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: campaign.image != null && campaign.image!.isNotEmpty
+                  ? Image.network(
+                      campaign.image!,
+                      height: 140,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 140,
+                          width: double.infinity,
+                          color: Colors.grey[300],
+                          child: Icon(Icons.image,
+                              size: 48, color: Colors.grey[400]),
+                        );
+                      },
+                    )
+                  : Container(
+                      height: 140,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child:
+                          Icon(Icons.image, size: 48, color: Colors.grey[400]),
+                    ),
             ),
 
             const SizedBox(height: 10),
@@ -50,29 +70,59 @@ class CampaignCard extends StatelessWidget {
 
             /// Description
             Text(
-              campaign.description,
+              campaign.description ?? 'No description',
               style: const TextStyle(fontSize: 14),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
 
             const SizedBox(height: 10),
 
-            /// Progress
-            LinearProgressIndicator(value: progress),
+            /// Progress Bar with Percentage
+            Row(
+              children: [
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "${(progress * 100).toStringAsFixed(0)}%",
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
-            Text(
-              "Raised \$${campaign.raisedAmount}",
-              style: const TextStyle(fontSize: 12),
+            /// Raised vs Target Amount
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Raised: LKR ${raisedAmount.toStringAsFixed(0)}",
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Text(
+                  "Target: LKR ${targetAmount.toStringAsFixed(0)}",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
 
             const SizedBox(height: 10),
 
-            /// Donate button
+            /// Support Campaign button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                child: const Text("Donate"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[900],
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -81,6 +131,7 @@ class CampaignCard extends StatelessWidget {
                     ),
                   );
                 },
+                child: const Text("Support Campaign"),
               ),
             ),
           ],

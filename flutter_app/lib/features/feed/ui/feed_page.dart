@@ -60,9 +60,9 @@ class FeedPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       const Text('Feed content coming soon...'),
                       const SizedBox(height: 12),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: const [
+                        children: [
                           Icon(Icons.favorite_outline),
                           Icon(Icons.mode_comment_outlined),
                           Icon(Icons.share_outlined),
@@ -72,11 +72,11 @@ class FeedPage extends StatelessWidget {
                   ),
                 ),
               ),
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.only(top: 32),
+                padding: EdgeInsets.only(top: 32),
                 child: Column(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.feed,
                       size: 64,
