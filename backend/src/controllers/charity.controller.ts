@@ -76,7 +76,7 @@ export class CharityController {
 
       const userId = req.userId;
 
-      const charity = await CharityService.registerCharity(userId, value);
+      const charity = await CharityService.registerCharity(userId ?? '', value);
 
       res.status(201).json({
         success: true,

@@ -7,6 +7,7 @@ import Joi from 'joi';
 
 const createDonationSchema = Joi.object({
   campaign_id: Joi.string().uuid().required(),
+  charity_id: Joi.string().uuid().optional(),
   amount: Joi.number().required().positive().min(10).max(100000),
   payment_method: Joi.string()
     .valid('card', 'wallet', 'bank_transfer', 'stripe', 'payhere')
@@ -338,7 +339,7 @@ export class DonationController {
       });
 
       // Update donation with transaction ID
-      await DonationService.updateDonationStatus(donation.donation_id, 'success', payment_intent_id);
+      await DonationService.updateDonationStatus((donation as any).donation_id, 'success', payment_intent_id);
 
       res.json({
         success: true,

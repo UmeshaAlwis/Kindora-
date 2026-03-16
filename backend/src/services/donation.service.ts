@@ -18,10 +18,9 @@ export class DonationService {
     }
 
     // Create donation record in Supabase
-    const donation = await supabase.insert('donations', {
+    const donationData: any = {
       id: donationId,
       user_id: donorId,
-      campaign_id: data.campaign_id,
       amount: data.amount,
       currency: 'LKR',
       payment_method: data.payment_method,
@@ -31,11 +30,23 @@ export class DonationService {
       donor_phone: data.donor_phone,
       transaction_id: null,
       created_at: new Date().toISOString(),
-    });
+    };
+
+    // Support both regular campaigns and charities
+    if (data.campaign_id) {
+      donationData.campaign_id = data.campaign_id;
+    }
+    if (data.charity_id) {
+      donationData.charity_id = data.charity_id;
+    }
+
+    const donation = await supabase.insert('donations', donationData);
 
     // If wallet payment, immediately update campaign and points
     if (isWalletPayment) {
-      await this.updateCampaignAmount(data.campaign_id, data.amount);
+      if (data.campaign_id) {
+        await this.updateCampaignAmount(data.campaign_id, data.amount);
+      }
       await this.awardDonationPoints(donorId, data.amount);
     }
 
@@ -58,7 +69,9 @@ export class DonationService {
 
     if (status === 'success' && donation?.[0]) {
       // Update campaign current amount
-      await this.updateCampaignAmount(donation[0].campaign_id, donation[0].amount);
+      if (donation[0].campaign_id) {
+        await this.updateCampaignAmount(donation[0].campaign_id, donation[0].amount);
+      }
 
       // Award points to donor (gamification)
       await this.awardDonationPoints(donation[0].user_id, donation[0].amount);

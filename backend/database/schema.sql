@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS donations (
   user_id UUID,
   campaign_id UUID,
   charity_id UUID,
+  beneficiary_campaign_id UUID,
   amount DECIMAL(15, 2) NOT NULL,
   currency VARCHAR(3) DEFAULT 'LKR',
   payment_method VARCHAR(50) NOT NULL,
@@ -99,7 +100,8 @@ CREATE TABLE IF NOT EXISTS donations (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT fk_donations_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
   CONSTRAINT fk_donations_campaign_id FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE SET NULL,
-  CONSTRAINT fk_donations_charity_id FOREIGN KEY (charity_id) REFERENCES charities(id) ON DELETE SET NULL
+  CONSTRAINT fk_donations_charity_id FOREIGN KEY (charity_id) REFERENCES charities(id) ON DELETE SET NULL,
+  CONSTRAINT fk_donations_beneficiary_campaign_id FOREIGN KEY (beneficiary_campaign_id) REFERENCES beneficiary_campaigns(id) ON DELETE SET NULL
 );
 
 -- ============================================
@@ -158,6 +160,7 @@ CREATE INDEX IF NOT EXISTS idx_campaigns_created_at ON campaigns(created_at DESC
 -- Donations indexes
 CREATE INDEX IF NOT EXISTS idx_donations_user_id ON donations(user_id);
 CREATE INDEX IF NOT EXISTS idx_donations_campaign_id ON donations(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_donations_beneficiary_campaign_id ON donations(beneficiary_campaign_id);
 CREATE INDEX IF NOT EXISTS idx_donations_charity_id ON donations(charity_id);
 CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
 CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at DESC);
@@ -272,6 +275,25 @@ CREATE TRIGGER trigger_donations_update_charity
 AFTER INSERT ON donations
 FOR EACH ROW
 EXECUTE FUNCTION update_charity_amount_raised();
+
+-- Update beneficiary campaign raised_amount when donation is created
+CREATE OR REPLACE FUNCTION update_beneficiary_campaign_raised_amount()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.beneficiary_campaign_id IS NOT NULL THEN
+    UPDATE beneficiary_campaigns
+    SET raised_amount = raised_amount + NEW.amount
+    WHERE id = NEW.beneficiary_campaign_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_donations_update_beneficiary_campaign ON donations CASCADE;
+CREATE TRIGGER trigger_donations_update_beneficiary_campaign
+AFTER INSERT ON donations
+FOR EACH ROW
+EXECUTE FUNCTION update_beneficiary_campaign_raised_amount();
 
 -- ============================================
 -- TABLE COMMENTS (DOCUMENTATION)

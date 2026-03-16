@@ -3,6 +3,8 @@ import { getFirebaseAuth } from '../services/firebase.service';
 import { SupabaseUserService } from '../services/supabase-user.service';
 import Logger from '../utils/logger';
 
+const logger = new Logger('AUTH');
+
 declare global {
   namespace Express {
     interface Request {
@@ -21,7 +23,7 @@ export async function authenticateToken(
   try {
     // Skip authentication in development if SKIP_AUTH is enabled
     if (process.env.SKIP_AUTH === 'true' && process.env.NODE_ENV === 'development') {
-      Logger.warn('⚠️  Authentication skipped (SKIP_AUTH=true)');
+      logger.warn('⚠️  Authentication skipped (SKIP_AUTH=true)');
       
       // Mock user for testing
       req.user = {
