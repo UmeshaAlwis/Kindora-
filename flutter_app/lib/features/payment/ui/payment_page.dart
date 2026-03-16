@@ -8,11 +8,13 @@ import 'bank_transfer_page.dart';
 class PaymentPage extends StatefulWidget {
   final Campaign campaign;
   final double? preSelectedAmount;
+  final String? beneficiaryCampaignId;
 
   const PaymentPage({
     super.key,
     required this.campaign,
     this.preSelectedAmount,
+    this.beneficiaryCampaignId,
   });
 
   @override
@@ -74,16 +76,20 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> _fetchWalletBalance() async {
+    if (!mounted) return;
+
     setState(() => _loadingWallet = true);
     try {
       final balance = await _walletService.getWalletBalance();
-      setState(() {
-        _walletBalance = balance;
-        _loadingWallet = false;
-      });
-    } catch (e) {
-      setState(() => _loadingWallet = false);
       if (mounted) {
+        setState(() {
+          _walletBalance = balance;
+          _loadingWallet = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingWallet = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load wallet: $e'),
@@ -168,7 +174,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
       if (_selectedPaymentMethod == 'wallet') {
         // Handle wallet payment
-        await _processWalletPayment(payment, orderId);
+        await _processWalletPayment(
+            payment, orderId, widget.beneficiaryCampaignId);
       } else if (_selectedPaymentMethod == 'stripe') {
         // Handle Stripe payment
         await _processStripePayment(payment, orderId);
@@ -177,60 +184,64 @@ class _PaymentPageState extends State<PaymentPage> {
         await _processBankTransfer(payment);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Payment failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  Future<void> _processWalletPayment(Payment payment, String orderId) async {
+  Future<void> _processWalletPayment(
+      Payment payment, String orderId, String? beneficiaryCampaignId) async {
     try {
       // Process wallet payment through the service
       await _walletService.processWalletPayment(
         amount: _donationAmount,
         campaignId: widget.campaign.id,
+        beneficiaryCampaignId: beneficiaryCampaignId,
         donorName: _donorNameController.text,
         donorEmail: _donorEmailController.text,
       );
 
+      if (!mounted) return;
+
+      // Show success dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wallet donation successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Update wallet balance
       if (mounted) {
-        setState(() => _isProcessing = false);
-
-        // Show success dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Wallet donation successful!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Update wallet balance
         setState(() {
+          _isProcessing = false;
           _walletBalance -= _donationAmount;
         });
+      }
 
-        // Navigate back after a short delay
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          Navigator.pop(context);
-        }
+      // Navigate back after a short delay
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Wallet payment failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      setState(() => _isProcessing = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Wallet payment failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -261,8 +272,8 @@ class _PaymentPageState extends State<PaymentPage> {
       // Step 3: Present payment sheet to user
       final success = await _stripeService.presentPaymentSheet();
 
-      if (success && mounted) {
-        setState(() => _isProcessing = false);
+      if (success) {
+        if (!mounted) return;
 
         // Success - Payment completed
         ScaffoldMessenger.of(context).showSnackBar(
@@ -272,6 +283,10 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         );
 
+        if (mounted) {
+          setState(() => _isProcessing = false);
+        }
+
         // Navigate back after a short delay
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
@@ -279,23 +294,27 @@ class _PaymentPageState extends State<PaymentPage> {
         }
       }
     } on Exception catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
+      if (!mounted) return;
 
-        final errorMessage = e.toString();
+      setState(() => _isProcessing = false);
 
-        // Check if user cancelled
-        if (errorMessage.contains('cancelled')) {
+      final errorMessage = e.toString();
+
+      // Check if user cancelled
+      if (errorMessage.contains('cancelled')) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Payment cancelled'),
               backgroundColor: Colors.orange,
             ),
           );
-        } else if (errorMessage.contains('401') ||
-            errorMessage.contains('Unauthorized') ||
-            errorMessage.contains('authentication')) {
-          // Stripe authentication issue - suggest alternative payment method
+        }
+      } else if (errorMessage.contains('401') ||
+          errorMessage.contains('Unauthorized') ||
+          errorMessage.contains('authentication')) {
+        // Stripe authentication issue - suggest alternative payment method
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -304,9 +323,11 @@ class _PaymentPageState extends State<PaymentPage> {
               duration: Duration(seconds: 4),
             ),
           );
-          // Reset to stripe but user should switch method
+          // Reset to bank transfer but user should switch method
           setState(() => _selectedPaymentMethod = 'bank_transfer');
-        } else {
+        }
+      } else {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(

@@ -75,12 +75,14 @@ class _BankTransferPageState extends State<BankTransferPage> {
     if (_selectedImage == null ||
         _transactionRefController.text.isEmpty ||
         _bankNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all fields and upload receipt'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please fill all fields and upload receipt'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -89,10 +91,12 @@ class _BankTransferPageState extends State<BankTransferPage> {
     // Simulate receipt upload
     await Future.delayed(const Duration(seconds: 2));
 
-    if (mounted) {
-      setState(() => _isSubmitting = false);
+    if (!mounted) return;
 
-      // Show success dialog
+    setState(() => _isSubmitting = false);
+
+    // Show success dialog
+    if (mounted) {
       showDialog(
         context: context,
         barrierDismissible: false,

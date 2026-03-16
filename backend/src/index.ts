@@ -14,6 +14,7 @@ import { KindoraError } from './utils/errors';
 import authRoutes from './routes/auth.routes';
 import campaignRoutes from './routes/campaign.routes';
 import donationRoutes from './routes/donation.routes';
+import beneficiaryDonationRoutes from './routes/beneficiary-donation.routes';
 import charityRoutes from './routes/charity.routes';
 import userRoutes from './routes/user.routes';
 import messageRoutes from './routes/message.routes';
@@ -173,6 +174,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       auth: '/api/auth',
       campaigns: '/api/campaigns',
       donations: '/api/donations',
+      beneficiary_donations: '/api/beneficiary-donations',
       charities: '/api/charities',
       users: '/api/users',
       messages: '/api/messages',
@@ -187,6 +189,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/campaigns', campaignRoutes);
 apiRouter.use('/donations', donationRoutes);
+apiRouter.use('/beneficiary-donations', beneficiaryDonationRoutes);
 apiRouter.use('/wallet', walletRoutes);
 apiRouter.use('/charities', charityRoutes);
 apiRouter.use('/users', userRoutes);

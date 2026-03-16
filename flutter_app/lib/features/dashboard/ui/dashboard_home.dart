@@ -139,7 +139,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                         icon: Icons.favorite_border,
                         label: "Donate",
                         onTap: () {
-                          context.push('/campaigns');
+                          context.push('/donor/beneficiary-campaigns');
                         },
                       ),
                       _HeaderAction(
@@ -215,7 +215,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        context.push('/campaigns');
+                        context.push('/donor/beneficiary-campaigns');
                       },
                     ),
                   ),

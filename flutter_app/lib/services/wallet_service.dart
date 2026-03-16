@@ -148,6 +148,7 @@ class WalletService {
   Future<void> processWalletPayment({
     required double amount,
     required String campaignId,
+    String? beneficiaryCampaignId,
     required String donorName,
     required String donorEmail,
   }) async {
@@ -157,19 +158,35 @@ class WalletService {
 
       final idToken = await user.getIdToken();
 
+      // Determine if this is a beneficiary campaign donation
+      final isBeneficiaryDonation =
+          beneficiaryCampaignId != null && beneficiaryCampaignId.isNotEmpty;
+
+      // Build request body
+      final body = {
+        'amount': amount,
+        'payment_method': 'wallet',
+        'donor_name': donorName,
+        'donor_email': donorEmail,
+      };
+
+      if (isBeneficiaryDonation) {
+        body['beneficiary_campaign_id'] = beneficiaryCampaignId;
+      } else {
+        body['campaign_id'] = campaignId;
+      }
+
+      // Use different endpoint for beneficiary donations
+      final endpoint =
+          isBeneficiaryDonation ? '/beneficiary-donations' : '/donations';
+
       final response = await http.post(
-        Uri.parse('${AppEnv.apiBaseUrl}/donations'),
+        Uri.parse('${AppEnv.apiBaseUrl}$endpoint'),
         headers: {
           'Authorization': 'Bearer $idToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'campaign_id': campaignId,
-          'amount': amount,
-          'payment_method': 'wallet',
-          'donor_name': donorName,
-          'donor_email': donorEmail,
-        }),
+        body: jsonEncode(body),
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {

@@ -14,6 +14,7 @@ import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_create_campaign_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_campaign_detail_screen.dart';
+import '../../features/beneficiary/ui/donor_beneficiary_campaigns_screen.dart';
 import '../../core/widgets/auth_gate.dart';
 import '../../core/widgets/main_layout.dart';
 
@@ -118,6 +119,12 @@ class AppRouter {
               final id = state.pathParameters['id']!;
               return BeneficiaryCampaignDetailScreen(campaignId: id);
             },
+          ),
+          GoRoute(
+            path: '/donor/beneficiary-campaigns',
+            name: 'donor-beneficiary-campaigns',
+            builder: (context, state) =>
+                const DonorBeneficiaryCampaignsScreen(),
           ),
         ],
       ),

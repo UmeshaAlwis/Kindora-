@@ -23,12 +23,14 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
 
   void _topUp(double amount) async {
     if (amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid amount'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid amount'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
