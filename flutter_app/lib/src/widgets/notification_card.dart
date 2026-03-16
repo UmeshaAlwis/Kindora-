@@ -15,15 +15,15 @@ class NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 0,
+      elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.indigo,
-          child: Icon(Icons.notifications, color: Colors.white),
+        leading: CircleAvatar(
+          backgroundColor: Colors.indigo.shade100,
+          child: const Icon(Icons.notifications, color: Colors.indigo),
         ),
         title: Text(
           title,
