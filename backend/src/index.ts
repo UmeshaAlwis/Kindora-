@@ -21,6 +21,7 @@ import paymentRoutes from './routes/payment.routes';
 import chatRoutes from './routes/chat.routes';
 import walletRoutes from './routes/wallet.routes';
 import storageRoutes from './routes/storage.routes';
+import beneficiaryRoutes from './routes/beneficiary.routes';
 
 // Load environment variables
 dotenv.config();
@@ -178,6 +179,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       payments: '/api/payments',
       chat: '/api/chat',
       storage: '/api/storage',
+      beneficiary: '/api/beneficiary',
     },
   });
 });
@@ -192,6 +194,7 @@ apiRouter.use('/messages', messageRoutes);
 apiRouter.use('/payments', paymentRoutes);
 apiRouter.use('/chat', chatRoutes);
 apiRouter.use('/storage', storageRoutes);
+apiRouter.use('/beneficiary', beneficiaryRoutes);
 
 app.use('/api', apiRouter);
 
