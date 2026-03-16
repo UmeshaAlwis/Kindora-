@@ -143,7 +143,7 @@ class _SignupScreenState extends State<SignupScreen> {
             },
             body: jsonEncode(payload),
           )
-          .timeout(Duration(seconds: 10));
+          .timeout(const Duration(seconds: 10));
 
       print('[Backend] Response status: ${response.statusCode}');
       print('[Backend] Response body: ${response.body}');

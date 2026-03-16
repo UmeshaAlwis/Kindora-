@@ -74,10 +74,10 @@ class MerchPage extends StatelessWidget {
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(32),
+              const Padding(
+                padding: EdgeInsets.all(32),
                 child: Column(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.shopping_bag,
                       size: 64,

@@ -246,20 +246,20 @@ class _DonationAmountSelectionModalState
                                 _selectedAmount = null;
                               });
                             },
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               prefixText: 'LKR ',
-                              prefixStyle: const TextStyle(
+                              prefixStyle: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w500,
                               ),
                               hintText: '0',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                 fontSize: 14,
                                 color: Color(0xFFC0C0C0),
                               ),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
+                              contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 11,
                               ),
@@ -272,9 +272,9 @@ class _DonationAmountSelectionModalState
                   const SizedBox(height: 12),
 
                   // Minimum donation note in teal/green
-                  Text(
+                  const Text(
                     'The minimum donation is LKR50,000',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Color(0xFF4A9B7F),
                       fontWeight: FontWeight.w400,
