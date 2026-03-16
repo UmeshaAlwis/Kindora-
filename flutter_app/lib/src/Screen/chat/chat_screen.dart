@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../widgets/typing_indicator.dart';
+
 
 class ChatScreen extends StatefulWidget {
   final String name;
