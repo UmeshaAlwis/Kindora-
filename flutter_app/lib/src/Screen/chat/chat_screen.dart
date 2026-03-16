@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 
 class ChatScreen extends StatefulWidget {
@@ -15,6 +16,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final TextEditingController controller = TextEditingController();
   final ScrollController scrollController = ScrollController();
+
+  String formatTime(String timestamp) {
+    final dateTime = DateTime.parse(timestamp);
+    return DateFormat('hh:mm a').format(dateTime);
+  }
 
   late final RealtimeChannel channel;
 
@@ -127,7 +133,7 @@ void dispose() {
                 return MessageBubble(
                   message: msg["content"],
                   isMe: isMe,
-                  time: msg["created_at"].toString(),
+                  time:formatTime(msg["created_at"]),
                 );
               }
             ),
