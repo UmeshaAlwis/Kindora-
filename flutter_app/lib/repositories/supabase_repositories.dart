@@ -614,15 +614,37 @@ class BeneficiaryCampaignRepository {
   Future<List<BeneficiaryCampaign>> getBeneficiaryCampaignsByUserId(
       String userId) async {
     try {
+      print(
+          '[BeneficiaryCampaignRepository] Fetching campaigns for user: $userId');
+
+      // First, let's check ALL campaigns to debug
+      final allResponse =
+          await _supabase.from('beneficiary_campaigns').select();
+      print(
+          '[BeneficiaryCampaignRepository] All campaigns in DB: ${allResponse.length}');
+      if (allResponse.isNotEmpty) {
+        for (var campaign in allResponse) {
+          print(
+              '[BeneficiaryCampaignRepository]   - Campaign ID: ${campaign['id']}, User ID: ${campaign['beneficiary_user_id']}, Title: ${campaign['title']}');
+        }
+      }
+
+      // Now try the filtered query
       final response = await _supabase
           .from('beneficiary_campaigns')
           .select()
           .eq('beneficiary_user_id', userId)
           .order('created_at', ascending: false);
+
+      print(
+          '[BeneficiaryCampaignRepository] Filtered response for $userId: ${response.length} campaigns');
+      print('[BeneficiaryCampaignRepository] ✓ Response: $response');
+
       return (response as List)
           .map((json) => BeneficiaryCampaign.fromJson(json))
           .toList();
     } catch (e) {
+      print('[BeneficiaryCampaignRepository] ✗ Error: $e');
       throw Exception('Failed to fetch beneficiary campaigns: $e');
     }
   }

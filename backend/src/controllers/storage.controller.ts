@@ -21,7 +21,7 @@ export class StorageController {
    */
   static async uploadImage(req: Request, res: Response): Promise<void> {
     try {
-      const { file } = req;
+      const file = req.file;
       const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'Kindora';
       const { folder = 'campaigns' } = req.body;
 
@@ -85,7 +85,7 @@ export class StorageController {
    */
   static async uploadMultiple(req: Request, res: Response): Promise<void> {
     try {
-      const { files } = req;
+      const files = req.files;
       const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'Kindora';
       const { folder = 'campaigns' } = req.body;
 

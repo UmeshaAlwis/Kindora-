@@ -128,6 +128,32 @@ class _BeneficiaryProfileScreenState
     }
   }
 
+  Future<void> _logout() async {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                context.go('/login');
+              }
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -144,6 +170,11 @@ class _BeneficiaryProfileScreenState
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
+            ),
+          if (!_isEditing && user != null)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logout,
             ),
         ],
       ),
@@ -178,8 +209,9 @@ class _BeneficiaryProfileScreenState
                             radius: 50,
                             backgroundColor: Colors.white,
                             child: Text(
-                              user.displayName?.substring(0, 1).toUpperCase() ??
-                                  'U',
+                              (user.displayName?.isNotEmpty == true
+                                  ? user.displayName![0].toUpperCase()
+                                  : 'U'),
                               style: TextStyle(
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold,

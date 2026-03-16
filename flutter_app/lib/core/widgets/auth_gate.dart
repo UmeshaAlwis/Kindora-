@@ -102,24 +102,50 @@ class _AuthenticatedGate extends ConsumerWidget {
     try {
       print('[AuthGate DEBUG] Fetching role for Firebase UID: $userId');
 
+      // Give Supabase a head start to sync from Firebase (initial delay)
+      print('[AuthGate DEBUG] Waiting for Supabase sync...');
+      await Future.delayed(const Duration(milliseconds: 1000));
+
       // Get user role from Supabase users table using firebase_uid
       final supabase = Supabase.instance.client;
-      final profileResponse = await supabase
-          .from('users')
-          .select('id, role')
-          .eq('firebase_uid', userId)
-          .maybeSingle();
+
+      // Retry logic - Supabase sync can take a moment
+      Map<String, dynamic>? profileResponse;
+      int retries = 0;
+      const maxRetries = 10; // Increased from 8 to 10
+      const retryDelayMs = 1000; // Increased from 750ms to 1000ms (1 second)
+
+      while (profileResponse == null && retries < maxRetries) {
+        profileResponse = await supabase
+            .from('users')
+            .select('id, role')
+            .eq('firebase_uid', userId)
+            .maybeSingle();
+
+        if (profileResponse == null && retries < maxRetries - 1) {
+          print(
+              '[AuthGate DEBUG] User not found in Supabase, retrying... (${retries + 1}/$maxRetries)');
+          await Future.delayed(const Duration(milliseconds: retryDelayMs));
+          retries++;
+        } else {
+          break;
+        }
+      }
 
       print('[AuthGate DEBUG] Profile response: $profileResponse');
 
       if (profileResponse == null) {
-        print('[AuthGate DEBUG] User not found in Supabase');
-        return null;
+        print(
+            '[AuthGate DEBUG] ✗ User not found in Supabase after $maxRetries retries. Defaulting to donor.');
+        return {
+          'role': 'donor',
+          'profileCompleted': true,
+        };
       }
 
       final supabaseUserId = profileResponse['id'] as String;
       final userRole = profileResponse['role'] as String? ?? 'donor';
-      print('[AuthGate DEBUG] User role from DB: $userRole');
+      print('[AuthGate DEBUG] ✓ Successfully fetched user role: $userRole');
 
       // If beneficiary, check if profile is completed
       if (userRole == 'beneficiary') {
@@ -143,7 +169,10 @@ class _AuthenticatedGate extends ConsumerWidget {
       // Error getting user role and status, proceed with default role
       print('[AuthGate ERROR] Error: $e');
       print('[AuthGate ERROR] Stack: ${StackTrace.current}');
-      return null;
+      return {
+        'role': 'donor',
+        'profileCompleted': true,
+      };
     }
   }
 }

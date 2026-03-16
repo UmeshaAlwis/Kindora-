@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../../repositories/supabase_repositories.dart';
 import '../../../config/app_env.dart';
+import '../../../providers/supabase_providers.dart';
 
 class BeneficiaryCreateCampaignScreen extends ConsumerStatefulWidget {
   const BeneficiaryCreateCampaignScreen({super.key});
@@ -76,29 +77,57 @@ class _BeneficiaryCreateCampaignScreenState
 
   Future<String?> _uploadImageToSupabase(XFile imageFile) async {
     try {
-      final file = File(imageFile.path);
-      final fileName =
-          'beneficiary_campaigns/${DateTime.now().millisecondsSinceEpoch}.png';
+      print('[CreateCampaign] Starting image upload: ${imageFile.name}');
 
-      final response = await http.post(
-        Uri.parse('${AppEnv.apiBaseUrl}/upload'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'filePath': fileName,
-          'fileContent': base64Encode(await file.readAsBytes()),
-        }),
+      final file = File(imageFile.path);
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+
+      if (firebaseUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get Firebase token for authentication
+      final token = await firebaseUser.getIdToken();
+      print('[CreateCampaign] Got auth token for upload');
+
+      // Create multipart request
+      final uri = Uri.parse('${AppEnv.apiBaseUrl}/storage/upload');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add authentication header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add file
+      request.files.add(
+        await http.MultipartFile.fromPath('image', file.path),
       );
 
+      print('[CreateCampaign] Sending multipart request to: $uri');
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      print('[CreateCampaign] Upload response status: ${response.statusCode}');
+      print('[CreateCampaign] Upload response body: $responseBody');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['url'];
+        final data = jsonDecode(responseBody);
+        final imageUrl = data['data']?['url'] ?? data['url'];
+        print('[CreateCampaign] ✓ Image uploaded successfully: $imageUrl');
+        return imageUrl;
       } else {
-        throw Exception('Failed to upload image: ${response.statusCode}');
+        throw Exception(
+            'Failed to upload image: ${response.statusCode} - $responseBody');
       }
     } catch (e) {
-      debugPrint('Error uploading image: $e');
+      print('[CreateCampaign] ✗ Error uploading image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Image upload failed: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
       return null;
     }
   }
@@ -116,6 +145,9 @@ class _BeneficiaryCreateCampaignScreenState
         throw Exception('User not authenticated');
       }
 
+      print(
+          '[CreateCampaign] Starting campaign creation for Firebase UID: ${firebaseUser.uid}');
+
       // Get Supabase user ID from Firebase UID
       final supabase = Supabase.instance.client;
       final userResponse = await supabase
@@ -124,20 +156,26 @@ class _BeneficiaryCreateCampaignScreenState
           .eq('firebase_uid', firebaseUser.uid)
           .maybeSingle();
 
+      print('[CreateCampaign] User response: $userResponse');
       if (userResponse == null) {
         throw Exception('User not found in Supabase');
       }
 
       final supabaseUserId = userResponse['id'] as String;
+      print('[CreateCampaign] Supabase User ID: $supabaseUserId');
 
       // Upload image if selected
       String? imageUrl;
       if (_selectedImageFile != null) {
+        print('[CreateCampaign] Uploading image...');
         imageUrl = await _uploadImageToSupabase(_selectedImageFile!);
+        print('[CreateCampaign] Image URL: $imageUrl');
       }
 
+      print(
+          '[CreateCampaign] Creating campaign with title: ${_titleController.text}');
       final repository = BeneficiaryCampaignRepository();
-      await repository.createBeneficiaryCampaign(
+      final campaign = await repository.createBeneficiaryCampaign(
         beneficiaryUserId: supabaseUserId,
         fullName: _fullNameController.text.trim(),
         title: _titleController.text.trim(),
@@ -145,6 +183,10 @@ class _BeneficiaryCreateCampaignScreenState
         targetAmount: double.parse(_targetAmountController.text.trim()),
         imageUrl: imageUrl,
       );
+      print('[CreateCampaign] ✓ Campaign created: ${campaign.id}');
+
+      // Invalidate the campaign provider to refresh the dashboard in real-time
+      ref.invalidate(beneficiaryCampaignsByUserProvider(supabaseUserId));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -154,10 +196,14 @@ class _BeneficiaryCreateCampaignScreenState
             duration: Duration(seconds: 2),
           ),
         );
-        // Navigate back to dashboard
-        context.go('/beneficiary/dashboard');
+        // Wait 1 second before navigating to ensure database is updated
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          context.go('/beneficiary/dashboard');
+        }
       }
     } catch (e) {
+      print('[CreateCampaign] ✗ Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
