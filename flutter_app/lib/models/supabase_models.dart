@@ -351,3 +351,172 @@ class Message extends Equatable {
   @override
   List<Object?> get props => [id, senderId, receiverId, content, createdAt];
 }
+
+/// Beneficiary Profile Details Model
+class BeneficiaryDetails extends Equatable {
+  final String id;
+  final String userId;
+  final String fullName;
+  final String nic;
+  final String address;
+  final String bankAccountHolderName;
+  final String bankAccountNumber;
+  final String bankName;
+  final String bankCode;
+  final bool profileCompleted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const BeneficiaryDetails({
+    required this.id,
+    required this.userId,
+    required this.fullName,
+    required this.nic,
+    required this.address,
+    required this.bankAccountHolderName,
+    required this.bankAccountNumber,
+    required this.bankName,
+    required this.bankCode,
+    this.profileCompleted = false,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory BeneficiaryDetails.fromJson(Map<String, dynamic> json) {
+    return BeneficiaryDetails(
+      id: json['id'] ?? '',
+      userId: json['user_id'] ?? '',
+      fullName: json['full_name'] ?? '',
+      nic: json['nic'] ?? '',
+      address: json['address'] ?? '',
+      bankAccountHolderName: json['bank_account_holder_name'] ?? '',
+      bankAccountNumber: json['bank_account_number'] ?? '',
+      bankName: json['bank_name'] ?? '',
+      bankCode: json['bank_code'] ?? '',
+      profileCompleted: json['profile_completed'] ?? false,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'full_name': fullName,
+      'nic': nic,
+      'address': address,
+      'bank_account_holder_name': bankAccountHolderName,
+      'bank_account_number': bankAccountNumber,
+      'bank_name': bankName,
+      'bank_code': bankCode,
+      'profile_completed': profileCompleted,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        userId,
+        fullName,
+        nic,
+        address,
+        bankAccountHolderName,
+        bankAccountNumber,
+        bankName,
+        bankCode,
+        profileCompleted,
+        createdAt,
+        updatedAt,
+      ];
+}
+
+/// Beneficiary Campaign Model (GoFundMe style)
+class BeneficiaryCampaign extends Equatable {
+  final String id;
+  final String beneficiaryUserId;
+  final String fullName;
+  final String title;
+  final String description;
+  final double targetAmount;
+  final double raisedAmount;
+  final String? imageUrl;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const BeneficiaryCampaign({
+    required this.id,
+    required this.beneficiaryUserId,
+    required this.fullName,
+    required this.title,
+    required this.description,
+    required this.targetAmount,
+    this.raisedAmount = 0,
+    this.imageUrl,
+    this.status = 'active',
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory BeneficiaryCampaign.fromJson(Map<String, dynamic> json) {
+    return BeneficiaryCampaign(
+      id: json['id'] ?? '',
+      beneficiaryUserId: json['beneficiary_user_id'] ?? '',
+      fullName: json['full_name'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      targetAmount: json['target_amount'] != null
+          ? double.tryParse(json['target_amount'].toString()) ?? 0
+          : 0,
+      raisedAmount: json['raised_amount'] != null
+          ? double.tryParse(json['raised_amount'].toString()) ?? 0
+          : 0,
+      imageUrl: json['image_url'],
+      status: json['status'] ?? 'active',
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'beneficiary_user_id': beneficiaryUserId,
+      'full_name': fullName,
+      'title': title,
+      'description': description,
+      'target_amount': targetAmount,
+      'raised_amount': raisedAmount,
+      'image_url': imageUrl,
+      'status': status,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        beneficiaryUserId,
+        fullName,
+        title,
+        description,
+        targetAmount,
+        raisedAmount,
+        imageUrl,
+        status,
+        createdAt,
+        updatedAt,
+      ];
+}

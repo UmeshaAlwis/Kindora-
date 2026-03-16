@@ -12,6 +12,12 @@ class MainLayout extends StatelessWidget {
   });
 
   int _getSelectedIndex(String location) {
+    // Beneficiary routes map to Home (index 0)
+    if (location.startsWith('/beneficiary/dashboard')) return 0;
+    if (location.startsWith('/beneficiary/profile')) return 4;
+    if (location.startsWith('/beneficiary')) return 0;
+
+    // Donor routes
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/feed')) return 1;
     if (location.startsWith('/messages')) return 2;
@@ -39,9 +45,19 @@ class MainLayout extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: _getSelectedIndex(location),
         onTap: (index) {
+          // Check if user is on beneficiary routes
+          final isBeneficiary = location.startsWith('/beneficiary');
+
+          print('[MainLayout] Tapped index: $index');
+          print('[MainLayout] Current location: $location');
+          print('[MainLayout] Is beneficiary: $isBeneficiary');
+
           switch (index) {
             case 0:
-              context.go('/dashboard');
+              final route =
+                  isBeneficiary ? '/beneficiary/dashboard' : '/dashboard';
+              print('[MainLayout] Navigating to: $route');
+              context.go(route);
               break;
             case 1:
               context.go('/feed');
@@ -53,7 +69,9 @@ class MainLayout extends StatelessWidget {
               context.go('/merch');
               break;
             case 4:
-              context.go('/profile');
+              final route = isBeneficiary ? '/beneficiary/profile' : '/profile';
+              print('[MainLayout] Navigating to: $route');
+              context.go(route);
               break;
           }
         },

@@ -40,6 +40,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_users_updated_at ON users CASCADE;
 CREATE TRIGGER trigger_update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
@@ -149,31 +150,31 @@ CREATE TABLE IF NOT EXISTS messages (
 -- ============================================
 
 -- Campaigns indexes
-CREATE INDEX idx_campaigns_user_id ON campaigns(user_id);
-CREATE INDEX idx_campaigns_status ON campaigns(status);
-CREATE INDEX idx_campaigns_category ON campaigns(category);
-CREATE INDEX idx_campaigns_created_at ON campaigns(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_campaigns_category ON campaigns(category);
+CREATE INDEX IF NOT EXISTS idx_campaigns_created_at ON campaigns(created_at DESC);
 
 -- Donations indexes
-CREATE INDEX idx_donations_user_id ON donations(user_id);
-CREATE INDEX idx_donations_campaign_id ON donations(campaign_id);
-CREATE INDEX idx_donations_charity_id ON donations(charity_id);
-CREATE INDEX idx_donations_status ON donations(status);
-CREATE INDEX idx_donations_created_at ON donations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_donations_user_id ON donations(user_id);
+CREATE INDEX IF NOT EXISTS idx_donations_campaign_id ON donations(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_donations_charity_id ON donations(charity_id);
+CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
+CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at DESC);
 
 -- Wallets indexes
-CREATE INDEX idx_wallets_user_id ON wallets(user_id);
+CREATE INDEX IF NOT EXISTS idx_wallets_user_id ON wallets(user_id);
 
 -- Wallet transactions indexes
-CREATE INDEX idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
-CREATE INDEX idx_wallet_transactions_timestamp ON wallet_transactions(timestamp DESC);
-CREATE INDEX idx_wallet_transactions_type ON wallet_transactions(type);
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_timestamp ON wallet_transactions(timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_type ON wallet_transactions(type);
 
 -- Messages indexes
-CREATE INDEX idx_messages_sender_id ON messages(sender_id);
-CREATE INDEX idx_messages_recipient_id ON messages(recipient_id);
-CREATE INDEX idx_messages_is_read ON messages(is_read);
-CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_recipient_id ON messages(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON messages(is_read);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
 
 -- ============================================
 -- TRIGGERS FOR AUTOMATIC UPDATES
@@ -188,6 +189,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_wallets_updated_at ON wallets CASCADE;
 CREATE TRIGGER trigger_wallets_updated_at
 BEFORE UPDATE ON wallets
 FOR EACH ROW
@@ -202,6 +204,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_campaigns_updated_at ON campaigns CASCADE;
 CREATE TRIGGER trigger_campaigns_updated_at
 BEFORE UPDATE ON campaigns
 FOR EACH ROW
@@ -226,6 +229,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_wallet_transactions_update ON wallet_transactions CASCADE;
 CREATE TRIGGER trigger_wallet_transactions_update
 AFTER INSERT ON wallet_transactions
 FOR EACH ROW
@@ -244,6 +248,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_donations_update_campaign ON donations CASCADE;
 CREATE TRIGGER trigger_donations_update_campaign
 AFTER INSERT ON donations
 FOR EACH ROW
@@ -262,6 +267,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_donations_update_charity ON donations CASCADE;
 CREATE TRIGGER trigger_donations_update_charity
 AFTER INSERT ON donations
 FOR EACH ROW
@@ -277,6 +283,99 @@ COMMENT ON TABLE donations IS 'Logs all donations made by users';
 COMMENT ON TABLE wallets IS 'Stores user wallet balances and recharge/spend history';
 COMMENT ON TABLE wallet_transactions IS 'Logs all wallet transactions (deposits and withdrawals)';
 COMMENT ON TABLE messages IS 'Stores messages between users';
+
+-- ============================================
+-- 7. BENEFICIARY_DETAILS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS beneficiary_details (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE,
+  full_name VARCHAR(255) NOT NULL,
+  nic VARCHAR(50) NOT NULL UNIQUE,
+  address TEXT NOT NULL,
+  bank_account_holder_name VARCHAR(255) NOT NULL,
+  bank_account_number VARCHAR(50) NOT NULL,
+  bank_name VARCHAR(100) NOT NULL,
+  bank_code VARCHAR(20) NOT NULL,
+  profile_completed BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT fk_beneficiary_details_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- 8. BENEFICIARY_CAMPAIGNS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS beneficiary_campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  beneficiary_user_id UUID NOT NULL,
+  full_name VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  target_amount DECIMAL(15, 2) NOT NULL,
+  raised_amount DECIMAL(15, 2) DEFAULT 0.00,
+  image_url TEXT,
+  status VARCHAR(50) DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT fk_beneficiary_campaigns_user_id FOREIGN KEY (beneficiary_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- BENEFICIARY INDEXES
+-- ============================================
+CREATE INDEX IF NOT EXISTS idx_beneficiary_details_user_id ON beneficiary_details(user_id);
+CREATE INDEX IF NOT EXISTS idx_beneficiary_details_nic ON beneficiary_details(nic);
+CREATE INDEX IF NOT EXISTS idx_beneficiary_campaigns_user_id ON beneficiary_campaigns(beneficiary_user_id);
+CREATE INDEX IF NOT EXISTS idx_beneficiary_campaigns_status ON beneficiary_campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_beneficiary_campaigns_created_at ON beneficiary_campaigns(created_at DESC);
+
+-- ============================================
+-- BENEFICIARY TRIGGERS
+-- ============================================
+CREATE OR REPLACE FUNCTION update_beneficiary_campaigns_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_beneficiary_campaigns_updated_at ON beneficiary_campaigns CASCADE;
+CREATE TRIGGER trigger_beneficiary_campaigns_updated_at
+BEFORE UPDATE ON beneficiary_campaigns
+FOR EACH ROW
+EXECUTE FUNCTION update_beneficiary_campaigns_updated_at();
+
+-- Update beneficiary campaign raised_amount when donation is created
+CREATE OR REPLACE FUNCTION update_beneficiary_campaign_raised_amount()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.campaign_id IS NOT NULL THEN
+    UPDATE beneficiary_campaigns
+    SET raised_amount = raised_amount + NEW.amount
+    WHERE id = NEW.campaign_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================
+
+-- Disable RLS for now (enable for production)
+-- ALTER TABLE beneficiary_details ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE beneficiary_campaigns ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- TABLE COMMENTS (DOCUMENTATION)
+-- ============================================
+COMMENT ON TABLE beneficiary_details IS 'Stores beneficiary personal and bank details';
+COMMENT ON TABLE beneficiary_campaigns IS 'Stores beneficiary fundraising campaigns (GoFundMe-style)';
+COMMENT ON COLUMN beneficiary_details.profile_completed IS 'Flag indicating if beneficiary profile setup is complete';
+COMMENT ON COLUMN beneficiary_campaigns.status IS 'Campaign status: active, completed, paused, cancelled';
+COMMENT ON COLUMN beneficiary_campaigns.raised_amount IS 'Total amount raised in the beneficiary campaign';
 
 COMMENT ON COLUMN campaigns.status IS 'Campaign status: active, completed, cancelled';
 COMMENT ON COLUMN wallets.balance IS 'Current wallet balance in LKR';

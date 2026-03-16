@@ -9,6 +9,10 @@ import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
 import '../../features/merch/ui/merch_page.dart';
+import '../../features/beneficiary/ui/beneficiary_profile_completion_screen.dart';
+import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
+import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
+import '../../features/beneficiary/ui/beneficiary_create_campaign_screen.dart';
 import '../../core/widgets/auth_gate.dart';
 import '../../core/widgets/main_layout.dart';
 
@@ -38,12 +42,21 @@ class AppRouter {
         name: 'signup',
         builder: (context, state) => const SignupScreen(),
       ),
-      // Main app routes with bottom navigation bar
+
+      // Beneficiary routes (without main layout bottom nav)
+      GoRoute(
+        path: '/beneficiary/profile-completion',
+        name: 'beneficiary-profile-completion',
+        builder: (context, state) => const BeneficiaryProfileCompletionScreen(),
+      ),
+
+      // Beneficiary routes with main layout
       ShellRoute(
         builder: (context, state, child) {
           return MainLayout(child: child);
         },
         routes: [
+          // Main app routes
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
@@ -74,6 +87,37 @@ class AppRouter {
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
           ),
+
+          // Beneficiary dashboard routes
+          GoRoute(
+            path: '/beneficiary/dashboard',
+            name: 'beneficiary-dashboard',
+            builder: (context, state) => const BeneficiaryDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/beneficiary/profile',
+            name: 'beneficiary-profile',
+            builder: (context, state) => const BeneficiaryProfileScreen(),
+          ),
+          GoRoute(
+            path: '/beneficiary/create-campaign',
+            name: 'beneficiary-create-campaign',
+            builder: (context, state) =>
+                const BeneficiaryCreateCampaignScreen(),
+          ),
+          GoRoute(
+            path: '/beneficiary/campaigns',
+            name: 'beneficiary-campaigns',
+            builder: (context, state) => const BeneficiaryDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/beneficiary/campaign/:id',
+            name: 'beneficiary-campaign-detail',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return BeneficiaryCampaignDetailScreen(campaignId: id);
+            },
+          ),
         ],
       ),
     ],
@@ -84,4 +128,28 @@ class AppRouter {
       ),
     ),
   );
+}
+
+// Temporary placeholder for campaign detail screen
+class BeneficiaryCampaignDetailScreen extends StatelessWidget {
+  final String campaignId;
+
+  const BeneficiaryCampaignDetailScreen({
+    super.key,
+    required this.campaignId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Campaign Details'),
+        backgroundColor: const Color(0xFF0C0C79),
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Text('Campaign ID: $campaignId'),
+      ),
+    );
+  }
 }

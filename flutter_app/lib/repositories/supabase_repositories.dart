@@ -490,3 +490,231 @@ class UserProfileRepository {
     }
   }
 }
+
+/// Beneficiary Details Repository
+class BeneficiaryDetailsRepository {
+  final SupabaseClient _supabase;
+
+  BeneficiaryDetailsRepository({SupabaseClient? supabase})
+      : _supabase = supabase ?? SupabaseService.supabaseClient;
+
+  /// Fetch beneficiary details by user ID
+  Future<BeneficiaryDetails?> getBeneficiaryDetails(String userId) async {
+    try {
+      final response = await _supabase
+          .from('beneficiary_details')
+          .select()
+          .eq('user_id', userId)
+          .maybeSingle();
+      return response != null ? BeneficiaryDetails.fromJson(response) : null;
+    } catch (e) {
+      print('[BeneficiaryDetailsRepository] Error fetching details: $e');
+      return null;
+    }
+  }
+
+  /// Create beneficiary details
+  Future<BeneficiaryDetails> createBeneficiaryDetails({
+    required String userId,
+    required String fullName,
+    required String nic,
+    required String address,
+    required String bankAccountHolderName,
+    required String bankAccountNumber,
+    required String bankName,
+    required String bankCode,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final response = await _supabase
+          .from('beneficiary_details')
+          .insert({
+            'user_id': userId,
+            'full_name': fullName,
+            'nic': nic,
+            'address': address,
+            'bank_account_holder_name': bankAccountHolderName,
+            'bank_account_number': bankAccountNumber,
+            'bank_name': bankName,
+            'bank_code': bankCode,
+            'profile_completed': true,
+            'created_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          })
+          .select()
+          .single();
+      return BeneficiaryDetails.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to create beneficiary details: $e');
+    }
+  }
+
+  /// Update beneficiary details
+  Future<BeneficiaryDetails> updateBeneficiaryDetails({
+    required String userId,
+    String? fullName,
+    String? nic,
+    String? address,
+    String? bankAccountHolderName,
+    String? bankAccountNumber,
+    String? bankName,
+    String? bankCode,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{};
+      if (fullName != null) updateData['full_name'] = fullName;
+      if (nic != null) updateData['nic'] = nic;
+      if (address != null) updateData['address'] = address;
+      if (bankAccountHolderName != null) {
+        updateData['bank_account_holder_name'] = bankAccountHolderName;
+      }
+      if (bankAccountNumber != null) {
+        updateData['bank_account_number'] = bankAccountNumber;
+      }
+      if (bankName != null) updateData['bank_name'] = bankName;
+      if (bankCode != null) updateData['bank_code'] = bankCode;
+      updateData['updated_at'] = DateTime.now().toIso8601String();
+
+      final response = await _supabase
+          .from('beneficiary_details')
+          .update(updateData)
+          .eq('user_id', userId)
+          .select()
+          .single();
+      return BeneficiaryDetails.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update beneficiary details: $e');
+    }
+  }
+}
+
+/// Beneficiary Campaign Repository
+class BeneficiaryCampaignRepository {
+  final SupabaseClient _supabase;
+
+  BeneficiaryCampaignRepository({SupabaseClient? supabase})
+      : _supabase = supabase ?? SupabaseService.supabaseClient;
+
+  /// Fetch all beneficiary campaigns
+  Future<List<BeneficiaryCampaign>> getAllBeneficiaryCampaigns() async {
+    try {
+      final response = await _supabase
+          .from('beneficiary_campaigns')
+          .select()
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((json) => BeneficiaryCampaign.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch beneficiary campaigns: $e');
+    }
+  }
+
+  /// Fetch beneficiary campaigns by user ID
+  Future<List<BeneficiaryCampaign>> getBeneficiaryCampaignsByUserId(
+      String userId) async {
+    try {
+      final response = await _supabase
+          .from('beneficiary_campaigns')
+          .select()
+          .eq('beneficiary_user_id', userId)
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((json) => BeneficiaryCampaign.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch beneficiary campaigns: $e');
+    }
+  }
+
+  /// Fetch campaign by ID
+  Future<BeneficiaryCampaign?> getBeneficiaryCampaignById(
+      String campaignId) async {
+    try {
+      final response = await _supabase
+          .from('beneficiary_campaigns')
+          .select()
+          .eq('id', campaignId)
+          .maybeSingle();
+      return response != null ? BeneficiaryCampaign.fromJson(response) : null;
+    } catch (e) {
+      print('[BeneficiaryCampaignRepository] Error fetching campaign: $e');
+      return null;
+    }
+  }
+
+  /// Create beneficiary campaign
+  Future<BeneficiaryCampaign> createBeneficiaryCampaign({
+    required String beneficiaryUserId,
+    required String fullName,
+    required String title,
+    required String description,
+    required double targetAmount,
+    String? imageUrl,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final response = await _supabase
+          .from('beneficiary_campaigns')
+          .insert({
+            'beneficiary_user_id': beneficiaryUserId,
+            'full_name': fullName,
+            'title': title,
+            'description': description,
+            'target_amount': targetAmount,
+            'raised_amount': 0,
+            'image_url': imageUrl,
+            'status': 'active',
+            'created_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          })
+          .select()
+          .single();
+      return BeneficiaryCampaign.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to create beneficiary campaign: $e');
+    }
+  }
+
+  /// Update beneficiary campaign
+  Future<BeneficiaryCampaign> updateBeneficiaryCampaign({
+    required String campaignId,
+    String? title,
+    String? description,
+    double? targetAmount,
+    String? imageUrl,
+    String? status,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{};
+      if (title != null) updateData['title'] = title;
+      if (description != null) updateData['description'] = description;
+      if (targetAmount != null) updateData['target_amount'] = targetAmount;
+      if (imageUrl != null) updateData['image_url'] = imageUrl;
+      if (status != null) updateData['status'] = status;
+      updateData['updated_at'] = DateTime.now().toIso8601String();
+
+      final response = await _supabase
+          .from('beneficiary_campaigns')
+          .update(updateData)
+          .eq('id', campaignId)
+          .select()
+          .single();
+      return BeneficiaryCampaign.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update beneficiary campaign: $e');
+    }
+  }
+
+  /// Delete beneficiary campaign
+  Future<void> deleteBeneficiaryCampaign(String campaignId) async {
+    try {
+      await _supabase
+          .from('beneficiary_campaigns')
+          .delete()
+          .eq('id', campaignId);
+    } catch (e) {
+      throw Exception('Failed to delete beneficiary campaign: $e');
+    }
+  }
+}

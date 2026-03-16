@@ -19,6 +19,14 @@ final userProfileRepositoryProvider = Provider((ref) {
   return UserProfileRepository();
 });
 
+final beneficiaryDetailsRepositoryProvider = Provider((ref) {
+  return BeneficiaryDetailsRepository();
+});
+
+final beneficiaryCampaignRepositoryProvider = Provider((ref) {
+  return BeneficiaryCampaignRepository();
+});
+
 // Campaign providers
 final allCampaignsProvider = FutureProvider((ref) async {
   print('[allCampaignsProvider] Starting to fetch campaigns...');
@@ -100,3 +108,35 @@ final userProfileProvider =
 final campaignRefreshProvider = StateProvider((ref) => DateTime.now());
 final charityRefreshProvider = StateProvider((ref) => DateTime.now());
 final donationRefreshProvider = StateProvider((ref) => DateTime.now());
+
+// ============= BENEFICIARY PROVIDERS =============
+
+// Beneficiary Details providers
+final beneficiaryDetailsProvider =
+    FutureProvider.family<BeneficiaryDetails?, String>((ref, userId) async {
+  final repository = ref.watch(beneficiaryDetailsRepositoryProvider);
+  return repository.getBeneficiaryDetails(userId);
+});
+
+// Beneficiary Campaign providers
+final allBeneficiaryCampaignsProvider = FutureProvider((ref) async {
+  final repository = ref.watch(beneficiaryCampaignRepositoryProvider);
+  return repository.getAllBeneficiaryCampaigns();
+});
+
+final beneficiaryCampaignsByUserProvider =
+    FutureProvider.family<List<BeneficiaryCampaign>, String>(
+        (ref, userId) async {
+  final repository = ref.watch(beneficiaryCampaignRepositoryProvider);
+  return repository.getBeneficiaryCampaignsByUserId(userId);
+});
+
+final beneficiaryCampaignByIdProvider =
+    FutureProvider.family<BeneficiaryCampaign?, String>(
+        (ref, campaignId) async {
+  final repository = ref.watch(beneficiaryCampaignRepositoryProvider);
+  return repository.getBeneficiaryCampaignById(campaignId);
+});
+
+// State notifier for beneficiary updates
+final beneficiaryRefreshProvider = StateProvider((ref) => DateTime.now());
