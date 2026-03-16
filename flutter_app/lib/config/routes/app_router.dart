@@ -13,6 +13,7 @@ import '../../features/beneficiary/ui/beneficiary_profile_completion_screen.dart
 import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_create_campaign_screen.dart';
+import '../../features/beneficiary/ui/beneficiary_campaign_detail_screen.dart';
 import '../../core/widgets/auth_gate.dart';
 import '../../core/widgets/main_layout.dart';
 
@@ -128,28 +129,4 @@ class AppRouter {
       ),
     ),
   );
-}
-
-// Temporary placeholder for campaign detail screen
-class BeneficiaryCampaignDetailScreen extends StatelessWidget {
-  final String campaignId;
-
-  const BeneficiaryCampaignDetailScreen({
-    super.key,
-    required this.campaignId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Campaign Details'),
-        backgroundColor: const Color(0xFF0C0C79),
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Text('Campaign ID: $campaignId'),
-      ),
-    );
-  }
 }
