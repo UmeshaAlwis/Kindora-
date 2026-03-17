@@ -107,55 +107,83 @@ class _WalletTransactionHistoryPageState
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: 2,
-                  child: ListTile(
-                    leading: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCredit
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.red.withOpacity(0.2),
-                      ),
-                      child: Icon(
-                        isCredit ? Icons.arrow_downward : Icons.arrow_upward,
-                        color: isCredit ? Colors.green : Colors.red,
-                      ),
-                    ),
-                    title: Text(
-                      transaction.description,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: Text(
-                      _formatDateTime(transaction.timestamp),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
                       children: [
-                        Text(
-                          '${isCredit ? '+' : '-'} LKR ${transaction.amount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        // Leading Icon
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isCredit
+                                ? Colors.green.withOpacity(0.2)
+                                : Colors.red.withOpacity(0.2),
+                          ),
+                          child: Icon(
+                            isCredit
+                                ? Icons.arrow_downward
+                                : Icons.arrow_upward,
                             color: isCredit ? Colors.green : Colors.red,
                           ),
                         ),
-                        if (transaction.referenceId != null)
-                          Text(
-                            'ID: ${transaction.referenceId}',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[400],
-                            ),
+                        const SizedBox(width: 12),
+                        // Title and Subtitle
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                transaction.description,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _formatDateTime(transaction.timestamp),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              if (transaction.referenceId != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    'ID: ${transaction.referenceId}',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: Colors.grey[400],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Trailing Amount
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${isCredit ? '+' : '-'} LKR ${transaction.amount.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isCredit ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
