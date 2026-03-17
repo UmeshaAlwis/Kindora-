@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../providers/language_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -9,8 +10,13 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(themeProvider);
+    final currentLanguage = ref.watch(languageProvider);
+    final languageNotifier = ref.read(languageProvider.notifier);
+
     final notificationsEnabled = true;
-    final selectedLanguage = 'English';
+    final selectedLanguageCode = currentLanguage.languageCode;
+    final selectedLanguageName =
+        languageNotifier.getLanguageName(selectedLanguageCode);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,9 +66,9 @@ class SettingsPage extends ConsumerWidget {
               _buildActionTile(
                 icon: Icons.language,
                 title: 'Language',
-                subtitle: selectedLanguage,
+                subtitle: selectedLanguageName,
                 onTap: () {
-                  _showLanguageDialog(context, selectedLanguage);
+                  _showLanguageDialog(context, ref, selectedLanguageCode);
                 },
                 showArrow: true,
               ),
@@ -295,7 +301,8 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  void _showLanguageDialog(BuildContext context, String currentLanguage) {
+  void _showLanguageDialog(
+      BuildContext context, WidgetRef ref, String currentLanguageCode) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -304,11 +311,12 @@ class SettingsPage extends ConsumerWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildLanguageOption('English', dialogContext, currentLanguage),
-              _buildLanguageOption('Spanish', dialogContext, currentLanguage),
-              _buildLanguageOption('French', dialogContext, currentLanguage),
-              _buildLanguageOption('German', dialogContext, currentLanguage),
-              _buildLanguageOption('Chinese', dialogContext, currentLanguage),
+              _buildLanguageOption(
+                  'en', 'English', dialogContext, ref, currentLanguageCode),
+              _buildLanguageOption(
+                  'si', 'සිංහල', dialogContext, ref, currentLanguageCode),
+              _buildLanguageOption(
+                  'ta', 'தமிழ்', dialogContext, ref, currentLanguageCode),
             ],
           ),
           actions: [
@@ -323,17 +331,22 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildLanguageOption(
-      String language, BuildContext dialogContext, String currentLanguage) {
+    String languageCode,
+    String languageName,
+    BuildContext dialogContext,
+    WidgetRef ref,
+    String currentLanguageCode,
+  ) {
     return ListTile(
-      title: Text(language),
-      trailing: currentLanguage == language
+      title: Text(languageName),
+      trailing: currentLanguageCode == languageCode
           ? const Icon(Icons.check, color: Color(0xFF0C0C79))
           : null,
       onTap: () {
         Navigator.pop(dialogContext);
+        ref.read(languageProvider.notifier).changeLanguage(languageCode);
         ScaffoldMessenger.of(dialogContext).showSnackBar(
-          SnackBar(
-              content: Text('Language changed to $language (Coming Soon)')),
+          SnackBar(content: Text('Language changed to $languageName')),
         );
       },
     );
