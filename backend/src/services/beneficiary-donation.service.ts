@@ -16,33 +16,46 @@ export class BeneficiaryDonationService {
       await WalletService.deductFromWallet(donorId, data.amount, donationId);
     }
 
-    // Create donation record in Supabase - specifically for beneficiary campaigns
-    const donationData: any = {
-      id: donationId,
-      user_id: donorId,
-      beneficiary_campaign_id: data.beneficiary_campaign_id,
-      amount: data.amount,
-      currency: 'LKR',
-      payment_method: data.payment_method,
-      status,
-      donor_name: data.donor_name,
-      donor_email: data.donor_email,
-      donor_phone: data.donor_phone,
-      is_anonymous: data.is_anonymous || false,
-      message: data.message,
-      transaction_id: null,
-      created_at: new Date().toISOString(),
-    };
+    try {
+      // Create donation record in Supabase - specifically for beneficiary campaigns
+      const donationData: any = {
+        id: donationId,
+        user_id: donorId,
+        beneficiary_campaign_id: data.beneficiary_campaign_id,
+        amount: data.amount,
+        currency: 'LKR',
+        payment_method: data.payment_method,
+        status,
+        donor_name: data.donor_name,
+        donor_email: data.donor_email,
+        donor_phone: data.donor_phone,
+        transaction_id: null,
+        created_at: new Date().toISOString(),
+      };
 
-    const donation = await supabase.insert('donations', donationData);
+      const donation = await supabase.insert('donations', donationData);
 
-    // If wallet payment, immediately update beneficiary campaign and points
-    if (isWalletPayment) {
-      await this.updateBeneficiaryCampaignAmount(data.beneficiary_campaign_id, data.amount);
-      await this.awardDonationPoints(donorId, data.amount);
+      // If wallet payment, immediately update beneficiary campaign and points
+      if (isWalletPayment) {
+        await this.updateBeneficiaryCampaignAmount(data.beneficiary_campaign_id, data.amount);
+        await this.awardDonationPoints(donorId, data.amount);
+      }
+
+      return donation;
+    } catch (error) {
+      // If donation insert failed and wallet was debited, reverse the wallet deduction
+      if (isWalletPayment) {
+        console.error('[BeneficiaryDonationService] Donation insert failed, reversing wallet deduction...', error);
+        try {
+          await WalletService.addToWallet(donorId, data.amount, `REVERSAL:${donationId}`);
+          console.log('[BeneficiaryDonationService] Wallet deduction reversed successfully');
+        } catch (reversalError) {
+          console.error('[BeneficiaryDonationService] CRITICAL: Failed to reverse wallet deduction!', reversalError);
+          // Log this critical issue for manual intervention
+        }
+      }
+      throw error;
     }
-
-    return donation;
   }
 
   /**
