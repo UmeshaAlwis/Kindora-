@@ -5,6 +5,7 @@ import '../../features/auth/ui/signup_screen.dart';
 import '../../features/home/ui/home_screen.dart';
 import '../../features/dashboard/ui/dashboard_screen.dart';
 import '../../features/profile/ui/profile_page.dart';
+import '../../features/profile/ui/settings_page.dart';
 import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
@@ -88,6 +89,11 @@ class AppRouter {
             path: '/profile',
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/profile/settings',
+            name: 'profile-settings',
+            builder: (context, state) => const SettingsPage(),
           ),
 
           // Beneficiary dashboard routes

@@ -387,7 +387,7 @@ class _BeneficiaryCampaignDetailScreenState
                                             TextField(
                                               controller:
                                                   _targetAmountController,
-                                              keyboardType: TextInputType
+                                              keyboardType: const TextInputType
                                                   .numberWithOptions(
                                                       decimal: true),
                                               decoration: InputDecoration(

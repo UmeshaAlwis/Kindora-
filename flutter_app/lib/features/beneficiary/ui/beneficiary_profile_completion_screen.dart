@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../models/supabase_models.dart';
 import '../../../repositories/supabase_repositories.dart';
 
 class BeneficiaryProfileCompletionScreen extends ConsumerStatefulWidget {

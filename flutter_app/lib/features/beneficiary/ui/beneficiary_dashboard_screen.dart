@@ -42,9 +42,9 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Welcome back!',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -68,7 +68,7 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Quick Actions
-                    Text(
+                    const Text(
                       'Quick Actions',
                       style: TextStyle(
                         fontSize: 18,
@@ -90,14 +90,14 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: accentColor),
                               ),
-                              child: Column(
+                              child: const Column(
                                 children: [
                                   Icon(
                                     Icons.add_circle_outline,
                                     color: accentColor,
                                     size: 32,
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8),
                                   Text(
                                     'New Campaign',
                                     textAlign: TextAlign.center,
@@ -123,15 +123,15 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Colors.blue),
                               ),
-                              child: Column(
+                              child: const Column(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.person,
                                     color: Colors.blue,
                                     size: 32,
                                   ),
-                                  const SizedBox(height: 8),
-                                  const Text(
+                                  SizedBox(height: 8),
+                                  Text(
                                     'My Profile',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
@@ -153,7 +153,7 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'My Campaigns',
                           style: TextStyle(
                             fontSize: 18,
@@ -163,7 +163,7 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () => context.go('/beneficiary/campaigns'),
-                          child: Text(
+                          child: const Text(
                             'View All',
                             style: TextStyle(
                               fontSize: 14,
@@ -183,7 +183,7 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
                             accentColor: accentColor,
                             primaryColor: primaryColor,
                           )
-                        : Center(
+                        : const Center(
                             child: Text(
                               'Please sign in',
                               style: TextStyle(color: primaryColor),
