@@ -1,193 +1,195 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../providers/theme_provider.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider);
+    final notificationsEnabled = true;
+    final selectedLanguage = 'English';
 
-class _SettingsPageState extends State<SettingsPage> {
-  bool _notificationsEnabled = true;
-  bool _emailUpdatesEnabled = false;
-  bool _darkModeEnabled = false;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: const Color(0xFF0C0C79),
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         centerTitle: true,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// NOTIFICATIONS SECTION
-                const SizedBox(height: 20),
-                const Text(
-                  'Notifications',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C0C79),
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// GENERAL SECTION
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                child: Text(
+                  'General',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 16),
-                _buildSettingsTile(
-                  title: 'Push Notifications',
-                  subtitle: 'Receive donation and campaign updates',
-                  value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _notificationsEnabled = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildSettingsTile(
-                  title: 'Email Updates',
-                  subtitle: 'Receive monthly donation summary',
-                  value: _emailUpdatesEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _emailUpdatesEnabled = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 32),
+              ),
+              _buildToggleTile(
+                title: 'Notifications',
+                subtitle: 'Receive campaign updates',
+                value: notificationsEnabled,
+                onChanged: (value) {
+                  // TODO: Implement notification preferences
+                },
+              ),
+              _buildDivider(),
+              _buildToggleTile(
+                title: 'Dark Mode',
+                subtitle: 'Enable dark theme',
+                value: isDarkMode,
+                onChanged: (value) {
+                  ref.read(themeProvider.notifier).toggleDarkMode(value);
+                },
+              ),
+              _buildDivider(),
+              _buildActionTile(
+                icon: Icons.language,
+                title: 'Language',
+                subtitle: selectedLanguage,
+                onTap: () {
+                  _showLanguageDialog(context, selectedLanguage);
+                },
+                showArrow: true,
+              ),
+              const SizedBox(height: 32),
 
-                /// APPEARANCE SECTION
-                const Text(
-                  'Appearance',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C0C79),
-                  ),
+              /// SECURITY SECTION
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  'Security',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 16),
-                _buildSettingsTile(
-                  title: 'Dark Mode',
-                  subtitle: 'Enable dark theme for better visibility',
-                  value: _darkModeEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _darkModeEnabled = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 32),
+              ),
+              _buildActionTile(
+                icon: Icons.lock,
+                title: 'Change Password',
+                subtitle: '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Change Password - Coming Soon')),
+                  );
+                },
+                showArrow: true,
+              ),
+              _buildDivider(),
+              _buildActionTile(
+                icon: Icons.delete_outline,
+                title: 'Delete Account',
+                subtitle: '',
+                onTap: () {
+                  _showDeleteAccountDialog(context);
+                },
+                showArrow: false,
+                isDestructive: true,
+              ),
+              const SizedBox(height: 32),
 
-                /// ACCOUNT SECTION
-                const Text(
-                  'Account',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C0C79),
-                  ),
+              /// LEGAL SECTION
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  'Legal',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 16),
-                _buildActionTile(
-                  icon: Icons.person,
-                  title: 'Edit Profile',
-                  subtitle: 'Update your profile information',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Edit Profile - Coming Soon')),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildActionTile(
-                  icon: Icons.lock,
-                  title: 'Change Password',
-                  subtitle: 'Update your account password',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Change Password - Coming Soon')),
-                    );
-                  },
-                ),
-                const SizedBox(height: 32),
+              ),
+              _buildActionTile(
+                icon: Icons.shield,
+                title: 'Privacy Policy',
+                subtitle: '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Privacy Policy - Coming Soon')),
+                  );
+                },
+                showArrow: true,
+              ),
+              _buildDivider(),
+              _buildActionTile(
+                icon: Icons.description,
+                title: 'Terms & Conditions',
+                subtitle: '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Terms & Conditions - Coming Soon')),
+                  );
+                },
+                showArrow: true,
+              ),
+              const SizedBox(height: 32),
 
-                /// ABOUT SECTION
-                const Text(
+              /// ABOUT SECTION
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
                   'About',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C0C79),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 16),
-                _buildActionTile(
-                  icon: Icons.info,
-                  title: 'About Kindora',
-                  subtitle: 'Learn more about our platform',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('About Kindora - Coming Soon')),
-                    );
-                  },
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Version',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '1.0.0',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildActionTile(
-                  icon: Icons.description,
-                  title: 'Privacy Policy',
-                  subtitle: 'Read our privacy terms',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Privacy Policy - Coming Soon')),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildActionTile(
-                  icon: Icons.description_outlined,
-                  title: 'Terms of Service',
-                  subtitle: 'Read our terms and conditions',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Terms of Service - Coming Soon')),
-                    );
-                  },
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSettingsTile({
+  Widget _buildToggleTile({
     required String title,
     required String subtitle,
     required bool value,
     required Function(bool) onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -201,14 +203,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
+              if (subtitle.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           Switch(
@@ -226,32 +230,22 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required bool showArrow,
+    bool isDestructive = false,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF0C0C79),
-                    size: 20,
-                  ),
+                Icon(
+                  icon,
+                  size: 24,
+                  color: isDestructive ? Colors.red : Colors.grey.shade600,
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -259,31 +253,122 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
+                        color: isDestructive ? Colors.red : Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey.shade400,
-            ),
+            if (showArrow)
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey.shade400,
+              ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Divider(
+        height: 1,
+        color: Colors.grey.shade300,
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, String currentLanguage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Select Language'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildLanguageOption('English', dialogContext, currentLanguage),
+              _buildLanguageOption('Spanish', dialogContext, currentLanguage),
+              _buildLanguageOption('French', dialogContext, currentLanguage),
+              _buildLanguageOption('German', dialogContext, currentLanguage),
+              _buildLanguageOption('Chinese', dialogContext, currentLanguage),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildLanguageOption(
+      String language, BuildContext dialogContext, String currentLanguage) {
+    return ListTile(
+      title: Text(language),
+      trailing: currentLanguage == language
+          ? const Icon(Icons.check, color: Color(0xFF0C0C79))
+          : null,
+      onTap: () {
+        Navigator.pop(dialogContext);
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
+          SnackBar(
+              content: Text('Language changed to $language (Coming Soon)')),
+        );
+      },
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  const SnackBar(
+                      content: Text('Account deletion - Coming Soon')),
+                );
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
