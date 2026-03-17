@@ -25,6 +25,7 @@
         "flutter",
         "flutter_dotenv",
         "flutter_feather_icons",
+        "flutter_localizations",
         "flutter_riverpod",
         "flutter_staggered_grid_view",
         "flutter_stripe",
@@ -562,6 +563,15 @@
       "name": "cupertino_icons",
       "version": "1.0.8",
       "dependencies": []
+    },
+    {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter",
+        "intl",
+        "path"
+      ]
     },
     {
       "name": "flutter",
@@ -1355,15 +1365,6 @@
       "version": "0.0.0",
       "dependencies": [
         "flutter"
-      ]
-    },
-    {
-      "name": "flutter_localizations",
-      "version": "0.0.0",
-      "dependencies": [
-        "flutter",
-        "intl",
-        "path"
       ]
     },
     {
