@@ -14,3 +14,4 @@ class NewsModel {
     required this.date,
   });
 }
+// final model update
