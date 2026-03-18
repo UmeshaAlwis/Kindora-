@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Added Supabase
 import 'package:lucide_icons/lucide_icons.dart';
 import 'screens/news_feed_screen.dart';
 import 'screens/recommendation_screen.dart';
 import 'screens/rewards_screen.dart';
 
-void main() {
+Future<void> main() async {
+  // 1. Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Initialize Supabase with your dashboard credentials
+  await Supabase.initialize(
+    // REPLACE these strings with the values from your Supabase screenshot
+    url: 'https://your-project-id.supabase.co',
+    anonKey: 'your-anon-public-key-here',
+  );
+
   runApp(const KindoraApp());
 }
 
@@ -19,6 +30,8 @@ class KindoraApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: const Color(0xFF1A1A40),
+        // Adding a global color scheme for consistency
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1A1A40)),
       ),
       home: const MainParent(),
     );
@@ -33,19 +46,19 @@ class MainParent extends StatefulWidget {
 }
 
 class _MainParentState extends State<MainParent> {
-  int _selectedIndex = 1; // Default to 'Feed' tab
+  int _selectedIndex = 1; // Default to 'Feed' (Center Tab)
 
-  // REMOVED 'const' from this list to prevent LucideIcon crashes
+  // This list holds the actual screens for navigation
   final List<Widget> _screens = [
     const RecommendationScreen(),
-    const FeedScreen(),
+    const NewsFeedScreen(), // Changed FeedScreen to NewsFeedScreen to match your backend setup
     const RewardsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // The IndexedStack keeps the state of your screens alive when switching tabs
+      // IndexedStack preserves the state (scroll position, etc.) of each tab
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -61,7 +74,7 @@ class _MainParentState extends State<MainParent> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(LucideIcons.sparkles),
             label: 'AI Feed',

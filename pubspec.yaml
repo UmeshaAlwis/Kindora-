@@ -16,9 +16,12 @@ dependencies:
   lucide_icons: ^0.257.0
   google_fonts: ^6.2.1
 
-  # NEW: Added to fix "Couldn't resolve package" errors
+  # UI Components
   cached_network_image: ^3.4.1
   percent_indicator: ^4.2.3
+
+  # BACKEND: Supabase integration
+  supabase_flutter: ^2.6.0
 
 dev_dependencies:
   flutter_test:
