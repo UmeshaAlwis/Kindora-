@@ -1,3 +1,4 @@
+// Unit Test: Validates reward point calculation and trophy display logic
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kindora/screens/rewards_screen.dart'; // Ensure this path is correct
