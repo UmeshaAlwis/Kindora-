@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
-import theme from './theme';
+import { getTheme } from './theme';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeContextProvider, useThemeMode } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import SplashScreen from './components/SplashScreen';
@@ -21,8 +22,9 @@ const ProtectedLayoutRoute = ({ children }) => (
   </ProtectedRoute>
 );
 
-function App() {
+function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
+  const { isDarkMode } = useThemeMode();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,7 +39,7 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={getTheme(isDarkMode)}>
       <CssBaseline />
       <Toaster position="top-right" />
       <AuthProvider>
@@ -93,4 +95,12 @@ function App() {
   );
 }
 
-export default App;
+function App() {
+  return (
+    <ThemeContextProvider>
+      <AppContent />
+    </ThemeContextProvider>
+  );
+}
+
+export default App;export default App;
