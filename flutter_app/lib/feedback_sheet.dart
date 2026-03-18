@@ -15,6 +15,13 @@ class FeedbackSheet extends StatefulWidget {
 
 class _FeedbackSheetState extends State<FeedbackSheet> {
   int selectedRating = 0;
+  final TextEditingController commentController = TextEditingController(); // ✅ added
+
+  @override
+  void dispose() {
+    commentController.dispose(); 
+    super.dispose();
+  }
 
   String get ratingLabel {
     switch (selectedRating) {
@@ -131,8 +138,79 @@ class _FeedbackSheetState extends State<FeedbackSheet> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            //  Comment label
+            Text(
+              "Comment (optional)",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Comment box
+            TextField(
+              controller: commentController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: "Share your thoughts about this campaign...",
+                hintStyle: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.grey[400],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0C0C79),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 24),
 
+            // Submit button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0C0C79),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: selectedRating == 0
+                    ? null //  disabled if no star selected
+                    : () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Thank you for your feedback! 🙏"),
+                            backgroundColor: Color(0xFF0C0C79),
+                          ),
+                        );
+                      },
+                child: Text(
+                  "Submit Feedback",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
           ],
         ),
       ),
