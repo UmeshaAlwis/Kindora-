@@ -1,3 +1,4 @@
+// UI Navigation Test: Verifies flow from Recommendation Card to Donation Selection Screen
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kindora/screens/recommendation_screen.dart';
