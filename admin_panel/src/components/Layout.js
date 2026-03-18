@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeMode } from '../contexts/ThemeContext';
 import {
   Box,
   Drawer,
@@ -29,6 +30,8 @@ import {
   Menu as MenuIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { supabase } from '../supabaseClient';
 
@@ -50,6 +53,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile } = useAuth();
+  const { isDarkMode, toggleTheme } = useThemeMode();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -135,7 +139,7 @@ const Layout = ({ children }) => {
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
               boxSizing: 'border-box',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: isDarkMode ? '#1A1A3A' : '#f5f5f5',
               border: 'none',
             },
           }}
@@ -153,7 +157,7 @@ const Layout = ({ children }) => {
           sx={{
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
-              backgroundColor: '#f5f5f5',
+              backgroundColor: isDarkMode ? '#1A1A3A' : '#f5f5f5',
             },
           }}
         >
@@ -168,8 +172,8 @@ const Layout = ({ children }) => {
           position="sticky"
           elevation={0}
           sx={{
-            backgroundColor: '#fff',
-            borderBottom: '1px solid #e0e0e0',
+            backgroundColor: theme.palette.background.paper,
+            borderBottom: `1px solid ${theme.palette.divider}`,
             ml: isMobile ? 0 : `${DRAWER_WIDTH}px`,
           }}
         >
@@ -185,6 +189,13 @@ const Layout = ({ children }) => {
               </IconButton>
             )}
             <Box sx={{ flex: 1 }} />
+            <IconButton
+              onClick={toggleTheme}
+              sx={{ color: isDarkMode ? '#FFD54F' : '#0C0C79', mr: 1 }}
+              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
             <IconButton
               onClick={(e) => setAnchorEl(e.currentTarget)}
               sx={{ p: 0 }}
@@ -231,7 +242,7 @@ const Layout = ({ children }) => {
           sx={{
             flex: 1,
             p: 3,
-            backgroundColor: '#fff',
+            backgroundColor: theme.palette.background.default,
             overflow: 'auto',
           }}
         >
