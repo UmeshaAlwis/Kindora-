@@ -6,6 +6,7 @@ import 'start_campaign_page.dart';
 import 'donation_sheet.dart';
 import 'progresstracker.dart';
 import 'services/campaign_services.dart';
+import 'feedback_sheet.dart';
 
 class CampaignHomePage extends StatelessWidget {
   const CampaignHomePage({super.key});
@@ -59,7 +60,7 @@ class CampaignHomePage extends StatelessWidget {
   }
 }
 
-// ✅ Single global showDonationSheet
+// Single global showDonationSheet
 void showDonationSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
@@ -80,7 +81,7 @@ class CampaignList extends StatefulWidget {
 
 class _CampaignListState extends State<CampaignList> {
 
-  // ✅ Stateful list for real-time
+  //  Stateful list for real-time
   List<dynamic> campaigns = [];
   bool _isLoading = true;
   late final RealtimeChannel _subscription;
@@ -106,7 +107,7 @@ class _CampaignListState extends State<CampaignList> {
     }
   }
 
-  // ✅ Real-time listener
+  //  Real-time listener
   void _subscribeToRealtime() {
     final supabase = Supabase.instance.client;
     _subscription = supabase
@@ -191,7 +192,7 @@ class _CampaignListState extends State<CampaignList> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      // ✅ Priority badge — Elevated or Urgent only
+                      // Priority badge — Elevated or Urgent only
                       if (priority == 'Urgent' || priority == 'Elevated')
                         Container(
                           margin: const EdgeInsets.only(bottom: 6),
@@ -278,6 +279,27 @@ class _CampaignListState extends State<CampaignList> {
                             onPressed: () {
                               Share.share(
                                 "Support my campaign: ${campaign['title']}",
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.feedback_outlined,
+                              size: 20,
+                              color: Color(0xFFFF751F),
+                            ),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                ),
+                                builder: (context) => FeedbackSheet(
+                                  campaignTitle: campaign['title'] ?? 'Campaign',
+                                ),
                               );
                             },
                           ),
