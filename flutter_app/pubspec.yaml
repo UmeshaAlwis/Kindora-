@@ -74,6 +74,7 @@ dependencies:
   
   # Analytics
   firebase_analytics: ^10.5.0
+  supabase_flutter: ^2.12.0
 
 dev_dependencies:
   flutter_test:

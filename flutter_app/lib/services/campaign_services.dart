@@ -40,6 +40,7 @@ class CampaignService {
     }
   }
 
+  // Fetches only Urgent priority campaigns for dashboard
   Future<List<dynamic>> getUrgentCampaigns() async {
     try {
       final data = await supabase
