@@ -36,12 +36,10 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
         future: causes,
         builder: (context, snapshot) {
 
-          // Loading state
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Error state
           if (snapshot.hasError) {
             return Center(
               child: Text(
@@ -55,7 +53,6 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
             );
           }
 
-          // Empty state
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
@@ -83,6 +80,11 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
             itemCount: data.length,
             itemBuilder: (context, index) {
               final cause = data[index];
+              
+              //  calculate progress
+              double raised = (cause['raised_amount'] ?? 0).toDouble();
+              double target = (cause['target_amount'] ?? 1).toDouble();
+              double progress = target > 0 ? raised / target : 0;
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 20),
@@ -120,7 +122,6 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
                       ),
                     ),
 
-                    // Title and description added
                     Padding(
                       padding: const EdgeInsets.all(14),
                       child: Column(
@@ -148,10 +149,60 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
                             ),
                           ),
 
+                          const SizedBox(height: 12),
+
+                          // Raised vs Goal
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Raised: LKR ${raised.toStringAsFixed(0)}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0C0C79),
+                                ),
+                              ),
+                              Text(
+                                "Goal: LKR ${target.toStringAsFixed(0)}",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          //  Progress bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progress.clamp(0.0, 1.0),
+                              minHeight: 8,
+                              backgroundColor: Colors.grey[200],
+                              color: const Color(0xFFFF751F),
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          // Percentage
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "${(progress * 100).toStringAsFixed(1)}% funded",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ),
+
                         ],
                       ),
                     ),
-
                   ],
                 ),
               );
