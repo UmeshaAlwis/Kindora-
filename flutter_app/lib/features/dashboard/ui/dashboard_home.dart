@@ -215,7 +215,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        context.push('/donor/beneficiary-campaigns');
+                        context.push('/campaigns');
                       },
                     ),
                   ),
