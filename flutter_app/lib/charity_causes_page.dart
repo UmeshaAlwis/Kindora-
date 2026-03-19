@@ -10,8 +10,7 @@ class CharityCausesPage extends StatefulWidget {
 }
 
 class _CharityCausesPageState extends State<CharityCausesPage> {
-  
-  // fetch causes from Supabase
+
   late Future<List<dynamic>> causes;
 
   @override
@@ -41,69 +40,92 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
           // Error state
-    if (snapshot.hasError) {
-      return Center(
-        child: Text(
-          "Something went wrong!\n${snapshot.error}",
-          textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.red,
-          ),
-        ),
-      );
-    }
-     
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Something went wrong!\n${snapshot.error}",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.red,
+                ),
+              ),
+            );
+          }
+
+          // Empty state
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.volunteer_activism,
+                      size: 60, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    "No causes available yet.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          //  image 
           final data = snapshot.data!;
 
-return ListView.builder(
-  padding: const EdgeInsets.all(16),
-  itemCount: data.length,
-  itemBuilder: (context, index) {
-    final cause = data[index];
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              final cause = data[index];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+              return Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-          // Image 
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16)),
-            child: Image.network(
-              cause['image_url'] ??
-                  "https://images.unsplash.com/photo-1593113630400-ea4288922497",
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 160,
-                color: Colors.grey[200],
-                child: const Icon(Icons.image_not_supported,
-                    size: 40, color: Colors.grey),
-              ),
-            ),
-          ),
+                    // ✅ Image only
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16)),
+                      child: Image.network(
+                        cause['image_url'] ??
+                            "https://images.unsplash.com/photo-1593113630400-ea4288922497",
+                        height: 160,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 160,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_not_supported,
+                              size: 40, color: Colors.grey),
+                        ),
+                      ),
+                    ),
 
-        ],
-      ),
-    );
-  },
-);
+                  ],
+                ),
+              );
+            },
+          );
         },
       ),
     );
