@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
+import 'direct_chat_page.dart';
+import '../services/direct_message_service.dart';
 
-class MessagesPage extends StatelessWidget {
+class MessagesPage extends StatefulWidget {
   const MessagesPage({super.key});
+
+  @override
+  State<MessagesPage> createState() => _MessagesPageState();
+}
+
+class _MessagesPageState extends State<MessagesPage> {
+  final DirectMessageService _messageService = DirectMessageService();
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,61 +27,89 @@ class MessagesPage extends StatelessWidget {
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SafeArea(
-        child: ListView(
-          children: [
-            for (int i = 0; i < 5; i++)
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: const Color(0xFF0C0C79),
+        child: FutureBuilder<List<ConversationPreview>>(
+          future: _messageService.getConversationPreviews(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
                   child: Text(
-                    'U$i',
-                    style: const TextStyle(color: Colors.white),
+                    'Unable to load messages: ${snapshot.error}',
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                title: Text('Contact ${i + 1}'),
-                subtitle: const Text('No messages yet...'),
-                trailing: const Text('Now'),
-                onTap: () {},
-              ),
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.mail,
-                      size: 64,
-                      color: Color(0xFF0C0C79),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Messaging System Coming Soon',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0C0C79),
+              );
+            }
+
+            final conversations = snapshot.data ?? [];
+            if (conversations.isEmpty) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text(
+                    'No messages yet.\nWhen a donor starts a chat, it will appear here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {});
+              },
+              child: ListView.separated(
+                itemCount: conversations.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final c = conversations[index];
+                  final title = c.partnerName.isEmpty ? 'User' : c.partnerName;
+                  final avatarText = title.substring(0, 1).toUpperCase();
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF0C0C79),
+                      child: Text(
+                        avatarText,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
-                  ],
-                ),
+                    title: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      c.lastMessage,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: Text(_formatTime(c.lastMessageAt)),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DirectChatPage(
+                            receiverId: c.partnerId,
+                            receiverName: title,
+                          ),
+                        ),
+                      ).then((_) => setState(() {}));
+                    },
+                  );
+                },
+                physics: const AlwaysScrollableScrollPhysics(),
               ),
-            ),
-          ],
+            );
+          },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFFF751F),
-        child: const Icon(Icons.message),
-        onPressed: () {},
       ),
     );
   }
