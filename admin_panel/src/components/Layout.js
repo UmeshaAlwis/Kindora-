@@ -34,6 +34,7 @@ import {
   Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { supabase } from '../supabaseClient';
+import KindoraLogo from './KindoraLogo';
 
 const DRAWER_WIDTH = 280;
 
@@ -65,13 +66,8 @@ const Layout = ({ children }) => {
 
   const drawer = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ p: 2.5, background: 'linear-gradient(135deg, #0C0C79 0%, #1a1a9a 100%)' }}>
-        <Typography variant="h6" fontWeight={800} color="white" sx={{ mb: 0.5 }}>
-          KINDORA
-        </Typography>
-        <Typography variant="caption" color="rgba(255,255,255,0.7)">
-          Admin Control
-        </Typography>
+      <Box sx={{ p: 2.5, background: 'linear-gradient(135deg, #0C0C79 0%, #1a1a9a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <KindoraLogo size={60} />
       </Box>
       <Divider />
       <List sx={{ flex: 1, py: 2 }}>
