@@ -14,6 +14,7 @@ import Campaigns from './pages/Campaigns';
 import FeedApprovals from './pages/FeedApprovals';
 import Merchandise from './pages/Merchandise';
 import Alerts from './pages/Alerts';
+import UserProfile from './pages/UserProfile';
 
 // Wrapper component for protected routes with layout
 const ProtectedLayoutRoute = ({ children }) => (
@@ -87,6 +88,14 @@ function AppContent() {
                 </ProtectedLayoutRoute>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedLayoutRoute>
+                  <UserProfile />
+                </ProtectedLayoutRoute>
+              }
+            />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
@@ -103,4 +112,4 @@ function App() {
   );
 }
 
-export default App;export default App;
+export default App;
