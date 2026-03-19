@@ -12,7 +12,7 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB max
   },
   fileFilter: (req, file, cb) => {
-    // Accept any image MIME type or check by extension
+    // Accept image/video MIME types or check by extension
     const allowedMimes = [
       'image/jpeg',
       'image/jpg',
@@ -21,10 +21,18 @@ const upload = multer({
       'image/webp',
       'image/gif',
       'image/bmp',
+      'video/mp4',
+      'video/quicktime',
+      'video/webm',
+      'video/x-msvideo',
+      'video/x-matroska',
     ];
     
     // Check MIME type or file extension
-    if (allowedMimes.includes(file.mimetype) || /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(file.originalname)) {
+    if (
+      allowedMimes.includes(file.mimetype) ||
+      /\.(jpg|jpeg|png|webp|gif|bmp|mp4|mov|webm|avi|mkv)$/i.test(file.originalname)
+    ) {
       cb(null, true);
     } else {
       console.error(`[Storage] File rejected - MIME: ${file.mimetype}, Name: ${file.originalname}`);
