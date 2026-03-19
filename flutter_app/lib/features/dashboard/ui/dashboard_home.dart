@@ -4,6 +4,8 @@ import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
 import 'package:kindora/features/wallet/ui/wallet_topup_page.dart';
 import 'package:kindora/features/wallet/ui/wallet_transaction_history_page.dart';
 import 'package:kindora/services/wallet_service.dart';
+import 'package:kindora/repositories/supabase_repositories.dart';
+import 'package:kindora/models/supabase_models.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -16,12 +18,15 @@ class _DashboardHomeState extends State<DashboardHome> {
   late WalletService _walletService;
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
+  bool _loadingUrgent = true;
+  List<Campaign> _urgentCampaigns = [];
 
   @override
   void initState() {
     super.initState();
     _walletService = WalletService();
     _fetchWalletBalance();
+    _fetchUrgentCampaigns();
   }
 
   Future<void> _fetchWalletBalance() async {
@@ -42,6 +47,34 @@ class _DashboardHomeState extends State<DashboardHome> {
         );
       }
     }
+  }
+
+  Future<void> _fetchUrgentCampaigns() async {
+    try {
+      final repo = CampaignRepository();
+      final campaigns = await repo.getUrgentCampaigns(limit: 10);
+      if (!mounted) return;
+      setState(() {
+        _urgentCampaigns = campaigns;
+        _loadingUrgent = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingUrgent = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load urgent campaigns: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  String _daysLeftLabel(DateTime? endDate) {
+    if (endDate == null) return 'No deadline';
+    final days = endDate.difference(DateTime.now()).inDays;
+    if (days <= 0) return 'Ending today';
+    return '$days days left';
   }
 
   @override
@@ -231,40 +264,124 @@ class _DashboardHomeState extends State<DashboardHome> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         "Urgent Donations",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("See all"),
+                      GestureDetector(
+                        onTap: () => context.push('/campaigns'),
+                        child: const Text("See all"),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 15),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 4,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.8,
+                  if (_loadingUrgent)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_urgentCampaigns.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: Text('No urgent campaigns available')),
+                    )
+                  else
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _urgentCampaigns.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.9,
+                      ),
+                      itemBuilder: (context, index) {
+                        final campaign = _urgentCampaigns[index];
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => context.push('/campaigns'),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (campaign.image != null && campaign.image!.isNotEmpty)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        campaign.image!,
+                                        height: 90,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) {
+                                          return Container(
+                                            height: 90,
+                                            width: double.infinity,
+                                            color: Colors.grey.shade200,
+                                            child: const Icon(Icons.image_not_supported),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      height: 90,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(Icons.campaign, color: Colors.grey),
+                                    ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    campaign.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    campaign.description?.isNotEmpty == true
+                                        ? campaign.description!
+                                        : 'Support this campaign',
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    _daysLeftLabel(campaign.endDate),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: campaign.endDate != null
+                                          ? Colors.redAccent
+                                          : Colors.grey,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: ListTile(
-                          title: Text('Campaign ${index + 1}'),
-                          subtitle: const Text('Support this campaign'),
-                        ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),

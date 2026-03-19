@@ -10,6 +10,7 @@ const createCampaignSchema = Joi.object({
   campaign_category: Joi.string().optional(),
   target_amount: Joi.number().required().positive(),
   image_url: Joi.string().uri().optional().allow(null, ''),
+  start_date: Joi.date().optional(),
   // These fields are sent from Flutter but not stored in campaigns table
   description: Joi.string().optional(),
   beneficiary_details: Joi.string().optional(),
@@ -33,6 +34,7 @@ export class CampaignController {
         category: req.query.category as string,
         charityId: req.query.charityId as string,
         searchQuery: req.query.search as string,
+        sortBy: req.query.sortBy as string,
       };
 
       const result = await CampaignService.getCampaigns(page, limit, filters);

@@ -12,6 +12,7 @@ class Campaign extends Equatable {
   final String? image;
   final String? description;
   final double? raisedAmount;
+  final DateTime? endDate;
 
   const Campaign({
     required this.id,
@@ -24,6 +25,7 @@ class Campaign extends Equatable {
     this.image,
     this.description,
     this.raisedAmount,
+    this.endDate,
   });
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,9 @@ class Campaign extends Equatable {
       raisedAmount: json['raised_amount'] != null
           ? double.tryParse(json['raised_amount'].toString())
           : 0.0,
+      endDate: json['end_date'] != null
+          ? DateTime.tryParse(json['end_date'].toString())
+          : null,
     );
   }
 
@@ -59,6 +64,7 @@ class Campaign extends Equatable {
       'image': image,
       'description': description,
       'raised_amount': raisedAmount,
+      'end_date': endDate?.toIso8601String(),
     };
   }
 
@@ -74,6 +80,7 @@ class Campaign extends Equatable {
         image,
         description,
         raisedAmount,
+        endDate,
       ];
 }
 
