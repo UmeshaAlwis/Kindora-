@@ -519,9 +519,9 @@
     },
     {
       "name": "flutter_svg",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_svg-2.2.3",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_svg-2.2.4",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "flutter_test",
@@ -597,7 +597,7 @@
     },
     {
       "name": "google_maps_flutter_android",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/google_maps_flutter_android-2.19.2",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/google_maps_flutter_android-2.19.3",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
@@ -609,7 +609,7 @@
     },
     {
       "name": "google_maps_flutter_platform_interface",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/google_maps_flutter_platform_interface-2.14.2",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/google_maps_flutter_platform_interface-2.15.0",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
@@ -849,7 +849,7 @@
     },
     {
       "name": "native_toolchain_c",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/native_toolchain_c-0.17.5",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/native_toolchain_c-0.17.6",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -1125,9 +1125,9 @@
     },
     {
       "name": "sqflite_android",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_android-2.4.2+2",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_android-2.4.2+3",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "sqflite_common",
@@ -1299,9 +1299,9 @@
     },
     {
       "name": "vector_graphics",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/vector_graphics-1.1.19",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/vector_graphics-1.1.20",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "vector_graphics_codec",
@@ -1365,7 +1365,7 @@
     },
     {
       "name": "webview_flutter_wkwebview",
-      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.8",
+      "rootUri": "file:///C:/Users/Asus/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_wkwebview-3.24.0",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },
