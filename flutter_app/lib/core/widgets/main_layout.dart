@@ -84,6 +84,10 @@ class MainLayout extends ConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex.clamp(0, 4), // Safely clamp to valid range
+        selectedItemColor: const Color(0xFF0C0C79),
+        unselectedItemColor: Colors.blueGrey,
+        selectedFontSize: 15,
+        unselectedFontSize: 14,
         onTap: (index) async {
           // Check user role from database
           final isBeneficiary = await _isBeneficiaryUser();
@@ -117,23 +121,29 @@ class MainLayout extends ConsumerWidget {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_filled),
+            activeIcon: Icon(Icons.home, color: Color(0xFF0C0C79)),
             label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.rss_feed),
+            activeIcon: Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
             label: 'Feed',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mail),
+            icon: Icon(Icons.near_me_outlined),
+            activeIcon: Icon(Icons.near_me, color: Color(0xFF0C0C79)),
             label: 'Messages',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
+            icon: Icon(Icons.volunteer_activism_outlined),
+            activeIcon:
+                Icon(Icons.volunteer_activism, color: Color(0xFF0C0C79)),
             label: 'Merch',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person, color: Color(0xFF0C0C79)),
             label: 'Profile',
           ),
         ],
