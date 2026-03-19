@@ -6,6 +6,7 @@ import { getTheme } from './theme';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeContextProvider, useThemeMode } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import SplashScreen from './components/SplashScreen';
 import AuthPage from './pages/AuthPage';
@@ -106,9 +107,11 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeContextProvider>
-      <AppContent />
-    </ThemeContextProvider>
+    <ErrorBoundary>
+      <ThemeContextProvider>
+        <AppContent />
+      </ThemeContextProvider>
+    </ErrorBoundary>
   );
 }
 
