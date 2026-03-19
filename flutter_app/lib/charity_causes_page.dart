@@ -54,28 +54,9 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
         ),
       );
     }
-     // Empty state
-    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.volunteer_activism,
-                size: 60, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              "No causes available yet.",
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-        return const Center(child: Text("Causes will appear here!"));
-      },
+     
+          return const Center(child: Text("Causes will appear here!"));
+        },
       ),
     );
   }
