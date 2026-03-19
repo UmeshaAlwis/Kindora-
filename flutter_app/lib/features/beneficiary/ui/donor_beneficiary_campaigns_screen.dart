@@ -4,6 +4,7 @@ import '../../../providers/supabase_providers.dart';
 import '../../../models/supabase_models.dart';
 import '../../payment/models/payment_model.dart' as payment_model;
 import 'package:kindora/features/payment/ui/beneficiary_donation_amount_selection_page.dart';
+import 'beneficiary_campaign_info_page.dart';
 
 class DonorBeneficiaryCampaignsScreen extends ConsumerWidget {
   const DonorBeneficiaryCampaignsScreen({super.key});
@@ -285,54 +286,79 @@ class _BeneficiaryCampaignDonorCard extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Donate Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Convert BeneficiaryCampaign to Campaign format for donation
-                      final paymentCampaign = payment_model.Campaign(
-                        id: campaign.id,
-                        title: campaign.title,
-                        image: campaign.imageUrl ?? '',
-                        raisedAmount: campaign.raisedAmount,
-                        targetAmount: campaign.targetAmount,
-                        description: campaign.description,
-                      );
-
-                      // Show donation amount selection modal
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          side: const BorderSide(color: Color(0xFF0C0C79)),
+                          foregroundColor: const Color(0xFF0C0C79),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        builder: (context) =>
-                            BeneficiaryDonationAmountSelectionModal(
-                          campaign: paymentCampaign,
-                          beneficiaryCampaignId: campaign.id,
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.favorite, size: 16),
-                        SizedBox(width: 8),
-                        Text('Donate Now'),
-                      ],
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BeneficiaryCampaignInfoPage(
+                                campaign: campaign,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('View Details'),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          final paymentCampaign = payment_model.Campaign(
+                            id: campaign.id,
+                            title: campaign.title,
+                            image: campaign.imageUrl ?? '',
+                            raisedAmount: campaign.raisedAmount,
+                            targetAmount: campaign.targetAmount,
+                            description: campaign.description,
+                          );
+
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.white,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(24),
+                              ),
+                            ),
+                            builder: (context) =>
+                                BeneficiaryDonationAmountSelectionModal(
+                              campaign: paymentCampaign,
+                              beneficiaryCampaignId: campaign.id,
+                            ),
+                          );
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.favorite, size: 16),
+                            SizedBox(width: 8),
+                            Text('Donate'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
