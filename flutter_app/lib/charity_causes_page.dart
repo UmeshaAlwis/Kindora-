@@ -55,7 +55,55 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
       );
     }
      
-          return const Center(child: Text("Causes will appear here!"));
+          final data = snapshot.data!;
+
+return ListView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: data.length,
+  itemBuilder: (context, index) {
+    final cause = data[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          // Image 
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16)),
+            child: Image.network(
+              cause['image_url'] ??
+                  "https://images.unsplash.com/photo-1593113630400-ea4288922497",
+              height: 160,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 160,
+                color: Colors.grey[200],
+                child: const Icon(Icons.image_not_supported,
+                    size: 40, color: Colors.grey),
+              ),
+            ),
+          ),
+
+        ],
+      ),
+    );
+  },
+);
         },
       ),
     );
