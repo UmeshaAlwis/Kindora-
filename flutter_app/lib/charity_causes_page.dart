@@ -76,7 +76,6 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
             );
           }
 
-          //  image 
           final data = snapshot.data!;
 
           return ListView.builder(
@@ -102,7 +101,7 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    // ✅ Image only
+                    // Image
                     ClipRRect(
                       borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16)),
@@ -118,6 +117,38 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
                           child: const Icon(Icons.image_not_supported,
                               size: 40, color: Colors.grey),
                         ),
+                      ),
+                    ),
+
+                    // Title and description added
+                    Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          // Title
+                          Text(
+                            cause['title'] ?? "Cause",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF0C0C79),
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          // Description
+                          Text(
+                            cause['description'] ?? "",
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+
+                        ],
                       ),
                     ),
 
