@@ -542,7 +542,7 @@
     },
     {
       "name": "flutter_svg",
-      "version": "2.2.3",
+      "version": "2.2.4",
       "dependencies": [
         "flutter",
         "http",
@@ -1125,7 +1125,7 @@
     },
     {
       "name": "webview_flutter_wkwebview",
-      "version": "3.23.8",
+      "version": "3.24.0",
       "dependencies": [
         "flutter",
         "meta",
@@ -1201,7 +1201,7 @@
     },
     {
       "name": "google_maps_flutter_platform_interface",
-      "version": "2.14.2",
+      "version": "2.15.0",
       "dependencies": [
         "collection",
         "flutter",
@@ -1220,7 +1220,7 @@
     },
     {
       "name": "google_maps_flutter_android",
-      "version": "2.19.2",
+      "version": "2.19.3",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -1675,7 +1675,7 @@
     },
     {
       "name": "vector_graphics",
-      "version": "1.1.19",
+      "version": "1.1.20",
       "dependencies": [
         "flutter",
         "http",
@@ -2203,7 +2203,7 @@
     },
     {
       "name": "sqflite_android",
-      "version": "2.4.2+2",
+      "version": "2.4.2+3",
       "dependencies": [
         "flutter",
         "path",
@@ -2221,7 +2221,7 @@
     },
     {
       "name": "native_toolchain_c",
-      "version": "0.17.5",
+      "version": "0.17.6",
       "dependencies": [
         "code_assets",
         "glob",
