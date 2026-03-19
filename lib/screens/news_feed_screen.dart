@@ -12,7 +12,6 @@ class NewsFeedScreen extends StatefulWidget {
 }
 
 class _NewsFeedScreenState extends State<NewsFeedScreen> {
-  // Kindora Design System Colors
   static const Color primaryNavy = Color(0xFF1A1A40);
   static const Color kindoraGreen = Color(0xFF4CAF50);
   static const Color primaryOrange = Color(0xFFFF751F);
@@ -20,28 +19,22 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = '';
 
-  // ✅ REAL-TIME STREAM: Listens to your 'news' table
+  // ✅ REAL-TIME STREAM
   final Stream<List<Map<String, dynamic>>> _newsStream = Supabase.instance.client
       .from('news')
       .stream(primaryKey: ['id'])
       .order('created_at', ascending: false);
 
-  // ✅ UI THEME MAPPER
   Map<String, dynamic> _getStatusTheme(String status) {
     switch (status.toLowerCase()) {
-      case 'ongoing':
-        return {'color': primaryNavy, 'icon': LucideIcons.loader};
+      case 'ongoing': return {'color': primaryNavy, 'icon': LucideIcons.loader};
       case 'success':
-      case 'completed':
-        return {'color': kindoraGreen, 'icon': LucideIcons.checkCircle};
-      case 'urgent':
-        return {'color': Colors.red[700]!, 'icon': LucideIcons.alertTriangle};
-      default:
-        return {'color': primaryOrange, 'icon': LucideIcons.award};
+      case 'completed': return {'color': kindoraGreen, 'icon': LucideIcons.checkCircle};
+      case 'urgent': return {'color': Colors.red[700]!, 'icon': LucideIcons.alertTriangle};
+      default: return {'color': primaryOrange, 'icon': LucideIcons.award};
     }
   }
 
-  // ✅ MODAL: Post Update Bottom Sheet
   void _showAddNewsSheet() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
@@ -51,83 +44,38 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20, top: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10))),
               const SizedBox(height: 20),
-              Text("Post Project Update",
-                  style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: primaryNavy)),
-              const SizedBox(height: 20),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: "Project Title",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
+              TextField(controller: titleController, decoration: const InputDecoration(labelText: "Project Title")),
               const SizedBox(height: 15),
-              TextField(
-                controller: descController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: "Description",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const Text("Project Status", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextField(controller: descController, maxLines: 2, decoration: const InputDecoration(labelText: "Description")),
               DropdownButton<String>(
                 value: selectedStatus,
                 isExpanded: true,
-                items: ['ongoing', 'success', 'urgent'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value.toUpperCase(), style: const TextStyle(fontSize: 14)),
-                  );
-                }).toList(),
+                items: ['ongoing', 'success', 'urgent'].map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase()))).toList(),
                 onChanged: (val) => setModalState(() => selectedStatus = val!),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryNavy,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: primaryNavy, minimumSize: const Size(double.infinity, 50)),
                 onPressed: () async {
                   if (titleController.text.isNotEmpty) {
-                    try {
-                      await Supabase.instance.client.from('news').insert({
-                        'title': titleController.text,
-                        'description': descController.text,
-                        'status': selectedStatus,
-                      });
-                      if (mounted) Navigator.pop(context);
-                    } catch (e) {
-                      debugPrint("Error inserting: $e");
-                    }
+                    await Supabase.instance.client.from('news').insert({
+                      'title': titleController.text,
+                      'description': descController.text,
+                      'status': selectedStatus,
+                    });
+                    if (mounted) Navigator.pop(context);
                   }
                 },
-                child: const Text("Post to Feed", style: TextStyle(color: Colors.white, fontSize: 16)),
+                child: const Text("Post Update", style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(height: 30),
             ],
@@ -143,19 +91,16 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: primaryNavy,
-        title: Text('Kindora News Feed',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
-        centerTitle: true,
+        title: Text('Kindora Feed', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryNavy,
-        onPressed: _showAddNewsSheet,
-        child: const Icon(LucideIcons.plus, color: Colors.white),
+          backgroundColor: primaryNavy,
+          onPressed: _showAddNewsSheet,
+          child: const Icon(LucideIcons.plus, color: Colors.white)
       ),
       body: Column(
         children: [
-          // SEARCH BAR
           Container(
             padding: const EdgeInsets.all(16),
             color: primaryNavy,
@@ -163,50 +108,55 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
               controller: _searchController,
               onChanged: (value) => setState(() => _searchTerm = value.toLowerCase()),
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
+                filled: true, fillColor: Colors.white,
                 hintText: "Search campaigns...",
-                prefixIcon: const Icon(LucideIcons.search, color: primaryNavy),
+                prefixIcon: const Icon(LucideIcons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
             ),
           ),
-
-          // LIVE LIST SECTION
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
               stream: _newsStream,
               builder: (context, snapshot) {
-                if (snapshot.hasError) return Center(child: Text("Connection Error: ${snapshot.error}"));
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: primaryNavy));
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
-                final filteredNews = snapshot.data!.where((item) {
-                  final title = (item['title'] ?? '').toString().toLowerCase();
-                  final desc = (item['description'] ?? '').toString().toLowerCase();
-                  return title.contains(_searchTerm) || desc.contains(_searchTerm);
+                final filtered = snapshot.data!.where((item) {
+                  return item['title'].toString().toLowerCase().contains(_searchTerm);
                 }).toList();
 
-                if (filteredNews.isEmpty) {
-                  return const Center(child: Text("No news found.", style: TextStyle(color: Colors.grey)));
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(LucideIcons.searchX, size: 50, color: Colors.grey[300]),
+                        const SizedBox(height: 10),
+                        const Text("No matches found", style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredNews.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredNews[index];
-                    final theme = _getStatusTheme(item['status'] ?? '');
-
-                    return _buildNewsCard(
-                      context,
-                      title: item['title'] ?? 'Untitled',
-                      subtitle: item['description'] ?? '',
-                      status: (item['status'] ?? 'INFO').toUpperCase(),
-                      color: theme['color'],
-                      icon: theme['icon'],
-                    );
-                  },
+                return RefreshIndicator(
+                  onRefresh: () async => setState(() {}),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final item = filtered[index];
+                      final theme = _getStatusTheme(item['status'] ?? '');
+                      return _buildNewsCard(
+                        context,
+                        title: item['title'] ?? 'Untitled',
+                        subtitle: item['description'] ?? '',
+                        status: (item['status'] ?? 'INFO').toUpperCase(),
+                        color: theme['color'],
+                        icon: theme['icon'],
+                        time: "Just now", // In a real app, parse item['created_at']
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -216,53 +166,29 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
     );
   }
 
-  Widget _buildNewsCard(BuildContext context,
-      {required String title, required String subtitle, required String status, required Color color, required IconData icon}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(15),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NewsDetailScreen(title: title, subtitle: subtitle, status: status, color: color),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
-                      child: Text(status, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                    ),
-                    Icon(icon, color: color, size: 20),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, color: Colors.black54)),
-                const Padding(
-                  padding: EdgeInsets.only(top: 12),
-                  child: Row(
-                    children: [
-                      Text("Read more", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: primaryNavy)),
-                      SizedBox(width: 4),
-                      Icon(LucideIcons.arrowRight, size: 14, color: primaryNavy),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+  Widget _buildNewsCard(BuildContext context, {required String title, required String subtitle, required String status, required Color color, required IconData icon, required String time}) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NewsDetailScreen(title: title, subtitle: subtitle, status: status, color: color))),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Chip(label: Text(status, style: const TextStyle(color: Colors.white, fontSize: 10)), backgroundColor: color),
+                  Text(time, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(title, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.black54)),
+            ],
           ),
         ),
       ),
