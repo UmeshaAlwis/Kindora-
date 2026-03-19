@@ -12,12 +12,21 @@ export const useThemeMode = () => {
 
 export const ThemeContextProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme-mode');
-    return saved ? JSON.parse(saved) : false;
+    try {
+      const saved = localStorage.getItem('theme-mode');
+      return saved ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.warn('Theme storage error:', error);
+      return false;
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem('theme-mode', JSON.stringify(isDarkMode));
+    try {
+      localStorage.setItem('theme-mode', JSON.stringify(isDarkMode));
+    } catch (error) {
+      console.warn('Failed to save theme:', error);
+    }
   }, [isDarkMode]);
 
   const toggleTheme = () => {
