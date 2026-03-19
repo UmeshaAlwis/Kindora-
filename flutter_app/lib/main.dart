@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'src/Screen/chat/chat_list_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'src/features/screens/conversations_screen.dart';  
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -8,7 +10,7 @@ void main() async {
     url: 'https://ucxqakixdpqqmbbpeptm.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjeHFha2l4ZHBxcW1iYnBlcHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzY1NDcsImV4cCI6MjA4NjExMjU0N30.lqbexF_zdeKXtcwpG-Ou0rw1IaBhYsMIgWa2yHfxDBY',
   );
-  runApp(const KindoraApp());
+  runApp(const ProviderScope(child: KindoraApp())); 
 }
 
 class KindoraApp extends StatelessWidget {
@@ -34,7 +36,7 @@ class KindoraApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const ChatListScreen(),
+      home: const ConversationsScreen(),
     );
   }
 }

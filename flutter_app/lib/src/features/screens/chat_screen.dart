@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:kindora/src/features/messaging/providers/messaging.provider.dart' show messagesProvider;
 import '../../core/theme/app_theme.dart';
-import '../messaging/models/message_model.dart';
-import '../messaging/providers/messaging_provider.dart';
+import '../../features/messaging/models/message_model.dart';
+// ignore: unused_import
+import '../../features/messaging/providers/messages_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final ConversationModel conversation;
@@ -72,7 +74,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _inputController.clear();
     await ref
         .read(messagesProvider(widget.conversation.id).notifier)
-        .sendMessage(text);
+        .sendMessage(widget.conversation.id, text);
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _scrollToBottom(animated: true));
   }
@@ -93,7 +95,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 ? _buildEmptyChat()
                 : _buildMessagesList(messages),
           ),
-          _buildInputArea(),
+          _buildInputBar(),
         ],
       ),
     );

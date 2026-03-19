@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
-import '../messaging/models/message_model.dart';
-import '../providers/messaging_provider.dart';
+import '../../features/messaging/models/message_model.dart';
 import 'chat_screen.dart';
+
+class ConversationsNotifier extends StateNotifier<List<ConversationModel>> {
+  ConversationsNotifier() : super([]);
+
+  void markAsRead(String conversationId) {
+    // TODO: Implement markAsRead logic
+  }
+}
+
+// Define the conversations provider
+final conversationsProvider = StateNotifierProvider<ConversationsNotifier, List<ConversationModel>>((ref) {
+  return ConversationsNotifier();
+});
 
 class ConversationsScreen extends ConsumerStatefulWidget {
   const ConversationsScreen({super.key});
@@ -16,6 +28,13 @@ class ConversationsScreen extends ConsumerStatefulWidget {
 class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +238,7 @@ class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
 // ---------------------------------------------------------------------------
 
 class _ConversationTile extends ConsumerWidget {
-  const _ConversationTile({required this.conversation, super.key});
+  const _ConversationTile({required this.conversation});
 
   final ConversationModel conversation;
 
@@ -265,7 +284,7 @@ class _ConversationTile extends ConsumerWidget {
               : null,
           child: conversation.participantAvatarUrl == null
               ? Text(
-                  (conversation.participantName?.isNotEmpty ?? false)
+                  (conversation.participantName.isNotEmpty)
                       ? conversation.participantName[0].toUpperCase()
                       : '?',
                   style: const TextStyle(

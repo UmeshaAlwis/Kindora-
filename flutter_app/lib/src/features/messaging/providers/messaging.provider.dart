@@ -231,12 +231,12 @@ class MessagesNotifier extends StateNotifier<List<MessageModel>> {
   MessagesNotifier(this.conversationId, this._ref)
       : super(_mockMessages[conversationId] ?? []);
 
-  Future<void> sendMessage(String content) async {
+  Future<void> sendMessage(String content, String receiverId) async {
     final newMsg = MessageModel(
       id: _uuid.v4(),
       conversationId: conversationId,
       senderId: 'current_user',
-      receiverId: 'other_user',
+      receiverId: receiverId,
       content: content,
       timestamp: DateTime.now(),
       status: MessageStatus.sending,

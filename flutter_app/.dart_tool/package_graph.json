@@ -22,6 +22,7 @@
         "firebase_messaging",
         "firebase_storage",
         "flutter",
+        "flutter_riverpod",
         "flutter_staggered_grid_view",
         "get",
         "get_it",
@@ -141,6 +142,17 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_riverpod",
+      "version": "2.6.1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "meta",
+        "riverpod",
+        "state_notifier"
       ]
     },
     {
@@ -915,6 +927,13 @@
       ]
     },
     {
+      "name": "state_notifier",
+      "version": "1.0.0",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
       "name": "firebase_core_platform_interface",
       "version": "5.4.2",
       "dependencies": [
@@ -1410,13 +1429,6 @@
         "http_parser",
         "meta",
         "web"
-      ]
-    },
-    {
-      "name": "state_notifier",
-      "version": "1.0.0",
-      "dependencies": [
-        "meta"
       ]
     },
     {
