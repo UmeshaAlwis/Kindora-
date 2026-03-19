@@ -41,9 +41,41 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          return const Center(child: Text("Causes will appear here!"));
-        },
+          // Error state
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(
+          "Something went wrong!\n${snapshot.error}",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.red,
+          ),
+        ),
+      );
+    }
+     // Empty state
+    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.volunteer_activism,
+                size: 60, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              "No causes available yet.",
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+        return const Center(child: Text("Causes will appear here!"));
+      },
       ),
     );
   }
