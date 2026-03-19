@@ -10,7 +10,6 @@ import {
   CircularProgress,
   Button,
   Chip,
-  Paper,
   Divider,
 } from '@mui/material';
 import {
@@ -18,8 +17,6 @@ import {
   Area,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
@@ -119,14 +116,6 @@ const Dashboard = () => {
   const [campaignProgress, setCampaignProgress] = useState([]);
   const [recentUpdates, setRecentUpdates] = useState([]);
 
-  useEffect(() => {
-    fetchDashboardData();
-    const subscription = setupRealtimeUpdates();
-    return () => {
-      if (subscription) subscription.unsubscribe();
-    };
-  }, []);
-
   const fetchDashboardData = async () => {
     try {
       // Fetch donations
@@ -135,7 +124,7 @@ const Dashboard = () => {
         .select('*', { count: 'exact', head: false });
 
       // Fetch campaigns
-      const { data: campaigns, count: campaignCount } = await supabase
+      const { data: campaigns } = await supabase
         .from('campaigns')
         .select('*', { count: 'exact', head: false });
 
@@ -208,6 +197,14 @@ const Dashboard = () => {
       })
       .subscribe();
   };
+
+  useEffect(() => {
+    fetchDashboardData();
+    const subscription = setupRealtimeUpdates();
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, []);
 
   if (loading) {
     return (

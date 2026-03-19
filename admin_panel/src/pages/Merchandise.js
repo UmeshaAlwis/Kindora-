@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   CircularProgress,

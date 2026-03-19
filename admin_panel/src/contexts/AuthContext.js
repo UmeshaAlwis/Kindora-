@@ -85,14 +85,26 @@ export const AuthProvider = ({ children }) => {
     let mounted = true;
     let retryCount = 0;
     const maxRetries = 3;
+    const sessionTimeout = 5000; // 5 second timeout
 
     const getSession = async () => {
+      console.log('AuthContext: Getting session...');
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session fetch timeout')), sessionTimeout)
+        );
+
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+        console.log('AuthContext: Got session:', session?.user?.email);
         if (!mounted) return;
         if (session?.user) {
           setUser(session.user);
           await fetchProfile(session.user.id);
+        } else {
+          console.log('AuthContext: No session found, user is null');
+          setUser(null);
+          setProfile(null);
         }
       } catch (err) {
         if (handleStorageError(err) && retryCount < maxRetries) {
@@ -102,15 +114,23 @@ export const AuthProvider = ({ children }) => {
           await getSession();
         } else if (!handleStorageError(err)) {
           console.error('Session error:', err);
+          // Set to null user on error so we can show login page
+          if (mounted) {
+            setUser(null);
+            setProfile(null);
+          }
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          console.log('AuthContext: Setting loading to false');
+          setLoading(false);
+        }
       }
     };
 
     getSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const subscription = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         try {
@@ -132,11 +152,20 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       mounted = false;
-      subscription?.unsubscribe().catch(err => {
-        if (!handleStorageError(err)) {
-          console.error('Unsubscribe error:', err);
+      try {
+        if (subscription && typeof subscription === 'object' && subscription.unsubscribe) {
+          const result = subscription.unsubscribe();
+          if (result && typeof result.catch === 'function') {
+            result.catch(err => {
+              if (!handleStorageError(err)) {
+                console.error('Unsubscribe error:', err);
+              }
+            });
+          }
         }
-      });
+      } catch (err) {
+        console.error('Error during cleanup:', err);
+      }
     };
   }, [fetchProfile]);
 

@@ -9,6 +9,8 @@ const ProtectedRoute = ({ children }) => {
   const [promoting, setPromoting] = useState(false);
   const [promoMsg, setPromoMsg] = useState('');
 
+  console.log('ProtectedRoute render - loading:', loading, 'user:', user?.email, 'profile:', profile?.role, 'isAdmin:', isAdmin);
+
   if (loading) {
     return (
       <Box

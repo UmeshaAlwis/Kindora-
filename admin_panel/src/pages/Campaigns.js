@@ -3,9 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
 import {
   Box,
-  Grid,
   Card,
-  CardContent,
   Typography,
   Button,
   Dialog,
@@ -21,7 +19,6 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Paper,
   InputAdornment,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';

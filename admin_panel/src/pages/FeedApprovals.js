@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   CircularProgress,
@@ -21,7 +20,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextareaAutosize,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
