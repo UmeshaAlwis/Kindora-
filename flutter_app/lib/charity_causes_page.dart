@@ -41,6 +41,21 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          // Error state
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(
+          "Something went wrong!\n${snapshot.error}",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.red,
+          ),
+        ),
+      );
+    }
+
+
 
           return const Center(child: Text("Causes will appear here!"));
         },
