@@ -10,6 +10,15 @@ class CharityCausesPage extends StatefulWidget {
 }
 
 class _CharityCausesPageState extends State<CharityCausesPage> {
+  
+  // fetch causes from Supabase
+  late Future<List<dynamic>> causes;
+
+  @override
+  void initState() {
+    super.initState();
+    causes = CampaignService().getCharityCauses();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +33,17 @@ class _CharityCausesPageState extends State<CharityCausesPage> {
           ),
         ),
       ),
-      body: const Center(
-        child: Text("Loading causes..."),
+      body: FutureBuilder<List<dynamic>>(
+        future: causes,
+        builder: (context, snapshot) {
+
+          // Loading state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return const Center(child: Text("Causes will appear here!"));
+        },
       ),
     );
   }
