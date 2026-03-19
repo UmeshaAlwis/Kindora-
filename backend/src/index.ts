@@ -23,6 +23,7 @@ import chatRoutes from './routes/chat.routes';
 import walletRoutes from './routes/wallet.routes';
 import storageRoutes from './routes/storage.routes';
 import beneficiaryRoutes from './routes/beneficiary.routes';
+import feedRoutes from './routes/feed.routes';
 
 // Load environment variables
 dotenv.config();
@@ -180,6 +181,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       messages: '/api/messages',
       payments: '/api/payments',
       chat: '/api/chat',
+      feed: '/api/feed',
       storage: '/api/storage',
       beneficiary: '/api/beneficiary',
     },
@@ -196,6 +198,7 @@ apiRouter.use('/users', userRoutes);
 apiRouter.use('/messages', messageRoutes);
 apiRouter.use('/payments', paymentRoutes);
 apiRouter.use('/chat', chatRoutes);
+apiRouter.use('/feed', feedRoutes);
 apiRouter.use('/storage', storageRoutes);
 apiRouter.use('/beneficiary', beneficiaryRoutes);
 
