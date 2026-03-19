@@ -14,17 +14,22 @@ export class CampaignService {
       category?: string;
       charityId?: string;
       searchQuery?: string;
+      sortBy?: string;
     } = {}
   ) {
     try {
       const offset = (page - 1) * limit;
       const options: any = {
         select:
-          'id,title,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at',
+          'id,title,description,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at,end_date',
         limit,
         offset,
         orderBy: { column: 'created_at', ascending: false },
       };
+
+      if (filters.sortBy === 'ending_soon') {
+        options.orderBy = { column: 'end_date', ascending: true };
+      }
 
       // Add filters if provided
       if (filters.status || filters.category || filters.charityId) {
@@ -93,6 +98,7 @@ export class CampaignService {
         campaign_category: data.campaign_category,
         target_amount: data.target_amount,
         image_url: data.image_url || null,
+        end_date: data.end_date || null,
       };
 
       console.log('[CampaignService] Inserting campaign:', campaignData);

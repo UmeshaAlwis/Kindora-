@@ -49,6 +49,43 @@ class CampaignRepository {
     }
   }
 
+  /// Fetch urgent campaigns (closest end date first)
+  Future<List<Campaign>> getUrgentCampaigns({int limit = 10}) async {
+    try {
+      final dio = Dio();
+      final apiUrl = '${AppEnv.apiBaseUrl}/campaigns?limit=50&sortBy=ending_soon';
+
+      final response = await dio.get(
+        apiUrl,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final campaigns = (data['data'] as List)
+            .map((json) => Campaign.fromJson(json))
+            .toList();
+
+        // Keep posts with end date first (already sorted by API), then others.
+        campaigns.sort((a, b) {
+          if (a.endDate == null && b.endDate == null) return 0;
+          if (a.endDate == null) return 1;
+          if (b.endDate == null) return -1;
+          return a.endDate!.compareTo(b.endDate!);
+        });
+
+        return campaigns.take(limit).toList();
+      }
+      throw Exception('Failed to fetch urgent campaigns: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Failed to fetch urgent campaigns: $e');
+    }
+  }
+
   /// Fetch campaign by ID
   Future<Campaign?> getCampaignById(String campaignId) async {
     try {
@@ -102,6 +139,7 @@ class CampaignRepository {
         'campaign_category': campaignCategory,
         'target_amount': targetAmount ?? 1000.0,
         'image_url': image,
+        'end_date': endDate?.toIso8601String(),
       };
       print('[CampaignRepository] Request payload: $data');
 
