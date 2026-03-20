@@ -2,205 +2,153 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// --- MAIN RECOMMENDATION SCREEN ---
 class RecommendationScreen extends StatelessWidget {
   const RecommendationScreen({super.key});
 
+  // Strict Brand Colors
+  static const Color primaryBlue = Color(0xFF0C0C79);
+  static const Color primaryOrange = Color(0xFFFF751F);
+
   @override
   Widget build(BuildContext context) {
-    const Color darkNavy = Color(0xFF1A1A40);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: false,
-        title: Text(
-          'AI Recommendations',
-          style: GoogleFonts.poppins(
-            color: darkNavy,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // AI Info Header
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [darkNavy, Color(0xFF2E2E6E)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
+      body: Column(
+        children: [
+          // Header Section
+          Container(
+            padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
+            decoration: const BoxDecoration(
+              color: primaryBlue,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
-              child: Row(
-                children: [
-                  const Icon(LucideIcons.sparkles, color: Colors.amber, size: 30),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Text(
-                      'Based on your interests, we found 3 new causes you might like.',
-                      style: GoogleFonts.poppins(color: Colors.white, fontSize: 14),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'AI Recommendations',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const Icon(LucideIcons.sparkles, color: primaryOrange, size: 28),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Tailored causes based on your donation history.',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
-            Text(
-              'Recommended for You',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: darkNavy,
-              ),
-            ),
-            const SizedBox(height: 20),
+          ),
 
-            // Recommendation Cards
-            _buildRecommendationCard(
-              context,
-              "Clean Water Initiative",
-              "Matches your interest in Sustainability",
-              LucideIcons.droplets,
-              Colors.blue,
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                Text(
+                  'Recommended for You',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildCard(context, "Clean Water Initiative", "Sustainability", LucideIcons.droplets, Colors.blue),
+                _buildCard(context, "Emergency Food Aid", "Urgent Need", LucideIcons.utensils, primaryOrange),
+                _buildCard(context, "Village Education Fund", "Education", LucideIcons.bookOpen, Colors.purple),
+              ],
             ),
-            _buildRecommendationCard(
-              context,
-              "Emergency Food Aid",
-              "Urgent need in your local area",
-              LucideIcons.utensils,
-              Colors.orange,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, String title, String tag, IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => DonationDetailsPage(title: title, icon: icon, color: color)),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(backgroundColor: color.withOpacity(0.1), child: Icon(icon, color: color, size: 20)),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryBlue)),
+                Text(tag, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              ]),
             ),
-            _buildRecommendationCard(
-              context,
-              "Rural School Library",
-              "80% funded - Help them reach the goal",
-              LucideIcons.bookOpen,
-              Colors.purple,
-            ),
+            const Icon(LucideIcons.chevronRight, size: 18, color: Colors.grey),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildRecommendationCard(BuildContext context, String title, String reason, IconData icon, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        onTap: () {
-          // Navigate to Details
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CauseDetailScreen(
-                title: title,
-                reason: reason,
-                icon: icon,
-                color: color,
-              ),
-            ),
-          );
-        },
-        leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.1),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        title: Text(
-            title,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: const Color(0xFF1A1A40))
-        ),
-        subtitle: Text(
-            reason,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      ),
-    );
-  }
 }
 
-// --- DETAIL SCREEN ---
-class CauseDetailScreen extends StatelessWidget {
+// --- PAGE 1: DONATION DETAILS ---
+class DonationDetailsPage extends StatelessWidget {
   final String title;
-  final String reason;
   final IconData icon;
   final Color color;
 
-  const CauseDetailScreen({
-    super.key,
-    required this.title,
-    required this.reason,
-    required this.icon,
-    required this.color
-  });
+  const DonationDetailsPage({super.key, required this.title, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: const Color(0xFF1A1A40),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: const BackButton(color: Color(0xFF0C0C79))
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
           children: [
             const SizedBox(height: 20),
             Icon(icon, size: 100, color: color),
-            const SizedBox(height: 30),
-            Text(title, style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Text(
-              "Every donation helps provide resources for this cause. $reason.",
+            const SizedBox(height: 40),
+            Text(title, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold, color: const Color(0xFF0C0C79))),
+            const SizedBox(height: 20),
+            const Text(
+              "Your contribution provides vital support for this project. Join a community dedicated to creating lasting change through transparent and impactful giving.",
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 15, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16, color: Colors.black54, height: 1.5),
             ),
             const Spacer(),
-            // ✅ THE BUTTON IS NOW FULLY FUNCTIONAL
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DonationAmountScreen(campaignTitle: title),
-                  ),
-                );
-              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A1A40),
-                minimumSize: const Size(double.infinity, 55),
+                backgroundColor: const Color(0xFF0C0C79), // Primary Blue
+                minimumSize: const Size(double.infinity, 60),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                elevation: 0,
               ),
-              child: Text(
-                "Donate Now",
-                style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentSelectionPage(title: title))),
+              child: const Text("Donate Now", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -208,94 +156,83 @@ class CauseDetailScreen extends StatelessWidget {
   }
 }
 
-// --- AMOUNT SELECTION SCREEN ---
-class DonationAmountScreen extends StatefulWidget {
-  final String campaignTitle;
-  const DonationAmountScreen({super.key, required this.campaignTitle});
-
-  @override
-  State<DonationAmountScreen> createState() => _DonationAmountScreenState();
-}
-
-class _DonationAmountScreenState extends State<DonationAmountScreen> {
-  final TextEditingController _amountController = TextEditingController();
+// --- PAGE 2: PAYMENT & AMOUNT SELECTION ---
+class PaymentSelectionPage extends StatelessWidget {
+  final String title;
+  const PaymentSelectionPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Select Amount", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1A40),
+        title: Text("Select Amount", style: GoogleFonts.poppins(color: const Color(0xFF0C0C79), fontWeight: FontWeight.bold)),
+        leading: const BackButton(color: Color(0xFF0C0C79)),
         elevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Your contribution to:", style: GoogleFonts.poppins(color: Colors.grey)),
-            Text(widget.campaignTitle, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text("Supporting:", style: TextStyle(color: Colors.grey)),
+            Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0C0C79))),
             const SizedBox(height: 40),
             TextField(
-              controller: _amountController,
               keyboardType: TextInputType.number,
-              autofocus: true,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
-                labelText: "Donation Amount",
                 prefixText: "\$ ",
-                hintText: "0.00",
+                labelText: "Enter Donation Amount",
+                labelStyle: const TextStyle(color: Colors.grey, fontSize: 16),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Color(0xFF1A1A40), width: 2),
+                    borderSide: const BorderSide(color: Color(0xFFFF751F), width: 2), // Focus Orange
+                    borderRadius: BorderRadius.circular(15)
                 ),
               ),
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: () {
-                if (_amountController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter an amount")),
-                  );
-                  return;
-                }
-
-                // Show Success Message
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Icon(LucideIcons.checkCircle, color: Colors.green, size: 50),
-                    content: Text(
-                      "Thank you! Your donation of \$${_amountController.text} to ${widget.campaignTitle} was successful.",
-                      textAlign: TextAlign.center,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          // Go back to the very beginning (The Recommendation Feed)
-                          Navigator.popUntil(context, (route) => route.isFirst);
-                        },
-                        child: const Text("Done"),
-                      )
-                    ],
-                  ),
-                );
-              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF751F), // Brand Orange
-                minimumSize: const Size(double.infinity, 55),
+                backgroundColor: const Color(0xFFFF751F), // Brand Orange for confirmation
+                minimumSize: const Size(double.infinity, 60),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: const Text(
-                "Confirm & Pay",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              onPressed: () => _showSuccess(context),
+              child: const Text("Confirm & Pay", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
             ),
             const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSuccess(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 90),
+            const SizedBox(height: 20),
+            Text("Success!", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 22, color: const Color(0xFF0C0C79))),
+            const SizedBox(height: 10),
+            const Text("Thank you for your generous gift. Your support changes lives.", textAlign: TextAlign.center),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0C0C79),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+              child: const Text("Done", style: TextStyle(color: Colors.white)),
+            ),
           ],
         ),
       ),
