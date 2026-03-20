@@ -18,6 +18,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get notifications => 'அறிவிப்புகள்';
 
   @override
+  String get wallet => 'பணப்பை';
+
+  @override
   String get receiveCampaignUpdates => 'பிரச்சார புதுப்பிப்புகளை பெறுங்கள்';
 
   @override

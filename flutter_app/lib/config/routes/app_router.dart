@@ -11,6 +11,7 @@ import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
 import '../../features/merch/ui/merch_page.dart';
 import '../../features/notifications/ui/notifications_page.dart';
+import '../../features/wallet/ui/beneficiary_wallet_page.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_completion_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
@@ -112,6 +113,11 @@ class AppRouter {
             path: '/beneficiary/profile',
             name: 'beneficiary-profile',
             builder: (context, state) => const BeneficiaryProfileScreen(),
+          ),
+          GoRoute(
+            path: '/beneficiary/wallet',
+            name: 'beneficiary-wallet',
+            builder: (context, state) => const BeneficiaryWalletPage(),
           ),
           GoRoute(
             path: '/beneficiary/create-campaign',

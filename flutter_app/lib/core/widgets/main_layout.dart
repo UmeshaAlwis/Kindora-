@@ -16,7 +16,8 @@ class MainLayout extends ConsumerWidget {
   });
 
   int _getSelectedIndex(String location) {
-    // Beneficiary routes map to Home (index 0)
+    // Beneficiary routes
+    if (location.startsWith('/beneficiary/wallet')) return 3;
     if (location.startsWith('/beneficiary/dashboard')) return 0;
     if (location.startsWith('/beneficiary/profile')) return 4;
     if (location.startsWith('/beneficiary/create-campaign')) return 0;
@@ -70,6 +71,7 @@ class MainLayout extends ConsumerWidget {
     }
 
     final selectedIndex = _getSelectedIndex(location);
+    final isBeneficiaryRoute = location.startsWith('/beneficiary');
     debugPrint(
         '[MainLayout] Location: $location, SelectedIndex: $selectedIndex');
 
@@ -113,7 +115,9 @@ class MainLayout extends ConsumerWidget {
               if (context.mounted) context.go('/messages');
               break;
             case 3:
-              if (context.mounted) context.go('/merch');
+              if (context.mounted) {
+                context.go(isBeneficiary ? '/beneficiary/wallet' : '/merch');
+              }
               break;
             case 4:
               final route = isBeneficiary ? '/beneficiary/profile' : '/profile';
@@ -122,31 +126,39 @@ class MainLayout extends ConsumerWidget {
               break;
           }
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            activeIcon: Icon(Icons.home, color: Color(0xFF0C0C79)),
+            icon: const Icon(Icons.home_filled),
+            activeIcon: const Icon(Icons.home, color: Color(0xFF0C0C79)),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.rss_feed),
-            activeIcon: Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
+            icon: const Icon(Icons.rss_feed),
+            activeIcon: const Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.near_me_outlined),
-            activeIcon: Icon(Icons.near_me, color: Color(0xFF0C0C79)),
+            icon: const Icon(Icons.near_me_outlined),
+            activeIcon: const Icon(Icons.near_me, color: Color(0xFF0C0C79)),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.volunteer_activism_outlined),
-            activeIcon:
-                Icon(Icons.volunteer_activism, color: Color(0xFF0C0C79)),
+            icon: Icon(
+              isBeneficiaryRoute
+                  ? Icons.account_balance_wallet_outlined
+                  : Icons.volunteer_activism_outlined,
+            ),
+            activeIcon: Icon(
+              isBeneficiaryRoute
+                  ? Icons.account_balance_wallet
+                  : Icons.volunteer_activism,
+              color: const Color(0xFF0C0C79),
+            ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person, color: Color(0xFF0C0C79)),
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person, color: Color(0xFF0C0C79)),
             label: '',
           ),
         ].asMap().entries.map((entry) {
@@ -156,7 +168,7 @@ class MainLayout extends ConsumerWidget {
             l10n.home,
             l10n.feed,
             l10n.messages,
-            l10n.merch,
+            isBeneficiaryRoute ? l10n.wallet : l10n.merch,
             l10n.profile,
           ];
           return BottomNavigationBarItem(

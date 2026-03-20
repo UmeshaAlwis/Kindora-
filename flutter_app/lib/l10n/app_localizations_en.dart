@@ -18,6 +18,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
+  String get wallet => 'Wallet';
+
+  @override
   String get receiveCampaignUpdates => 'Receive campaign updates';
 
   @override

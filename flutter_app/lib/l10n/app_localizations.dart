@@ -115,6 +115,12 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get notifications;
 
+  /// No description provided for @wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get wallet;
+
   /// No description provided for @receiveCampaignUpdates.
   ///
   /// In en, this message translates to:

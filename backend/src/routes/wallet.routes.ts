@@ -8,6 +8,7 @@ const router = Router();
 router.get('/balance', authenticateToken, DonationController.getWalletBalance);
 router.get('/transactions', authenticateToken, DonationController.getWalletTransactions);
 router.get('/details', authenticateToken, DonationController.getWalletDetails);
+router.get('/beneficiary-summary', authenticateToken, DonationController.getBeneficiaryWalletSummary);
 
 // Wallet initialization and top-up
 router.post('/initialize', authenticateToken, DonationController.initializeWallet);

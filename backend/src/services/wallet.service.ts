@@ -209,4 +209,41 @@ export class WalletService {
       throw error;
     }
   }
+
+  /**
+   * Get beneficiary lifetime earnings from donations table.
+   * Includes past completed beneficiary campaign donations even if
+   * wallet-crediting logic was added later.
+   */
+  static async getBeneficiaryLifetimeEarnings(userId: string): Promise<number> {
+    try {
+      const campaigns = await supabase.select<any>('beneficiary_campaigns', {
+        select: 'id',
+        filters: { beneficiary_user_id: userId },
+      });
+
+      const campaignIds = (campaigns || []).map((c: any) => c.id).filter(Boolean);
+      if (campaignIds.length == 0) return 0;
+
+      // Supabase wrapper currently supports only eq filters; fetch completed
+      // beneficiary donations and then filter campaign IDs in memory.
+      const donations = await supabase.select<any>('donations', {
+        select: 'beneficiary_campaign_id,amount,status',
+        filters: { status: 'completed' },
+      });
+
+      const earned = (donations || [])
+        .filter(
+          (d: any) =>
+            d.beneficiary_campaign_id &&
+            campaignIds.includes(d.beneficiary_campaign_id)
+        )
+        .reduce((sum: number, d: any) => sum + (Number(d.amount) || 0), 0);
+
+      return earned;
+    } catch (error) {
+      console.error('[WalletService] Error fetching beneficiary lifetime earnings:', error);
+      throw error;
+    }
+  }
 }
