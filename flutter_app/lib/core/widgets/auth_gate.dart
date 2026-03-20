@@ -259,10 +259,15 @@ class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
         } catch (_) {}
       }
 
-      // If Firebase says beneficiary, trust it; otherwise use beneficiary_details if available.
+      // Resolve role deterministically during login:
+      // - Trust Firebase claim for both `beneficiary` and `charity` (volunteer).
+      // - If Firebase claim isn't available yet, fall back to beneficiary_details existence.
+      // - Otherwise use Supabase users.role.
       final resolvedRole = firebaseRoleClaim == 'beneficiary'
           ? 'beneficiary'
-          : (hasBeneficiaryDetails ? 'beneficiary' : userRole);
+          : (firebaseRoleClaim == 'charity'
+              ? 'charity'
+              : (hasBeneficiaryDetails ? 'beneficiary' : userRole));
 
       if (resolvedRole == 'beneficiary') {
         final profileCompleted = beneficiaryDetails?.profileCompleted ?? true;

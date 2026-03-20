@@ -138,6 +138,16 @@ class AppRouter {
             builder: (context, state) => const VolunteerDashboardScreen(),
           ),
           GoRoute(
+            path: '/volunteer/feed',
+            name: 'volunteer-feed',
+            builder: (context, state) => const FeedPage(),
+          ),
+          GoRoute(
+            path: '/volunteer/messages',
+            name: 'volunteer-messages',
+            builder: (context, state) => const MessagesPage(),
+          ),
+          GoRoute(
             path: '/volunteer/joined-campaigns',
             name: 'volunteer-joined-campaigns',
             builder: (context, state) =>

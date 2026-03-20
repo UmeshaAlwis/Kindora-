@@ -112,7 +112,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       radius: 60,
                       backgroundColor: const Color(0xFF0C0C79),
                       child: Text(
-                        user?.displayName?[0].toUpperCase() ?? 'U',
+                        (() {
+                          final name = user?.displayName?.trim() ?? '';
+                          if (name.isEmpty) return 'U';
+                          return name[0].toUpperCase();
+                        })(),
                         style: const TextStyle(
                           fontSize: 48,
                           color: Colors.white,
