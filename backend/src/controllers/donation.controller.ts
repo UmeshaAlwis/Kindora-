@@ -598,6 +598,38 @@ export class DonationController {
   }
 
   /**
+   * Get beneficiary wallet summary (balance + lifetime earnings)
+   */
+  static async getBeneficiaryWalletSummary(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const balance = await WalletService.getWalletBalance(userId);
+      const totalEarnings =
+        await WalletService.getBeneficiaryLifetimeEarnings(userId);
+
+      res.json({
+        success: true,
+        data: {
+          user_id: userId,
+          balance,
+          total_earnings: totalEarnings,
+          currency: 'LKR',
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Top up wallet balance
    */
   static async topUpWallet(req: Request, res: Response, next: NextFunction) {

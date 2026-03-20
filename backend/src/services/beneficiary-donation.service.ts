@@ -54,6 +54,11 @@ export class BeneficiaryDonationService {
           data.beneficiary_campaign_id,
           amount
         );
+        await this.creditBeneficiaryWallet(
+          data.beneficiary_campaign_id,
+          amount,
+          donationId
+        );
         await this.awardDonationPoints(donorId, amount);
 
         // Create notifications (best-effort)
@@ -116,6 +121,44 @@ export class BeneficiaryDonationService {
         }
       }
       throw error;
+    }
+  }
+
+  private static async creditBeneficiaryWallet(
+    beneficiaryCampaignId: string,
+    amount: number,
+    donationId: string
+  ) {
+    try {
+      const campaigns = await supabase.select<any>('beneficiary_campaigns', {
+        select: 'beneficiary_user_id',
+        filters: { id: beneficiaryCampaignId },
+      });
+      const beneficiaryUserId = campaigns?.[0]?.beneficiary_user_id as
+        | string
+        | undefined;
+      if (!beneficiaryUserId) return;
+
+      try {
+        await WalletService.addToWallet(
+          beneficiaryUserId,
+          amount,
+          `beneficiary_donation_${donationId}`
+        );
+      } catch (e) {
+        // If wallet doesn't exist for this user yet, initialize and retry once.
+        await WalletService.initializeWallet(beneficiaryUserId, 0);
+        await WalletService.addToWallet(
+          beneficiaryUserId,
+          amount,
+          `beneficiary_donation_${donationId}`
+        );
+      }
+    } catch (error) {
+      console.error(
+        '[BeneficiaryDonationService] Failed to credit beneficiary wallet:',
+        error
+      );
     }
   }
 
@@ -353,6 +396,11 @@ export class BeneficiaryDonationService {
         await this.updateBeneficiaryCampaignAmount(
           donationRow.beneficiary_campaign_id,
           donationRow.amount
+        );
+        await this.creditBeneficiaryWallet(
+          donationRow.beneficiary_campaign_id,
+          donationRow.amount,
+          donationId
         );
       }
 

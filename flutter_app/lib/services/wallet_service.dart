@@ -108,6 +108,37 @@ class WalletService {
     }
   }
 
+  /// Get beneficiary wallet summary (current balance + lifetime earnings)
+  Future<Map<String, double>> getBeneficiaryWalletSummary() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final idToken = await user.getIdToken();
+
+      final response = await http.get(
+        Uri.parse('${AppEnv.apiBaseUrl}/wallet/beneficiary-summary'),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch beneficiary wallet summary');
+      }
+
+      final data = jsonDecode(response.body);
+      final payload = data['data'] ?? {};
+      return {
+        'balance': (payload['balance'] as num?)?.toDouble() ?? 0.0,
+        'total_earnings': (payload['total_earnings'] as num?)?.toDouble() ?? 0.0,
+      };
+    } catch (e) {
+      throw Exception('Error fetching beneficiary wallet summary: $e');
+    }
+  }
+
   /// Top-up wallet balance (Demo/Mock implementation)
   Future<Map<String, dynamic>> topUpWallet({
     required double amount,

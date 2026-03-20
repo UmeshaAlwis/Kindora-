@@ -18,6 +18,9 @@ class AppLocalizationsSi extends AppLocalizations {
   String get notifications => 'දැනුම්දීම්';
 
   @override
+  String get wallet => 'පසුම්බිය';
+
+  @override
   String get receiveCampaignUpdates => 'ව්‍යාපාර යාවත්කාලීන ලබාගන්න';
 
   @override
