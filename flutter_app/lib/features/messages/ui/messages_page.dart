@@ -74,7 +74,9 @@ class _MessagesPageState extends State<MessagesPage> {
                 itemBuilder: (context, index) {
                   final c = conversations[index];
                   final title = c.partnerName.isEmpty ? l10n.user : c.partnerName;
-                  final avatarText = title.substring(0, 1).toUpperCase();
+                  final safeTitle = title.trim();
+                  final avatarText =
+                      safeTitle.isEmpty ? 'U' : safeTitle[0].toUpperCase();
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: const Color(0xFF0C0C79),

@@ -209,9 +209,11 @@ class _BeneficiaryProfileScreenState
                             radius: 50,
                             backgroundColor: Colors.white,
                             child: Text(
-                              (user.displayName?.isNotEmpty == true
-                                  ? user.displayName![0].toUpperCase()
-                                  : 'U'),
+                              (() {
+                                final name = user.displayName?.trim() ?? '';
+                                if (name.isEmpty) return 'U';
+                                return name[0].toUpperCase();
+                              })(),
                               style: TextStyle(
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold,

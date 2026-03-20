@@ -10,6 +10,7 @@ import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
 import '../../features/merch/ui/merch_page.dart';
+import '../../features/merch/ui/product_detail_page.dart';
 import '../../features/notifications/ui/notifications_page.dart';
 import '../../features/wallet/ui/beneficiary_wallet_page.dart';
 import '../../features/volunteer/ui/volunteer_dashboard_screen.dart';
@@ -98,6 +99,15 @@ class AppRouter {
             path: '/merch',
             name: 'merch',
             builder: (context, state) => const MerchPage(),
+          ),
+          GoRoute(
+            path: '/merch/product',
+            name: 'merch-product',
+            builder: (context, state) {
+              final product =
+                  (state.extra as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+              return ProductDetailPage(product: product);
+            },
           ),
           GoRoute(
             path: '/campaigns',

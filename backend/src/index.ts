@@ -25,6 +25,7 @@ import storageRoutes from './routes/storage.routes';
 import beneficiaryRoutes from './routes/beneficiary.routes';
 import feedRoutes from './routes/feed.routes';
 import notificationRoutes from './routes/notification.routes';
+import productRoutes from './routes/product.routes';
 import { BeneficiaryDonationService } from './services/beneficiary-donation.service';
 
 // Load environment variables
@@ -187,6 +188,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       storage: '/api/storage',
       beneficiary: '/api/beneficiary',
       notifications: '/api/notifications',
+      products: '/api/products',
     },
   });
 });
@@ -205,6 +207,7 @@ apiRouter.use('/feed', feedRoutes);
 apiRouter.use('/storage', storageRoutes);
 apiRouter.use('/beneficiary', beneficiaryRoutes);
 apiRouter.use('/notifications', notificationRoutes);
+apiRouter.use('/products', productRoutes);
 
 app.use('/api', apiRouter);
 
