@@ -24,6 +24,7 @@ import walletRoutes from './routes/wallet.routes';
 import storageRoutes from './routes/storage.routes';
 import beneficiaryRoutes from './routes/beneficiary.routes';
 import feedRoutes from './routes/feed.routes';
+import { BeneficiaryDonationService } from './services/beneficiary-donation.service';
 
 // Load environment variables
 dotenv.config();
@@ -243,6 +244,21 @@ async function startServer() {
     // Initialize Database
     await initializeDatabase();
     logger.info('✓ Database initialized');
+
+    // Recurring beneficiary donation scheduler (wallet-based only).
+    // Runs every 60 seconds and processes due installments.
+    let isRecurringJobRunning = false;
+    setInterval(async () => {
+      if (isRecurringJobRunning) return;
+      isRecurringJobRunning = true;
+      try {
+        await BeneficiaryDonationService.processDueRecurringBeneficiaryDonations();
+      } catch (error) {
+        logger.error('Recurring beneficiary donation job failed:', error);
+      } finally {
+        isRecurringJobRunning = false;
+      }
+    }, 60_000);
 
     // Start listening
     const server = app.listen(PORT, () => {

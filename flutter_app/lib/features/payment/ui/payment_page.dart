@@ -71,12 +71,18 @@ class PaymentPage extends StatefulWidget {
   final Campaign campaign;
   final double? preSelectedAmount;
   final String? beneficiaryCampaignId;
+  final String donationType;
+  final String? recurringFrequency;
+  final DateTime? recurringEndDate;
 
   const PaymentPage({
     super.key,
     required this.campaign,
     this.preSelectedAmount,
     this.beneficiaryCampaignId,
+    this.donationType = 'one-time',
+    this.recurringFrequency,
+    this.recurringEndDate,
   });
 
   @override
@@ -125,6 +131,11 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorPhoneController = TextEditingController();
     _wishController = TextEditingController();
     _walletService = WalletService();
+
+    // Recurring donations are currently processed using wallet payments.
+    if (widget.donationType == 'recurring') {
+      _selectedPaymentMethod = 'wallet';
+    }
 
     // Set pre-selected amount if provided
     if (widget.preSelectedAmount != null) {
@@ -195,6 +206,28 @@ class _PaymentPageState extends State<PaymentPage> {
       return;
     }
 
+    // Recurring payments are currently wallet-based only.
+    if (widget.donationType == 'recurring') {
+      if (_selectedPaymentMethod != 'wallet') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recurring donations use Wallet payments only'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (widget.recurringFrequency == null || widget.recurringEndDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select recurring frequency and end date'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     // Validate wallet balance for wallet payments
     if (_selectedPaymentMethod == 'wallet') {
       if (_walletBalance < _donationAmount) {
@@ -262,6 +295,9 @@ class _PaymentPageState extends State<PaymentPage> {
         beneficiaryCampaignId: beneficiaryCampaignId,
         donorName: _donorNameController.text,
         donorEmail: _donorEmailController.text,
+        donationType: widget.donationType,
+        recurringFrequency: widget.recurringFrequency,
+        recurringEndDate: widget.recurringEndDate,
       );
 
       if (!mounted) return;

@@ -1,19 +1,31 @@
 import { WalletService } from './wallet.service';
 import { supabase } from './supabase.service';
 import { v4 as uuidv4 } from 'uuid';
+import { ValidationError } from '../utils/errors';
 
 export class BeneficiaryDonationService {
   /**
    * Create beneficiary donation record
    */
   static async createBeneficiaryDonation(donorId: string, data: any) {
+    const donationType: string = data.donation_type ?? 'one-time';
+    if (donationType === 'recurring') {
+      return this.setupRecurringBeneficiaryDonation(donorId, data);
+    }
+
+    return this.createOneTimeBeneficiaryDonation(donorId, data);
+  }
+
+  private static async createOneTimeBeneficiaryDonation(donorId: string, data: any) {
     const donationId = uuidv4();
     const isWalletPayment = data.payment_method === 'wallet';
     const status = isWalletPayment ? 'completed' : 'pending';
+    const amount =
+      typeof data.amount === 'string' ? parseFloat(data.amount) : data.amount;
 
     // If wallet payment, deduct from wallet first
     if (isWalletPayment) {
-      await WalletService.deductFromWallet(donorId, data.amount, donationId);
+      await WalletService.deductFromWallet(donorId, amount, donationId);
     }
 
     try {
@@ -22,7 +34,7 @@ export class BeneficiaryDonationService {
         id: donationId,
         user_id: donorId,
         beneficiary_campaign_id: data.beneficiary_campaign_id,
-        amount: data.amount,
+        amount: amount,
         currency: 'LKR',
         payment_method: data.payment_method,
         status,
@@ -37,24 +49,207 @@ export class BeneficiaryDonationService {
 
       // If wallet payment, immediately update beneficiary campaign and points
       if (isWalletPayment) {
-        await this.updateBeneficiaryCampaignAmount(data.beneficiary_campaign_id, data.amount);
-        await this.awardDonationPoints(donorId, data.amount);
+        await this.updateBeneficiaryCampaignAmount(
+          data.beneficiary_campaign_id,
+          amount
+        );
+        await this.awardDonationPoints(donorId, amount);
       }
 
       return donation;
     } catch (error) {
       // If donation insert failed and wallet was debited, reverse the wallet deduction
       if (isWalletPayment) {
-        console.error('[BeneficiaryDonationService] Donation insert failed, reversing wallet deduction...', error);
+        console.error(
+          '[BeneficiaryDonationService] Donation insert failed, reversing wallet deduction...',
+          error
+        );
         try {
-          await WalletService.addToWallet(donorId, data.amount, `REVERSAL:${donationId}`);
-          console.log('[BeneficiaryDonationService] Wallet deduction reversed successfully');
+          await WalletService.addToWallet(donorId, amount, `REVERSAL:${donationId}`);
+          console.log(
+            '[BeneficiaryDonationService] Wallet deduction reversed successfully'
+          );
         } catch (reversalError) {
-          console.error('[BeneficiaryDonationService] CRITICAL: Failed to reverse wallet deduction!', reversalError);
+          console.error(
+            '[BeneficiaryDonationService] CRITICAL: Failed to reverse wallet deduction!',
+            reversalError
+          );
           // Log this critical issue for manual intervention
         }
       }
       throw error;
+    }
+  }
+
+  private static addFrequency(base: Date, frequency: string): Date {
+    const d = new Date(base);
+    switch (frequency) {
+      case 'daily':
+        d.setDate(d.getDate() + 1);
+        return d;
+      case 'weekly':
+        d.setDate(d.getDate() + 7);
+        return d;
+      case 'monthly':
+        d.setMonth(d.getMonth() + 1);
+        return d;
+      case 'yearly':
+        d.setFullYear(d.getFullYear() + 1);
+        return d;
+      default:
+        throw new ValidationError(`Unsupported recurring frequency: ${frequency}`);
+    }
+  }
+
+  /**
+   * Setup a recurring wallet-based beneficiary donation.
+   * Card/bank transfer recurring is not supported (no stored payment method/subscription).
+   */
+  private static async setupRecurringBeneficiaryDonation(
+    donorId: string,
+    data: any
+  ) {
+    if (data.payment_method !== 'wallet') {
+      throw new ValidationError(
+        'Recurring beneficiary donations are only supported with wallet payments'
+      );
+    }
+
+    const recurringFrequency: string | undefined = data.recurring_frequency;
+    if (!recurringFrequency) {
+      throw new ValidationError('recurring_frequency is required for recurring donations');
+    }
+
+    const endDateRaw = data.recurring_end_date;
+    const endDate = endDateRaw ? new Date(endDateRaw) : null;
+    const now = new Date();
+
+    if (endDate && endDate.getTime() <= now.getTime()) {
+      throw new ValidationError('recurring_end_date must be in the future');
+    }
+
+    // Process first installment immediately.
+    const firstDonation = await this.createOneTimeBeneficiaryDonation(donorId, {
+      ...data,
+      donation_type: 'one-time',
+    });
+
+    const nextPaymentAt = this.addFrequency(now, recurringFrequency);
+
+    // If next payment is beyond end date, we don't create a schedule.
+    if (endDate && nextPaymentAt.getTime() > endDate.getTime()) {
+      return firstDonation;
+    }
+
+    await supabase.insert('beneficiary_recurring_donations', {
+      user_id: donorId,
+      beneficiary_campaign_id: data.beneficiary_campaign_id,
+      amount: typeof data.amount === 'string' ? parseFloat(data.amount) : data.amount,
+      currency: 'LKR',
+      recurring_frequency: recurringFrequency,
+      recurring_end_date: endDate ? endDate.toISOString() : null,
+      next_payment_at: nextPaymentAt.toISOString(),
+      occurrences_done: 1,
+      status: 'active',
+      donor_name: data.donor_name,
+      donor_email: data.donor_email,
+      donor_phone: data.donor_phone ?? null,
+    });
+
+    return firstDonation;
+  }
+
+  /**
+   * Scheduler entry-point for processing due recurring beneficiary donations.
+   * Called periodically from `src/index.ts`.
+   */
+  static async processDueRecurringBeneficiaryDonations() {
+    const now = new Date();
+
+    // The current Supabase client wrapper only supports `eq` filters,
+    // so we fetch active schedules and filter in JS.
+    const schedules = await supabase.select<any>('beneficiary_recurring_donations', {
+      select:
+        'id,user_id,beneficiary_campaign_id,amount,recurring_frequency,recurring_end_date,next_payment_at,occurrences_done,donor_name,donor_email,donor_phone,status',
+      filters: { status: 'active' },
+      orderBy: { column: 'next_payment_at', ascending: true },
+      limit: 200,
+    });
+
+    const due = (schedules || []).filter((s: any) => {
+      const nextAt = new Date(s.next_payment_at);
+      return nextAt.getTime() <= now.getTime();
+    });
+
+    for (const schedule of due) {
+      try {
+        // Reduce duplicate runs by marking as processing first.
+        await supabase.update<any>(
+          'beneficiary_recurring_donations',
+          { status: 'processing' },
+          { id: schedule.id }
+        );
+
+        const endDate = schedule.recurring_end_date
+          ? new Date(schedule.recurring_end_date)
+          : null;
+
+        // Create one-time donation installment (wallet only)
+        await this.createOneTimeBeneficiaryDonation(schedule.user_id, {
+          beneficiary_campaign_id: schedule.beneficiary_campaign_id,
+          amount: schedule.amount,
+          payment_method: 'wallet',
+          donor_name: schedule.donor_name,
+          donor_email: schedule.donor_email,
+          donor_phone: schedule.donor_phone ?? null,
+          donation_type: 'one-time',
+        });
+
+        // Advance schedule
+        const currentNextAt = new Date(schedule.next_payment_at);
+        const nextPaymentAt = this.addFrequency(
+          currentNextAt,
+          schedule.recurring_frequency
+        );
+
+        const occurrencesDone =
+          (typeof schedule.occurrences_done === 'string'
+            ? parseInt(schedule.occurrences_done, 10)
+            : schedule.occurrences_done) + 1;
+
+        const shouldFinish = endDate && nextPaymentAt.getTime() > endDate.getTime();
+
+        await supabase.update<any>(
+          'beneficiary_recurring_donations',
+          {
+            next_payment_at: nextPaymentAt.toISOString(),
+            occurrences_done: occurrencesDone,
+            status: shouldFinish ? 'completed' : 'active',
+          },
+          { id: schedule.id }
+        );
+      } catch (error) {
+        console.error(
+          '[BeneficiaryDonationService] Failed processing recurring beneficiary donation:',
+          {
+            scheduleId: schedule.id,
+            error,
+          }
+        );
+
+        try {
+          await supabase.update<any>(
+            'beneficiary_recurring_donations',
+            { status: 'failed' },
+            { id: schedule.id }
+          );
+        } catch (updateError) {
+          console.error(
+            '[BeneficiaryDonationService] Failed updating schedule status after error:',
+            updateError
+          );
+        }
+      }
     }
   }
 

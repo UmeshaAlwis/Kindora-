@@ -151,6 +151,9 @@ class WalletService {
     String? beneficiaryCampaignId,
     required String donorName,
     required String donorEmail,
+    String donationType = 'one-time',
+    String? recurringFrequency,
+    DateTime? recurringEndDate,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -168,12 +171,23 @@ class WalletService {
         'payment_method': 'wallet',
         'donor_name': donorName,
         'donor_email': donorEmail,
+        'donation_type': donationType,
       };
 
       if (isBeneficiaryDonation) {
         body['beneficiary_campaign_id'] = beneficiaryCampaignId;
       } else {
         body['campaign_id'] = campaignId;
+      }
+
+      // Recurring fields (backend will validate these only when donation_type === 'recurring')
+      if (donationType == 'recurring') {
+        if (recurringFrequency != null) {
+          body['recurring_frequency'] = recurringFrequency;
+        }
+        if (recurringEndDate != null) {
+          body['recurring_end_date'] = recurringEndDate.toIso8601String();
+        }
       }
 
       // Use different endpoint for beneficiary donations
