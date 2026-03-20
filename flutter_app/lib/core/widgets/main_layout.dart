@@ -69,7 +69,10 @@ class MainLayout extends ConsumerWidget {
             child: child,
           ),
           // Chat assistant floating button
-          if (!location.startsWith('/messages'))
+          if (!location.startsWith('/messages') &&
+              !location.startsWith('/beneficiary/messages') &&
+              !location.startsWith('/volunteer/messages') &&
+              !location.startsWith('/merch/product'))
             const ChatAssistantButton(showBadge: true),
         ],
       ),

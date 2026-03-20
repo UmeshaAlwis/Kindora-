@@ -1,6 +1,7 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_URL || 'http://localhost:5001/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -36,94 +37,32 @@ class ApiClient {
     );
   }
 
-  // Auth Endpoints
-  login(email: string, password: string) {
-    return this.client.post('/auth/login', { email, password });
+  adminLogin(email: string, password: string) {
+    return this.client.post('/products/admin/login', { email, password });
   }
 
-  register(data: any) {
-    return this.client.post('/auth/register', data);
+  getProducts() {
+    return this.client.get('/products/admin');
   }
 
-  getCurrentUser() {
-    return this.client.get('/auth/me');
+  createProduct(data: {
+    name: string;
+    description?: string;
+    price: number;
+    stock_quantity: number;
+    category: string;
+    image_url?: string;
+  }) {
+    return this.client.post('/products/admin', data);
   }
 
-  // Users Endpoints
-  getUsers(page: number = 1, limit: number = 20) {
-    return this.client.get('/users', { params: { page, limit } });
-  }
-
-  getUserById(userId: string) {
-    return this.client.get(`/users/${userId}`);
-  }
-
-  updateUser(userId: string, data: any) {
-    return this.client.put(`/users/${userId}`, data);
-  }
-
-  // Charities Endpoints
-  getCharities(page: number = 1, status?: string) {
-    return this.client.get('/charities', {
-      params: { page, status },
-    });
-  }
-
-  getCharityById(charityId: string) {
-    return this.client.get(`/charities/${charityId}`);
-  }
-
-  verifyCharity(charityId: string) {
-    return this.client.post(`/charities/${charityId}/verify`, {});
-  }
-
-  rejectCharity(charityId: string, reason: string) {
-    return this.client.post(`/charities/${charityId}/reject`, { reason });
-  }
-
-  // Campaigns Endpoints
-  getCampaigns(page: number = 1, status?: string) {
-    return this.client.get('/campaigns', {
-      params: { page, status },
-    });
-  }
-
-  getCampaignById(campaignId: string) {
-    return this.client.get(`/campaigns/${campaignId}`);
-  }
-
-  approveCampaign(campaignId: string) {
-    return this.client.post(`/campaigns/${campaignId}/approve`, {});
-  }
-
-  rejectCampaign(campaignId: string, reason: string) {
-    return this.client.post(`/campaigns/${campaignId}/reject`, { reason });
-  }
-
-  // Analytics Endpoints
-  getAnalytics(startDate?: string, endDate?: string) {
-    return this.client.get('/analytics', {
-      params: { startDate, endDate },
-    });
-  }
-
-  getDonationStats() {
-    return this.client.get('/analytics/donations');
-  }
-
-  getUserStats() {
-    return this.client.get('/analytics/users');
-  }
-
-  // Scam Reports Endpoints
-  getScamReports(status?: string) {
-    return this.client.get('/scam-reports', { params: { status } });
-  }
-
-  reviewScamReport(reportId: string, verified: boolean, notes: string) {
-    return this.client.post(`/scam-reports/${reportId}/review`, {
-      verified,
-      notes,
+  uploadProductImage(file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.client.post('/products/admin/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
   }
 }

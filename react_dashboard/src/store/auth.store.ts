@@ -17,17 +17,27 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
+  user: (() => {
+    const raw = localStorage.getItem('admin_user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as User;
+    } catch (_) {
+      return null;
+    }
+  })(),
   token: localStorage.getItem('access_token'),
   isAuthenticated: !!localStorage.getItem('access_token'),
 
   login: (user, token) => {
     localStorage.setItem('access_token', token);
+    localStorage.setItem('admin_user', JSON.stringify(user));
     set({ user, token, isAuthenticated: true });
   },
 
   logout: () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('admin_user');
     set({ user: null, token: null, isAuthenticated: false });
   },
 
