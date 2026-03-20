@@ -10,6 +10,7 @@ ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallet_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaign_volunteers ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- USERS POLICIES
@@ -47,6 +48,21 @@ WITH CHECK (auth.uid() = user_id);
 
 -- Users can delete their own campaigns
 CREATE POLICY "campaigns_delete_own" ON campaigns
+FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================
+-- CAMPAIGN_VOLUNTEERS POLICIES
+-- ============================================
+-- Volunteers can view only their own joined rows
+CREATE POLICY "campaign_volunteers_view_own" ON campaign_volunteers
+FOR SELECT USING (auth.uid() = user_id);
+
+-- Volunteers can join/create their own join row
+CREATE POLICY "campaign_volunteers_insert_own" ON campaign_volunteers
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Volunteers can leave (delete) their own join row
+CREATE POLICY "campaign_volunteers_delete_own" ON campaign_volunteers
 FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================

@@ -197,6 +197,128 @@ export class CampaignService {
   }
 
   /**
+   * Volunteer endpoints
+   * Volunteers can see/join campaigns that require volunteer support.
+   */
+  static async getVolunteerAvailableCampaigns(userId: string, limit: number = 20) {
+    // Find which campaigns this volunteer already joined
+    const joinedRows = await supabase.select<any>('campaign_volunteers', {
+      select: 'campaign_id',
+      filters: { user_id: userId },
+    });
+    const joinedSet = new Set((joinedRows || []).map((r: any) => r.campaign_id));
+
+    const campaigns = await supabase.select<any>('campaigns', {
+      select: 'id,title,description,image_url,end_date,needs_volunteers,user_id,status',
+      filters: {
+        needs_volunteers: true,
+        status: 'active',
+      },
+      limit,
+      orderBy: { column: 'end_date', ascending: true },
+    });
+
+    const enriched = [];
+    for (const c of campaigns) {
+      // Donor info (who created the campaign)
+      const users = await supabase.select<any>('users', {
+        select: 'id,full_name,email',
+        filters: { id: c.user_id },
+        limit: 1,
+      });
+      const donor = users?.[0];
+
+      enriched.push({
+        ...c,
+        donor_full_name: donor?.full_name || donor?.email || 'User',
+        donor_id: c.user_id,
+        is_joined: joinedSet.has(c.id),
+      });
+    }
+
+    return enriched;
+  }
+
+  static async getVolunteerJoinedCampaigns(userId: string) {
+    const joinedRows = await supabase.select<any>('campaign_volunteers', {
+      select: 'campaign_id',
+      filters: { user_id: userId },
+      limit: 100,
+      orderBy: { column: 'created_at', ascending: false },
+    });
+
+    const campaignIds = (joinedRows || []).map((r: any) => r.campaign_id).filter(Boolean);
+    if (campaignIds.length === 0) return [];
+
+    const enriched = [];
+    for (const campaignId of campaignIds) {
+      const campaigns = await supabase.select<any>('campaigns', {
+        select: 'id,title,description,image_url,end_date,needs_volunteers,user_id,status',
+        filters: { id: campaignId },
+        limit: 1,
+      });
+
+      const c = campaigns?.[0];
+      if (!c) continue;
+
+      const users = await supabase.select<any>('users', {
+        select: 'id,full_name,email',
+        filters: { id: c.user_id },
+        limit: 1,
+      });
+      const donor = users?.[0];
+
+      enriched.push({
+        ...c,
+        donor_full_name: donor?.full_name || donor?.email || 'User',
+        donor_id: c.user_id,
+        is_joined: true,
+      });
+    }
+
+    return enriched;
+  }
+
+  static async joinVolunteerCampaign(userId: string, campaignId: string) {
+    // Validate campaign eligibility
+    const campaigns = await supabase.select<any>('campaigns', {
+      select: 'id,needs_volunteers,status',
+      filters: { id: campaignId },
+      limit: 1,
+    });
+
+    const campaign = campaigns?.[0];
+    if (!campaign) throw new Error('Campaign not found');
+    if (campaign.status !== 'active' || campaign.needs_volunteers !== true) {
+      throw new Error('Campaign is not available for volunteers');
+    }
+
+    // Avoid duplicates
+    const existing = await supabase.select<any>('campaign_volunteers', {
+      select: 'id',
+      filters: { user_id: userId, campaign_id: campaignId },
+      limit: 1,
+    });
+    if ((existing || []).length > 0) {
+      return { joined: true };
+    }
+
+    await supabase.insert('campaign_volunteers', {
+      campaign_id: campaignId,
+      user_id: userId,
+    });
+    return { joined: true };
+  }
+
+  static async leaveVolunteerCampaign(userId: string, campaignId: string) {
+    await supabase.delete('campaign_volunteers', {
+      user_id: userId,
+      campaign_id: campaignId,
+    });
+    return { left: true };
+  }
+
+  /**
    * Delete campaign
    */
   static async deleteCampaign(campaignId: string) {

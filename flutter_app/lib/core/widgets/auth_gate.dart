@@ -85,6 +85,8 @@ class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
                 } else {
                   context.go('/beneficiary/dashboard');
                 }
+              } else if (userRole == 'charity') {
+                context.go('/volunteer/dashboard');
               } else {
                 context.go('/dashboard');
               }
@@ -130,6 +132,13 @@ class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
               body: Center(child: CircularProgressIndicator()),
             );
           }
+        } else if (userRole == 'charity') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go('/volunteer/dashboard');
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // For donor and volunteer roles, go to regular dashboard (with bottom nav)

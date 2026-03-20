@@ -30,7 +30,7 @@ class _SignupScreenState extends State<SignupScreen> {
   // Role options for display and mapping
   final Map<String, String> roleOptions = {
     'donor': 'Donor - Support Causes',
-    'charity': 'Charity/Volunteer - Manage Programs',
+    'charity': 'Volunteer - Join campaigns',
     'beneficiary': 'Beneficiary - Receive Support',
   };
 

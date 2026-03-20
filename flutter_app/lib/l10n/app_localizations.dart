@@ -121,6 +121,12 @@ abstract class AppLocalizations {
   /// **'Wallet'**
   String get wallet;
 
+  /// No description provided for @joinedCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined campaigns'**
+  String get joinedCampaigns;
+
   /// No description provided for @receiveCampaignUpdates.
   ///
   /// In en, this message translates to:

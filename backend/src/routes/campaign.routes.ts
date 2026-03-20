@@ -9,6 +9,28 @@ const router = Router();
  */
 router.get('/', CampaignController.getCampaigns);
 
+// Volunteer join endpoints
+router.get(
+  '/volunteer/available',
+  authenticateToken,
+  CampaignController.getVolunteerAvailableCampaigns
+);
+router.get(
+  '/volunteer/joined',
+  authenticateToken,
+  CampaignController.getVolunteerJoinedCampaigns
+);
+router.post(
+  '/volunteer/:campaignId/join',
+  authenticateToken,
+  CampaignController.joinVolunteerCampaign
+);
+router.delete(
+  '/volunteer/:campaignId/join',
+  authenticateToken,
+  CampaignController.leaveVolunteerCampaign
+);
+
 /**
  * POST /campaigns - Create new campaign (protected)
  */
