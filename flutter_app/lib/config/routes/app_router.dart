@@ -137,6 +137,11 @@ class AppRouter {
             builder: (context, state) => const BeneficiaryProfileScreen(),
           ),
           GoRoute(
+            path: '/beneficiary/profile/settings',
+            name: 'beneficiary-profile-settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
             path: '/beneficiary/wallet',
             name: 'beneficiary-wallet',
             builder: (context, state) => const BeneficiaryWalletPage(),

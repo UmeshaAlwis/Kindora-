@@ -19,6 +19,7 @@ class _BeneficiaryProfileScreenState
     extends ConsumerState<BeneficiaryProfileScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
+  Future<String?>? _supabaseUserIdFuture;
 
   late TextEditingController _fullNameController;
   late TextEditingController _nicController;
@@ -41,6 +42,21 @@ class _BeneficiaryProfileScreenState
     _bankAccountNumberController = TextEditingController();
     _bankNameController = TextEditingController();
     _bankCodeController = TextEditingController();
+    _supabaseUserIdFuture = _resolveSupabaseUserId();
+  }
+
+  Future<String?> _resolveSupabaseUserId() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) return null;
+
+    final supabase = Supabase.instance.client;
+    final userResponse = await supabase
+        .from('users')
+        .select('id')
+        .eq('firebase_uid', firebaseUser.uid)
+        .maybeSingle();
+
+    return userResponse?['id'] as String?;
   }
 
   @override
@@ -63,6 +79,9 @@ class _BeneficiaryProfileScreenState
     _bankAccountNumberController.text = details.bankAccountNumber;
     _bankNameController.text = details.bankName;
     _bankCodeController.text = details.bankCode;
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -101,7 +120,7 @@ class _BeneficiaryProfileScreenState
       );
 
       // Refresh the provider
-      ref.refresh(beneficiaryDetailsProvider(supabaseUserId));
+      ref.invalidate(beneficiaryDetailsProvider(supabaseUserId));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -168,13 +187,13 @@ class _BeneficiaryProfileScreenState
         actions: [
           if (!_isEditing && user != null)
             IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.push('/profile/settings'),
             ),
           if (!_isEditing && user != null)
             IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: _logout,
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditing = true),
             ),
         ],
       ),
@@ -186,74 +205,113 @@ class _BeneficiaryProfileScreenState
                   style: TextStyle(color: primaryColor),
                 ),
               )
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Profile Header
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            primaryColor,
-                            primaryColor.withOpacity(0.8),
+            : FutureBuilder<String?>(
+                future: _supabaseUserIdFuture ??= _resolveSupabaseUserId(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final supabaseUserId = snapshot.data;
+                  if (supabaseUserId == null || supabaseUserId.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.red[400], size: 48),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Failed to load profile data.',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _supabaseUserIdFuture = _resolveSupabaseUserId();
+                                });
+                              },
+                              child: const Text('Retry'),
+                            ),
                           ],
                         ),
                       ),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            child: Text(
-                              (() {
-                                final name = user.displayName?.trim() ?? '';
-                                if (name.isEmpty) return 'U';
-                                return name[0].toUpperCase();
-                              })(),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            user.email ?? 'User',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    );
+                  }
 
-                    // Profile Details
-                    _BeneficiaryDetailsContent(
-                      userId: user.uid,
-                      isEditing: _isEditing,
-                      isSaving: _isSaving,
-                      fullNameController: _fullNameController,
-                      nicController: _nicController,
-                      addressController: _addressController,
-                      bankAccountHolderNameController:
-                          _bankAccountHolderNameController,
-                      bankAccountNumberController: _bankAccountNumberController,
-                      bankNameController: _bankNameController,
-                      bankCodeController: _bankCodeController,
-                      primaryColor: primaryColor,
-                      accentColor: accentColor,
-                      onLoadDetails: _loadBeneficiaryDetails,
-                      onSave: _saveProfile,
-                      onCancel: () => setState(() => _isEditing = false),
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Profile Header
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                primaryColor,
+                                primaryColor.withOpacity(0.8),
+                              ],
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.white,
+                                child: Text(
+                                  (() {
+                                    final name = user.displayName?.trim() ?? '';
+                                    if (name.isEmpty) return 'U';
+                                    return name[0].toUpperCase();
+                                  })(),
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                user.email ?? 'User',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Profile Details
+                        _BeneficiaryDetailsContent(
+                          userId: supabaseUserId,
+                          isEditing: _isEditing,
+                          isSaving: _isSaving,
+                          fullNameController: _fullNameController,
+                          nicController: _nicController,
+                          addressController: _addressController,
+                          bankAccountHolderNameController:
+                              _bankAccountHolderNameController,
+                          bankAccountNumberController: _bankAccountNumberController,
+                          bankNameController: _bankNameController,
+                          bankCodeController: _bankCodeController,
+                          primaryColor: primaryColor,
+                          accentColor: accentColor,
+                          onLoadDetails: _loadBeneficiaryDetails,
+                          onSave: _saveProfile,
+                          onCancel: () => setState(() => _isEditing = false),
+                          onLogout: _logout,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
       ),
     );
@@ -276,6 +334,7 @@ class _BeneficiaryDetailsContent extends ConsumerWidget {
   final Function(BeneficiaryDetails) onLoadDetails;
   final VoidCallback onSave;
   final VoidCallback onCancel;
+  final VoidCallback onLogout;
 
   const _BeneficiaryDetailsContent({
     required this.userId,
@@ -293,6 +352,7 @@ class _BeneficiaryDetailsContent extends ConsumerWidget {
     required this.onLoadDetails,
     required this.onSave,
     required this.onCancel,
+    required this.onLogout,
   });
 
   @override
@@ -315,10 +375,27 @@ class _BeneficiaryDetailsContent extends ConsumerWidget {
                 Text(
                   'Profile not completed',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey[600],
                   ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Complete your beneficiary profile to manage campaigns and receive donations.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () => context.push('/beneficiary/profile-completion'),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Complete Profile'),
                 ),
               ],
             ),
@@ -446,6 +523,27 @@ class _BeneficiaryDetailsContent extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+              ] else ...[
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onLogout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ],
