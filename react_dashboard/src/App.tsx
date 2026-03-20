@@ -247,6 +247,32 @@ export default function App() {
     }
   };
 
+  const removeCampaign = async (c: Campaign) => {
+    const ok = window.confirm(`Delete campaign "${c.title}"?`);
+    if (!ok) return;
+    try {
+      await api.deleteCampaign(c.id);
+      await loadCampaigns();
+      toast.success('Campaign deleted');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to delete campaign');
+    }
+  };
+
+  const removeBeneficiaryCampaign = async (c: Campaign) => {
+    const ok = window.confirm(`Delete beneficiary campaign "${c.title}"?`);
+    if (!ok) return;
+    try {
+      await api.deleteBeneficiaryCampaign(c.id);
+      await loadBeneficiaryCampaigns();
+      toast.success('Beneficiary campaign deleted');
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.error || 'Failed to delete beneficiary campaign'
+      );
+    }
+  };
+
   const toggleMerchStatus = async (p: Product) => {
     try {
       await api.updateMerchandiseStatus(p.id, !p.is_active);
@@ -470,6 +496,13 @@ export default function App() {
                       <option value="completed">completed</option>
                       <option value="cancelled">cancelled</option>
                     </select>
+                    <button
+                      className="btn ghost"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => removeCampaign(c)}
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -508,6 +541,13 @@ export default function App() {
                       <option value="completed">completed</option>
                       <option value="cancelled">cancelled</option>
                     </select>
+                    <button
+                      className="btn ghost"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => removeBeneficiaryCampaign(c)}
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -82,6 +82,10 @@ class ApiClient {
     return this.client.patch(`/admin/campaigns/${campaignId}/status`, { status });
   }
 
+  deleteCampaign(campaignId: string) {
+    return this.client.delete(`/admin/campaigns/${campaignId}`);
+  }
+
   getAdminBeneficiaryCampaigns() {
     return this.client.get('/admin/beneficiary-campaigns');
   }
@@ -90,6 +94,10 @@ class ApiClient {
     return this.client.patch(`/admin/beneficiary-campaigns/${campaignId}/status`, {
       status,
     });
+  }
+
+  deleteBeneficiaryCampaign(campaignId: string) {
+    return this.client.delete(`/admin/beneficiary-campaigns/${campaignId}`);
   }
 
   getAdminMerchandise() {

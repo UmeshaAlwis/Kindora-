@@ -638,12 +638,23 @@ class BeneficiaryCampaignRepository {
   /// Fetch all beneficiary campaigns
   Future<List<BeneficiaryCampaign>> getAllBeneficiaryCampaigns() async {
     try {
-      final response = await _supabase
-          .from('beneficiary_campaigns')
-          .select()
-          .order('created_at', ascending: false);
-      return (response as List)
-          .map((json) => BeneficiaryCampaign.fromJson(json))
+      // Use backend endpoint so admin deletions/status changes are respected consistently.
+      final dio = Dio();
+      final response = await dio.get(
+        '${AppEnv.apiBaseUrl}/beneficiary/campaigns/all?status=active&limit=100',
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch beneficiary campaigns: ${response.statusCode}');
+      }
+
+      final data = response.data as Map<String, dynamic>;
+      final rows = (data['data'] as List? ?? const []);
+      return rows
+          .map((json) => BeneficiaryCampaign.fromJson((json as Map).cast<String, dynamic>()))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch beneficiary campaigns: $e');
