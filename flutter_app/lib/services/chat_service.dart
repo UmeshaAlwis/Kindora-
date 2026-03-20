@@ -30,7 +30,7 @@ class ChatService {
     _sessionId = const Uuid().v4();
   }
 
-  /// 🔥 Toggle here (ONLY CHANGE THIS)
+  /// 🔥 Toggle here
   static const bool useFakeAI = true;
 
   /// Send message to chatbot and get response
@@ -46,13 +46,34 @@ class ChatService {
       _conversationHistory.add(userMsg);
 
       // ==================================================
-      // 🤖 FAKE AI MODE (SAFE - NO BACKEND REQUIRED)
+      // 🤖 FAKE AI MODE (SMART + SAFE)
       // ==================================================
       if (useFakeAI) {
         await Future.delayed(const Duration(milliseconds: 500));
 
+        String reply;
+        final text = userMessage.toLowerCase();
+
+        if (text.contains("donate")) {
+          reply =
+              "I can help you donate 💖. Would you like to see active campaigns?";
+        } else if (text.contains("campaign")) {
+          reply =
+              "We have many campaigns available. What cause are you interested in?";
+        } else if (text.contains("hello") || text.contains("hi")) {
+          reply =
+              "Hello! 😊 I'm your Kindora assistant. How can I help you?";
+        } else if (text.contains("help")) {
+          reply =
+              "You can ask me about donations, campaigns, or how Kindora works.";
+        } else if (text.contains("account")) {
+          reply = "You can manage your account from the profile section.";
+        } else {
+          reply = "I'm here to help you with Kindora! 😊";
+        }
+
         final chatResponse = ChatResponse(
-          reply: "AI says: $userMessage",
+          reply: reply,
           messageId: const Uuid().v4(),
           success: true,
         );
