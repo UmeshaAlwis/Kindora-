@@ -80,7 +80,8 @@ class MainLayout extends ConsumerWidget {
             child: child,
           ),
           // Chat assistant floating button
-          const ChatAssistantButton(showBadge: true),
+          if (!location.startsWith('/messages'))
+            const ChatAssistantButton(showBadge: true),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
