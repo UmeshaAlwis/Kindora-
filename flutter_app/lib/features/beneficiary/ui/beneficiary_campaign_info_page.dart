@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/supabase_models.dart';
+import '../../../providers/supabase_providers.dart';
 import '../../messages/services/direct_message_service.dart';
 import '../../messages/ui/direct_chat_page.dart';
 import '../../payment/models/payment_model.dart' as payment_model;
 import '../../payment/ui/beneficiary_donation_amount_selection_page.dart';
 
-class BeneficiaryCampaignInfoPage extends StatefulWidget {
+class BeneficiaryCampaignInfoPage extends ConsumerStatefulWidget {
   final BeneficiaryCampaign campaign;
 
   const BeneficiaryCampaignInfoPage({
@@ -14,11 +16,12 @@ class BeneficiaryCampaignInfoPage extends StatefulWidget {
   });
 
   @override
-  State<BeneficiaryCampaignInfoPage> createState() =>
+  ConsumerState<BeneficiaryCampaignInfoPage> createState() =>
       _BeneficiaryCampaignInfoPageState();
 }
 
-class _BeneficiaryCampaignInfoPageState extends State<BeneficiaryCampaignInfoPage> {
+class _BeneficiaryCampaignInfoPageState
+    extends ConsumerState<BeneficiaryCampaignInfoPage> {
   final DirectMessageService _messageService = DirectMessageService();
   bool _checkingRole = false;
 
@@ -64,8 +67,15 @@ class _BeneficiaryCampaignInfoPageState extends State<BeneficiaryCampaignInfoPag
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF0C0C79);
     const accentColor = Color(0xFFFF751F);
-    final campaign = widget.campaign;
-    final progress = (campaign.raisedAmount / campaign.targetAmount).clamp(0.0, 1.0);
+    final campaignAsync =
+        ref.watch(beneficiaryCampaignByIdProvider(widget.campaign.id));
+    final campaign = campaignAsync.valueOrNull ?? widget.campaign;
+    final baseProgress = campaign.targetAmount <= 0
+        ? 0.0
+        : (campaign.raisedAmount / campaign.targetAmount).clamp(0.0, 1.0);
+    final progress = campaign.raisedAmount > 0 && baseProgress < 0.01
+        ? 0.01
+        : baseProgress;
 
     return Scaffold(
       appBar: AppBar(
@@ -150,17 +160,8 @@ class _BeneficiaryCampaignInfoPageState extends State<BeneficiaryCampaignInfoPag
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onPressed: () {
-                        final paymentCampaign = payment_model.Campaign(
-                          id: campaign.id,
-                          title: campaign.title,
-                          image: campaign.imageUrl ?? '',
-                          raisedAmount: campaign.raisedAmount,
-                          targetAmount: campaign.targetAmount,
-                          description: campaign.description,
-                        );
-
-                        showModalBottomSheet(
+                      onPressed: () async {
+                        final shouldRefresh = await showModalBottomSheet<bool>(
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.white,
@@ -169,11 +170,27 @@ class _BeneficiaryCampaignInfoPageState extends State<BeneficiaryCampaignInfoPag
                               top: Radius.circular(24),
                             ),
                           ),
-                          builder: (context) => BeneficiaryDonationAmountSelectionModal(
-                            campaign: paymentCampaign,
+                          builder: (context) =>
+                              BeneficiaryDonationAmountSelectionModal(
+                            campaign: payment_model.Campaign(
+                              id: campaign.id,
+                              title: campaign.title,
+                              image: campaign.imageUrl ?? '',
+                              raisedAmount: campaign.raisedAmount,
+                              targetAmount: campaign.targetAmount,
+                              description: campaign.description,
+                            ),
                             beneficiaryCampaignId: campaign.id,
                           ),
                         );
+
+                        if (!mounted) return;
+                        if (shouldRefresh == true) {
+                          ref.invalidate(
+                            beneficiaryCampaignByIdProvider(widget.campaign.id),
+                          );
+                        }
+
                       },
                       icon: const Icon(Icons.favorite),
                       label: const Text('Donate Now'),
