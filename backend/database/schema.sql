@@ -220,6 +220,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+
 -- ============================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================
