@@ -25,6 +25,12 @@ class MainLayout extends ConsumerWidget {
     if (location.startsWith('/beneficiary/campaign')) return 0;
     if (location.startsWith('/beneficiary')) return 0;
 
+    // Volunteer routes
+    if (location.startsWith('/volunteer/joined-campaigns')) return 3;
+    if (location.startsWith('/volunteer/dashboard')) return 0;
+    if (location.startsWith('/volunteer/profile')) return 4;
+    if (location.startsWith('/volunteer')) return 0;
+
     // Donor routes
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/feed')) return 1;
@@ -50,6 +56,7 @@ class MainLayout extends ConsumerWidget {
 
     final selectedIndex = _getSelectedIndex(location);
     final isBeneficiary = location.startsWith('/beneficiary');
+    final isVolunteer = location.startsWith('/volunteer');
     debugPrint(
         '[MainLayout] Location: $location, SelectedIndex: $selectedIndex');
 
@@ -75,17 +82,20 @@ class MainLayout extends ConsumerWidget {
           print('[MainLayout] Tapped index: $index');
           print('[MainLayout] Current location: $location');
           print('[MainLayout] Is beneficiary (resolved): $isBeneficiary');
+          print('[MainLayout] Is volunteer (resolved): $isVolunteer');
 
           switch (index) {
             case 0:
-              final route =
-                  isBeneficiary ? '/beneficiary/dashboard' : '/dashboard';
+              final route = isBeneficiary
+                  ? '/beneficiary/dashboard'
+                  : (isVolunteer ? '/volunteer/dashboard' : '/dashboard');
               print('[MainLayout] Navigating to: $route');
               if (context.mounted) context.go(route);
               break;
             case 1:
               if (context.mounted) {
-                context.go(isBeneficiary ? '/beneficiary/feed' : '/feed');
+                context.go(
+                    isBeneficiary ? '/beneficiary/feed' : '/feed');
               }
               break;
             case 2:
@@ -96,11 +106,15 @@ class MainLayout extends ConsumerWidget {
               break;
             case 3:
               if (context.mounted) {
-                context.go(isBeneficiary ? '/beneficiary/wallet' : '/merch');
+                context.go(isBeneficiary
+                    ? '/beneficiary/wallet'
+                    : (isVolunteer ? '/volunteer/joined-campaigns' : '/merch'));
               }
               break;
             case 4:
-              final route = isBeneficiary ? '/beneficiary/profile' : '/profile';
+              final route = isBeneficiary
+                  ? '/beneficiary/profile'
+                  : (isVolunteer ? '/volunteer/profile' : '/profile');
               print('[MainLayout] Navigating to: $route');
               if (context.mounted) context.go(route);
               break;
@@ -126,12 +140,14 @@ class MainLayout extends ConsumerWidget {
             icon: Icon(
               isBeneficiary
                   ? Icons.account_balance_wallet_outlined
-                  : Icons.volunteer_activism_outlined,
+                  : (isVolunteer
+                      ? Icons.group_add_outlined
+                      : Icons.volunteer_activism_outlined),
             ),
             activeIcon: Icon(
               isBeneficiary
                   ? Icons.account_balance_wallet
-                  : Icons.volunteer_activism,
+                  : (isVolunteer ? Icons.group_add : Icons.volunteer_activism),
               color: const Color(0xFF0C0C79),
             ),
             label: '',
@@ -148,7 +164,9 @@ class MainLayout extends ConsumerWidget {
             l10n.home,
             l10n.feed,
             l10n.messages,
-            isBeneficiary ? l10n.wallet : l10n.merch,
+            isBeneficiary
+                ? l10n.wallet
+                : (isVolunteer ? l10n.joinedCampaigns : l10n.merch),
             l10n.profile,
           ];
           return BottomNavigationBarItem(

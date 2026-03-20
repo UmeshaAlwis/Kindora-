@@ -167,4 +167,104 @@ export class CampaignController {
       next(error);
     }
   }
+
+  /**
+   * Volunteers: list available campaigns that require volunteer support.
+   * GET /campaigns/volunteer/available?limit=20
+   */
+  static async getVolunteerAvailableCampaigns(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) throw new ValidationError('User not authenticated');
+
+      const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
+      const campaigns = await CampaignService.getVolunteerAvailableCampaigns(userId, limit);
+
+      res.json({
+        success: true,
+        data: campaigns,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Volunteers: list campaigns the volunteer already joined.
+   * GET /campaigns/volunteer/joined
+   */
+  static async getVolunteerJoinedCampaigns(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) throw new ValidationError('User not authenticated');
+
+      const campaigns = await CampaignService.getVolunteerJoinedCampaigns(userId);
+      res.json({
+        success: true,
+        data: campaigns,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Volunteers: join a campaign.
+   * POST /campaigns/volunteer/:campaignId/join
+   */
+  static async joinVolunteerCampaign(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) throw new ValidationError('User not authenticated');
+
+      const { campaignId } = req.params;
+      if (!campaignId) throw new ValidationError('campaignId is required');
+
+      const result = await CampaignService.joinVolunteerCampaign(userId, campaignId);
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Volunteers: leave a joined campaign.
+   * DELETE /campaigns/volunteer/:campaignId/join
+   */
+  static async leaveVolunteerCampaign(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) throw new ValidationError('User not authenticated');
+
+      const { campaignId } = req.params;
+      if (!campaignId) throw new ValidationError('campaignId is required');
+
+      const result = await CampaignService.leaveVolunteerCampaign(userId, campaignId);
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

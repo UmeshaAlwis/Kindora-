@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wallet => 'Wallet';
 
   @override
+  String get joinedCampaigns => 'Joined campaigns';
+
+  @override
   String get receiveCampaignUpdates => 'Receive campaign updates';
 
   @override

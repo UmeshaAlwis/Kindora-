@@ -21,6 +21,9 @@ class AppLocalizationsSi extends AppLocalizations {
   String get wallet => 'පසුම්බිය';
 
   @override
+  String get joinedCampaigns => 'සම්බන්ධ වූ ව්‍යාපාර';
+
+  @override
   String get receiveCampaignUpdates => 'ව්‍යාපාර යාවත්කාලීන ලබාගන්න';
 
   @override

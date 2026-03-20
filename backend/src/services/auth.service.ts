@@ -74,8 +74,13 @@ export class AuthService {
       console.log('[AuthService] User synced to Supabase:', userId);
 
       // Step 5: Create wallet for new user in Supabase
-      await SupabaseUserService.createWallet(userId);
-      console.log('[AuthService] Wallet created for user:', userId);
+      // Volunteers (stored as `charity` role in this app) do not need wallets.
+      if (data.role === 'donor' || data.role === 'beneficiary') {
+        await SupabaseUserService.createWallet(userId);
+        console.log('[AuthService] Wallet created for user:', userId);
+      } else {
+        console.log('[AuthService] Skipping wallet creation for role:', data.role);
+      }
     } catch (error: any) {
       console.error('[AuthService] Supabase sync failed:', error.message);
       throw new Error(`User registration failed: ${error.message}`);
