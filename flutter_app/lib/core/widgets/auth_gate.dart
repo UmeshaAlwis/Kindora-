@@ -54,11 +54,36 @@ class _AuthenticatedGate extends ConsumerWidget {
         }
 
         if (snapshot.hasError) {
-        // Error fetching user data, proceed with default role
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) context.go('/dashboard');
-        });
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          // Error fetching user data.
+          // Don't immediately fall back to donor UI; instead, retry role fetch
+          // and route based on what we find.
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              final data = await _getUserRoleAndStatus(user.uid);
+              if (!context.mounted) return;
+
+              final userRole = data?['role'] as String? ?? 'donor';
+              final profileCompleted =
+                  data?['profileCompleted'] as bool? ?? false;
+
+              if (userRole == 'beneficiary') {
+                if (!profileCompleted) {
+                  context.go('/beneficiary/profile-completion');
+                } else {
+                  context.go('/beneficiary/dashboard');
+                }
+              } else {
+                context.go('/dashboard');
+              }
+            } catch (_) {
+              if (!context.mounted) return;
+              context.go('/dashboard');
+            }
+          });
+
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         final data = snapshot.data;
@@ -107,6 +132,17 @@ class _AuthenticatedGate extends ConsumerWidget {
     try {
       print('[AuthGate DEBUG] Fetching role for Firebase UID: $userId');
 
+      // Prefer Firebase custom claims (most reliable during initial sync).
+      // This avoids briefly routing beneficiary users to donor screens.
+      String? firebaseRoleClaim;
+      try {
+        final idTokenResult = await user.getIdTokenResult();
+        final claim = idTokenResult.claims?['role'];
+        if (claim is String) firebaseRoleClaim = claim;
+      } catch (_) {
+        firebaseRoleClaim = null;
+      }
+
       // Give Supabase a head start to sync from Firebase (initial delay)
       print('[AuthGate DEBUG] Waiting for Supabase sync...');
       await Future.delayed(const Duration(milliseconds: 1000));
@@ -141,7 +177,18 @@ class _AuthenticatedGate extends ConsumerWidget {
 
       if (profileResponse == null) {
         print(
-            '[AuthGate DEBUG] ✗ User not found in Supabase after $maxRetries retries. Defaulting to donor.');
+            '[AuthGate DEBUG] ✗ User not found in Supabase after $maxRetries retries.');
+
+        // Fallback to Firebase claim when Supabase row isn't ready yet.
+        if (firebaseRoleClaim != null) {
+          final isBeneficiary = firebaseRoleClaim == 'beneficiary';
+          return {
+            'role': firebaseRoleClaim,
+            'profileCompleted': isBeneficiary ? true : true,
+          };
+        }
+
+        // Last-resort fallback.
         return {
           'role': 'donor',
           'profileCompleted': true,
@@ -152,30 +199,54 @@ class _AuthenticatedGate extends ConsumerWidget {
       final userRole = profileResponse['role'] as String? ?? 'donor';
       print('[AuthGate DEBUG] ✓ Successfully fetched user role: $userRole');
 
+      // If Firebase says beneficiary, trust it (Supabase may still be syncing).
+      final resolvedRole =
+          firebaseRoleClaim == 'beneficiary' ? 'beneficiary' : userRole;
+
       // If beneficiary, check if profile is completed
-      if (userRole == 'beneficiary') {
+      if (resolvedRole == 'beneficiary') {
         print(
             '[AuthGate DEBUG] User is beneficiary, checking profile completion...');
-        final beneficiaryDetails = BeneficiaryDetailsRepository()
-            .getBeneficiaryDetails(supabaseUserId);
-        final details = await beneficiaryDetails;
-        print('[AuthGate DEBUG] Beneficiary details: $details');
+        bool profileCompleted = true;
+        try {
+          final details = await BeneficiaryDetailsRepository()
+              .getBeneficiaryDetails(supabaseUserId);
+          print('[AuthGate DEBUG] Beneficiary details: $details');
+          profileCompleted = details != null && details.profileCompleted;
+        } catch (e) {
+          // If beneficiary details isn't ready yet, still route to beneficiary
+          // dashboard rather than incorrectly defaulting to donor UI.
+          print(
+              '[AuthGate DEBUG] Failed to fetch beneficiary details, defaulting profileCompleted=true: $e');
+          profileCompleted = true;
+        }
+
         return {
-          'role': userRole,
-          'profileCompleted': details != null && details.profileCompleted,
+          'role': resolvedRole,
+          'profileCompleted': profileCompleted,
         };
       }
 
       return {
-        'role': userRole,
+        'role': resolvedRole,
         'profileCompleted': true,
       };
     } catch (e) {
-      // Error getting user role and status, proceed with default role
+      // Error getting user role and status, proceed with Firebase claim if possible.
       print('[AuthGate ERROR] Error: $e');
       print('[AuthGate ERROR] Stack: ${StackTrace.current}');
+
+      String? firebaseRoleClaim;
+      try {
+        final idTokenResult = await user.getIdTokenResult();
+        final claim = idTokenResult.claims?['role'];
+        if (claim is String) firebaseRoleClaim = claim;
+      } catch (_) {
+        firebaseRoleClaim = null;
+      }
+
       return {
-        'role': 'donor',
+        'role': firebaseRoleClaim ?? 'donor',
         'profileCompleted': true,
       };
     }
