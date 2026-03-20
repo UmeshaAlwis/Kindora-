@@ -20,6 +20,17 @@ router.get('/history', authenticateToken, (req: Request, res: Response, next: Ne
   BeneficiaryDonationController.getBeneficiaryDonationHistory(req, res, next);
 });
 
+// Card (non-stripe) payment routes for beneficiary campaigns
+router.post('/card/create-intent', authenticateToken, (req: Request, res: Response, next: NextFunction) => {
+  BeneficiaryDonationController.createCardPaymentIntent(req, res, next);
+});
+router.post('/card/confirm-payment', authenticateToken, (req: Request, res: Response, next: NextFunction) => {
+  BeneficiaryDonationController.confirmCardPayment(req, res, next);
+});
+router.post('/card/cancel-payment', authenticateToken, (req: Request, res: Response, next: NextFunction) => {
+  BeneficiaryDonationController.cancelCardPayment(req, res, next);
+});
+
 /**
  * GET /api/beneficiary-donations/total
  * Get total donated to beneficiary campaigns by current user

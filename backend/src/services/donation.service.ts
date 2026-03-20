@@ -106,22 +106,23 @@ export class DonationService {
       {
         status,
         transaction_id: transactionId,
-        updated_at: new Date().toISOString(),
       },
       { id: donationId }
     );
 
-    if (status === 'success' && donation?.[0]) {
+    const donationRow = Array.isArray(donation) ? donation?.[0] : donation;
+
+    if (status === 'success' && donationRow) {
       // Update campaign current amount
-      if (donation[0].campaign_id) {
-        await this.updateCampaignAmount(donation[0].campaign_id, donation[0].amount);
+      if (donationRow.campaign_id) {
+        await this.updateCampaignAmount(donationRow.campaign_id, donationRow.amount);
       }
 
       // Award points to donor (gamification)
-      await this.awardDonationPoints(donation[0].user_id, donation[0].amount);
+      await this.awardDonationPoints(donationRow.user_id, donationRow.amount);
     }
 
-    return donation?.[0];
+    return donationRow;
   }
 
   /**

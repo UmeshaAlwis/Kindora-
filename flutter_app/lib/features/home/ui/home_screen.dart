@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -74,7 +75,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        context.go('/login');
+                        final user = FirebaseAuth.instance.currentUser;
+                        context.go(user != null ? '/dashboard' : '/login');
                       },
                       child: const Text(
                         'Get Started',
