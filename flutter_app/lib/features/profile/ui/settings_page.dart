@@ -3,24 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/language_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isDarkMode = ref.watch(themeProvider);
     final currentLanguage = ref.watch(languageProvider);
     final languageNotifier = ref.read(languageProvider.notifier);
 
-    final notificationsEnabled = true;
+    const notificationsEnabled = true;
     final selectedLanguageCode = currentLanguage.languageCode;
     final selectedLanguageName =
         languageNotifier.getLanguageName(selectedLanguageCode);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         centerTitle: true,
@@ -39,15 +41,15 @@ class SettingsPage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
                 child: Text(
-                  'General',
+                  l10n.general,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
               ),
               _buildToggleTile(
-                title: 'Notifications',
-                subtitle: 'Receive campaign updates',
+                title: l10n.notifications,
+                subtitle: l10n.receiveCampaignUpdates,
                 value: notificationsEnabled,
                 onChanged: (value) {
                   // TODO: Implement notification preferences
@@ -55,8 +57,8 @@ class SettingsPage extends ConsumerWidget {
               ),
               _buildDivider(),
               _buildToggleTile(
-                title: 'Dark Mode',
-                subtitle: 'Enable dark theme',
+                title: l10n.darkMode,
+                subtitle: l10n.enableDarkTheme,
                 value: isDarkMode,
                 onChanged: (value) {
                   ref.read(themeProvider.notifier).toggleDarkMode(value);
@@ -65,7 +67,7 @@ class SettingsPage extends ConsumerWidget {
               _buildDivider(),
               _buildActionTile(
                 icon: Icons.language,
-                title: 'Language',
+                title: l10n.language,
                 subtitle: selectedLanguageName,
                 onTap: () {
                   _showLanguageDialog(context, ref, selectedLanguageCode);
@@ -78,7 +80,7 @@ class SettingsPage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Text(
-                  'Security',
+                  l10n.security,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -86,7 +88,7 @@ class SettingsPage extends ConsumerWidget {
               ),
               _buildActionTile(
                 icon: Icons.lock,
-                title: 'Change Password',
+                title: l10n.changePassword,
                 subtitle: '',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -99,7 +101,7 @@ class SettingsPage extends ConsumerWidget {
               _buildDivider(),
               _buildActionTile(
                 icon: Icons.delete_outline,
-                title: 'Delete Account',
+                title: l10n.deleteAccount,
                 subtitle: '',
                 onTap: () {
                   _showDeleteAccountDialog(context);
@@ -113,7 +115,7 @@ class SettingsPage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Text(
-                  'Legal',
+                  l10n.legal,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -121,7 +123,7 @@ class SettingsPage extends ConsumerWidget {
               ),
               _buildActionTile(
                 icon: Icons.shield,
-                title: 'Privacy Policy',
+                title: l10n.privacyPolicy,
                 subtitle: '',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +136,7 @@ class SettingsPage extends ConsumerWidget {
               _buildDivider(),
               _buildActionTile(
                 icon: Icons.description,
-                title: 'Terms & Conditions',
+                title: l10n.termsConditions,
                 subtitle: '',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -150,7 +152,7 @@ class SettingsPage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Text(
-                  'About',
+                  l10n.about,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -163,7 +165,7 @@ class SettingsPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Version',
+                      l10n.version,
                       style: TextStyle(
                         fontSize: 15,
                         color: Colors.grey.shade700,
@@ -224,7 +226,7 @@ class SettingsPage extends ConsumerWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF0C0C79),
+            activeThumbColor: const Color(0xFF0C0C79),
           ),
         ],
       ),
@@ -303,11 +305,12 @@ class SettingsPage extends ConsumerWidget {
 
   void _showLanguageDialog(
       BuildContext context, WidgetRef ref, String currentLanguageCode) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Select Language'),
+          title: Text(l10n.language),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -322,7 +325,7 @@ class SettingsPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
           ],
         );
@@ -353,18 +356,17 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Delete Account'),
-          content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone.',
-          ),
+          title: Text(l10n.deleteAccount),
+          content: Text(l10n.deleteAccountConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -374,8 +376,8 @@ class SettingsPage extends ConsumerWidget {
                       content: Text('Account deletion - Coming Soon')),
                 );
               },
-              child: const Text(
-                'Delete',
+              child: Text(
+                l10n.delete,
                 style: TextStyle(color: Colors.red),
               ),
             ),

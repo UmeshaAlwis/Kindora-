@@ -97,7 +97,7 @@ class MyApp extends ConsumerWidget {
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       locale: currentLocale,
       supportedLocales: supportedLocales,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

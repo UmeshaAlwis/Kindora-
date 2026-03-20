@@ -6,6 +6,7 @@ import 'package:kindora/features/wallet/ui/wallet_transaction_history_page.dart'
 import 'package:kindora/services/wallet_service.dart';
 import 'package:kindora/repositories/supabase_repositories.dart';
 import 'package:kindora/models/supabase_models.dart';
+import 'package:kindora/l10n/app_localizations.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -70,15 +71,16 @@ class _DashboardHomeState extends State<DashboardHome> {
     }
   }
 
-  String _daysLeftLabel(DateTime? endDate) {
-    if (endDate == null) return 'No deadline';
+  String _daysLeftLabel(DateTime? endDate, AppLocalizations l10n) {
+    if (endDate == null) return l10n.noDeadline;
     final days = endDate.difference(DateTime.now()).inDays;
-    if (days <= 0) return 'Ending today';
-    return '$days days left';
+    if (days <= 0) return l10n.endingToday;
+    return '$days ${l10n.daysLeft}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -100,8 +102,8 @@ class _DashboardHomeState extends State<DashboardHome> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Your Balance",
+                      Text(
+                        l10n.yourBalance,
                         style: TextStyle(color: Colors.white),
                       ),
                       IconButton(
@@ -143,7 +145,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                     children: [
                       _HeaderAction(
                         icon: Icons.add_circle_outline,
-                        label: "Top up",
+                        label: l10n.topUp,
                         onTap: () async {
                           final result = await Navigator.push<bool>(
                             context,
@@ -159,7 +161,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                       ),
                       _HeaderAction(
                         icon: Icons.swap_horiz,
-                        label: "Transfer",
+                        label: l10n.transfer,
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -170,14 +172,14 @@ class _DashboardHomeState extends State<DashboardHome> {
                       ),
                       _HeaderAction(
                         icon: Icons.favorite_border,
-                        label: "Donate",
+                        label: l10n.donate,
                         onTap: () {
                           context.push('/donor/beneficiary-campaigns');
                         },
                       ),
                       _HeaderAction(
                         icon: Icons.history,
-                        label: "History",
+                        label: l10n.history,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -202,8 +204,8 @@ class _DashboardHomeState extends State<DashboardHome> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Share Kindness Today",
+                  Text(
+                    l10n.shareKindnessToday,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -217,7 +219,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.add),
-                      label: const Text("Start a Campaign"),
+                      label: Text(l10n.startCampaign),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF751F),
                         foregroundColor: Colors.white,
@@ -241,7 +243,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.favorite_border),
-                      label: const Text("Support a Campaign"),
+                      label: Text(l10n.supportCampaign),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0C0C79),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -267,8 +269,8 @@ class _DashboardHomeState extends State<DashboardHome> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Urgent Donations",
+                      Text(
+                        l10n.urgentDonations,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -276,7 +278,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                       ),
                       GestureDetector(
                         onTap: () => context.push('/campaigns'),
-                        child: const Text("See all"),
+                        child: Text(l10n.seeAll),
                       ),
                     ],
                   ),
@@ -287,9 +289,9 @@ class _DashboardHomeState extends State<DashboardHome> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else if (_urgentCampaigns.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: Text('No urgent campaigns available')),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: Text(l10n.noUrgentCampaigns)),
                     )
                   else
                     GridView.builder(
@@ -359,14 +361,14 @@ class _DashboardHomeState extends State<DashboardHome> {
                                   Text(
                                     campaign.description?.isNotEmpty == true
                                         ? campaign.description!
-                                        : 'Support this campaign',
+                                        : l10n.supportCampaign,
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
-                                    _daysLeftLabel(campaign.endDate),
+                                    _daysLeftLabel(campaign.endDate, l10n),
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: campaign.endDate != null

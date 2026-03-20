@@ -8,6 +8,7 @@ const router = Router();
 router.post('/', authenticateToken, DonationController.createDonation);
 router.get('/history', authenticateToken, DonationController.getDonationHistory);
 router.get('/total', authenticateToken, DonationController.getTotalDonated);
+router.get('/badges', authenticateToken, DonationController.getBadgeSummary);
 router.post('/recurring', authenticateToken, DonationController.setupRecurring);
 router.delete('/recurring/:donationId', authenticateToken, DonationController.cancelRecurring);
 router.get('/campaign/:campaignId/stats', DonationController.getCampaignStats);

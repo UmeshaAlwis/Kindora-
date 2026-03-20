@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../l10n/app_localizations.dart';
 import '../models/feed_post_model.dart';
 import '../services/feed_service.dart';
 
@@ -57,6 +58,7 @@ class _FeedPageState extends State<FeedPage> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
+            final l10n = AppLocalizations.of(context)!;
             Future<void> pickImage() async {
               final file = await _picker.pickImage(
                 source: ImageSource.gallery,
@@ -144,8 +146,8 @@ class _FeedPageState extends State<FeedPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Create Post',
+                  Text(
+                    l10n.createPost,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 10),
@@ -154,7 +156,7 @@ class _FeedPageState extends State<FeedPage> {
                     minLines: 4,
                     maxLines: 8,
                     decoration: InputDecoration(
-                      hintText: "What's on your mind?",
+                      hintText: l10n.whatsOnYourMind,
                       filled: true,
                       fillColor: Colors.grey.shade100,
                       border: OutlineInputBorder(
@@ -206,12 +208,12 @@ class _FeedPageState extends State<FeedPage> {
                       TextButton.icon(
                         onPressed: pickImage,
                         icon: const Icon(Icons.photo_library_outlined),
-                        label: const Text('Photo'),
+                        label: Text(l10n.photo),
                       ),
                       TextButton.icon(
                         onPressed: pickVideo,
                         icon: const Icon(Icons.videocam_outlined),
-                        label: const Text('Video'),
+                        label: Text(l10n.video),
                       ),
                       const Spacer(),
                       ElevatedButton(
@@ -226,7 +228,7 @@ class _FeedPageState extends State<FeedPage> {
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Post'),
+                            : Text(l10n.post),
                       ),
                     ],
                   ),
@@ -262,9 +264,10 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Feed'),
+        title: Text(l10n.feed),
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
         centerTitle: true,
@@ -288,7 +291,7 @@ class _FeedPageState extends State<FeedPage> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   alignment: Alignment.center,
-                  child: const Text('No posts yet. Be the first to post!'),
+                  child: Text('${l10n.noPostsYet} ${l10n.beFirstToPost}'),
                 )
               else
                 ..._posts.map(_buildPostCard),
@@ -310,6 +313,7 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Widget _buildPostCard(FeedPost post) {
+    final l10n = AppLocalizations.of(context)!;
     final first = post.userName.isNotEmpty ? post.userName[0].toUpperCase() : 'U';
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -377,13 +381,13 @@ class _FeedPageState extends State<FeedPage> {
                       color: Colors.black12,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.play_circle_outline, size: 50),
-                          SizedBox(height: 8),
-                          Text('Tap to open video'),
+                          const Icon(Icons.play_circle_outline, size: 50),
+                          const SizedBox(height: 8),
+                          Text(l10n.tapToOpenVideo),
                         ],
                       ),
                     ),

@@ -111,6 +111,26 @@ export class DonationController {
   }
 
   /**
+   * Get donor badge summary
+   */
+  static async getBadgeSummary(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const result = await DonationService.getDonorBadgeSummary(userId);
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Setup recurring donation
    */
   static async setupRecurring(req: Request, res: Response, next: NextFunction) {

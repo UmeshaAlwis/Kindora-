@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'direct_chat_page.dart';
 import '../services/direct_message_service.dart';
 
@@ -20,9 +21,10 @@ class _MessagesPageState extends State<MessagesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: Text(l10n.messages),
         backgroundColor: const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
         centerTitle: true,
@@ -41,7 +43,7 @@ class _MessagesPageState extends State<MessagesPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'Unable to load messages: ${snapshot.error}',
+                    '${l10n.failedToLoadMessages}: ${snapshot.error}',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -50,13 +52,13 @@ class _MessagesPageState extends State<MessagesPage> {
 
             final conversations = snapshot.data ?? [];
             if (conversations.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),
                   child: Text(
-                    'No messages yet.\nWhen a donor starts a chat, it will appear here.',
+                    l10n.noMessagesYetStartConversation,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               );
@@ -71,7 +73,7 @@ class _MessagesPageState extends State<MessagesPage> {
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final c = conversations[index];
-                  final title = c.partnerName.isEmpty ? 'User' : c.partnerName;
+                  final title = c.partnerName.isEmpty ? l10n.user : c.partnerName;
                   final avatarText = title.substring(0, 1).toUpperCase();
                   return ListTile(
                     leading: CircleAvatar(

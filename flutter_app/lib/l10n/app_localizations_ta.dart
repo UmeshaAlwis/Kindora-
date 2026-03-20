@@ -88,4 +88,133 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get editProfile => 'சுயவிவரம் திருத்து';
+
+  @override
+  String get home => 'முகப்பு';
+
+  @override
+  String get feed => 'ஃபீட்';
+
+  @override
+  String get messages => 'செய்திகள்';
+
+  @override
+  String get merch => 'விற்பனை';
+
+  @override
+  String get yourBalance => 'உங்கள் இருப்பு';
+
+  @override
+  String get topUp => 'டாப் அப்';
+
+  @override
+  String get transfer => 'மாற்று';
+
+  @override
+  String get donate => 'நன்கொடை';
+
+  @override
+  String get history => 'வரலாறு';
+
+  @override
+  String get shareKindnessToday => 'இன்று கருணையை பகிருங்கள்';
+
+  @override
+  String get startCampaign => 'பிரச்சாரத்தை தொடங்கு';
+
+  @override
+  String get supportCampaign => 'பிரச்சாரத்தை ஆதரி';
+
+  @override
+  String get urgentDonations => 'அவசர நன்கொடைகள்';
+
+  @override
+  String get seeAll => 'அனைத்தையும்';
+
+  @override
+  String get noUrgentCampaigns => 'அவசர பிரச்சாரங்கள் இல்லை';
+
+  @override
+  String get noDeadline => 'கடைசி தேதி இல்லை';
+
+  @override
+  String get endingToday => 'இன்று முடிகிறது';
+
+  @override
+  String get daysLeft => 'நாட்கள் மீதம்';
+
+  @override
+  String get createPost => 'பதிவு உருவாக்கு';
+
+  @override
+  String get whatsOnYourMind => 'உங்கள் மனதில் என்ன உள்ளது?';
+
+  @override
+  String get photo => 'படம்';
+
+  @override
+  String get video => 'வீடியோ';
+
+  @override
+  String get post => 'பதிவு';
+
+  @override
+  String get noPostsYet => 'இன்னும் பதிவுகள் இல்லை.';
+
+  @override
+  String get beFirstToPost => 'முதல் பதிவை நீங்கள் செய்யுங்கள்!';
+
+  @override
+  String get tapToOpenVideo => 'வீடியோவை திறக்க தட்டவும்';
+
+  @override
+  String get failedToLoadFeed => 'ஃபீட்டை ஏற்ற முடியவில்லை';
+
+  @override
+  String get failedToCreatePost => 'பதிவு உருவாக்க முடியவில்லை';
+
+  @override
+  String get failedToLikePost => 'விருப்பமிட முடியவில்லை';
+
+  @override
+  String get writeSomethingOrAddMedia => 'ஏதாவது எழுதுங்கள் அல்லது மீடியா சேர்க்கவும்';
+
+  @override
+  String get failedToLoadMessages => 'செய்திகளை ஏற்ற முடியவில்லை';
+
+  @override
+  String get noMessagesYetStartConversation => 'இன்னும் செய்திகள் இல்லை. உரையாடலை தொடங்குங்கள்.';
+
+  @override
+  String get campaignDetails => 'பிரச்சார விவரங்கள்';
+
+  @override
+  String get campaignerName => 'பிரச்சாரர் பெயர்';
+
+  @override
+  String get campaignEndDate => 'பிரச்சார முடிவு தேதி';
+
+  @override
+  String get mainCategory => 'முக்கிய பிரிவு';
+
+  @override
+  String get campaignType => 'பிரச்சார வகை';
+
+  @override
+  String get campaignDescriptionOptional => 'பிரச்சார விளக்கம் (விருப்பம்)';
+
+  @override
+  String get chooseCampaignImage => 'பிரச்சார படத்தை தேர்வு செய்';
+
+  @override
+  String get createCampaign => 'பிரச்சாரம் உருவாக்கு';
+
+  @override
+  String get achievements => 'சாதனைகள்';
+
+  @override
+  String get loading => 'ஏற்றப்படுகிறது...';
+
+  @override
+  String get noBadgesYet => 'இன்னும் பதக்கங்கள் இல்லை';
 }
