@@ -53,15 +53,20 @@ class _BeneficiaryCampaignDetailScreenState
 
   Future<String?> _uploadImageToSupabase(XFile imageFile) async {
     try {
-      final file = File(imageFile.path);
-
       // Create multipart request
       final uri = Uri.parse('${AppEnv.apiBaseUrl}/storage/upload');
       final request = http.MultipartRequest('POST', uri);
 
       // Add file
+      // Using fromBytes avoids `PathNotFoundException` that can happen when
+      // image_picker returns a temp/cropped file path that disappears quickly.
+      final bytes = await imageFile.readAsBytes();
       request.files.add(
-        await http.MultipartFile.fromPath('image', file.path),
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
+        ),
       );
 
       final response = await request.send();
