@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../models/supabase_models.dart';
 import '../../../providers/supabase_providers.dart';
+import '../../../providers/cart_provider.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
   final String productId;
@@ -40,13 +41,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final productAsync = ref.watch(merchandiseByIdProvider(widget.productId));
     final reviewsAsync = ref.watch(productReviewsProvider(widget.productId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor:
+          isDarkMode ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFF0C0C79),
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text('Product Details'),
@@ -62,29 +66,29 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             child: Column(
               children: [
                 // Product Image
-                _buildProductImageSection(context, product),
+                _buildProductImageSection(context, product, isDarkMode),
 
                 // Product Info
-                _buildProductInfoSection(context, product),
+                _buildProductInfoSection(context, product, isDarkMode),
 
                 // Delivery Info
-                _buildDeliverySection(context),
+                _buildDeliverySection(context, isDarkMode),
 
                 // Quantity Selector
-                _buildQuantitySelector(context),
+                _buildQuantitySelector(context, isDarkMode),
 
                 // Reviews Section
-                _buildReviewsSection(context, reviewsAsync),
+                _buildReviewsSection(context, reviewsAsync, isDarkMode),
 
                 // Action Buttons
-                _buildActionButtons(context, product),
+                _buildActionButtons(context, product, isDarkMode),
 
                 const SizedBox(height: 20),
               ],
             ),
           );
         },
-        loading: () => _buildLoadingState(),
+        loading: () => _buildLoadingState(isDarkMode),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -113,7 +117,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   Widget _buildProductImageSection(
     BuildContext context,
     Merchandise product,
+    bool isDarkMode,
   ) {
+    // Use a working placeholder if imageUrl is invalid or empty
+    final validImageUrl = (product.imageUrl == null ||
+            product.imageUrl!.isEmpty)
+        ? 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=400&fit=crop'
+        : product.imageUrl!;
+
     return ScaleTransition(
       scale: Tween<double>(begin: 0.8, end: 1).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
@@ -122,34 +133,41 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         width: double.infinity,
         height: 300,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey[200],
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(24),
             bottomRight: Radius.circular(24),
           ),
         ),
-        child: product.imageUrl == null || product.imageUrl!.isEmpty
-            ? Center(
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 80,
-                  color: Colors.grey[400],
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: product.imageUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(color: Colors.grey[300]),
-                ),
-                errorWidget: (context, url, error) => Icon(
-                  Icons.image_not_supported,
-                  size: 80,
-                  color: Colors.grey[400],
-                ),
+        child: CachedNetworkImage(
+          imageUrl: validImageUrl,
+          fit: BoxFit.cover,
+          httpHeaders: const {
+            'Content-Type': 'image/jpeg',
+            'User-Agent': 'Mozilla/5.0'
+          },
+          placeholder: (context, url) => Container(
+            color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[200],
+            child: Shimmer.fromColors(
+              baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+              highlightColor:
+                  isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
+              child: Container(
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
               ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[200],
+            child: Center(
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                size: 80,
+                color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -157,6 +175,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   Widget _buildProductInfoSection(
     BuildContext context,
     Merchandise product,
+    bool isDarkMode,
   ) {
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
@@ -174,6 +193,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
               product.name ?? 'Unknown Product',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
             ),
             const SizedBox(height: 12),
@@ -185,10 +205,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Price',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey,
                         fontSize: 12,
                       ),
                     ),
@@ -207,10 +227,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const Text(
+                      Text(
                         'Rating',
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: isDarkMode ? Colors.grey[400] : Colors.grey,
                           fontSize: 12,
                         ),
                       ),
@@ -225,16 +245,19 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                           const SizedBox(width: 6),
                           Text(
                             product.averageRating?.toStringAsFixed(1) ?? '0',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                              color: isDarkMode ? Colors.white : Colors.black,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             '(${product.reviewCount ?? 0})',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                               fontSize: 14,
                             ),
                           ),
@@ -255,13 +278,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green),
                 ),
                 child: Text(
                   'In Stock (${product.stock} available)',
-                  style: TextStyle(
-                    color: Colors.green[700],
+                  style: const TextStyle(
+                    color: Colors.green,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -274,13 +298,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.red[100],
+                  color: Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red),
                 ),
-                child: Text(
+                child: const Text(
                   'Out of Stock',
                   style: TextStyle(
-                    color: Colors.red[700],
+                    color: Colors.red,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -294,18 +319,19 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Description',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     product.description!,
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
                       fontSize: 13,
                       height: 1.5,
                     ),
@@ -318,7 +344,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  Widget _buildDeliverySection(BuildContext context) {
+  Widget _buildDeliverySection(BuildContext context, bool isDarkMode) {
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
@@ -330,8 +356,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.blue[50],
-          border: Border.all(color: Colors.blue[200]!),
+          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.blue[50],
+          border: Border.all(
+            color: isDarkMode ? Colors.blue[700]! : Colors.blue[200]!,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -339,22 +367,26 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
           children: [
             Row(
               children: [
-                Icon(Icons.local_shipping, color: Colors.blue[600]),
+                Icon(
+                  Icons.local_shipping,
+                  color: isDarkMode ? Colors.blue[400] : Colors.blue[600],
+                ),
                 const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Estimated Delivery',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                     Text(
                       'Sat, Nov 23 - Mon, Nov 25',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         fontSize: 12,
                       ),
                     ),
@@ -369,17 +401,21 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: Colors.green[100],
+                color: Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.local_offer, size: 16, color: Colors.green[700]),
+                  Icon(
+                    Icons.local_offer,
+                    size: 16,
+                    color: Colors.green,
+                  ),
                   const SizedBox(width: 8),
-                  Text(
+                  const Text(
                     'Free Delivery',
                     style: TextStyle(
-                      color: Colors.green[700],
+                      color: Colors.green,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -393,7 +429,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  Widget _buildQuantitySelector(BuildContext context) {
+  Widget _buildQuantitySelector(BuildContext context, bool isDarkMode) {
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
@@ -406,17 +442,20 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Quantity',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(
+                  color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -440,9 +479,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     ),
                     child: Text(
                       _quantity.toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
@@ -467,6 +507,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
   Widget _buildReviewsSection(
     BuildContext context,
     AsyncValue<List<ProductReview>> reviewsAsync,
+    bool isDarkMode,
   ) {
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
@@ -480,11 +521,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Ratings & Reviews',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 12),
@@ -496,7 +538,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     child: Text(
                       'No reviews yet',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -508,18 +550,20 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: reviews.length > 3 ? 3 : reviews.length,
                   itemBuilder: (context, index) {
-                    return _buildReviewItem(context, reviews[index]);
+                    return _buildReviewItem(
+                        context, reviews[index], isDarkMode);
                   },
                 );
               },
               loading: () => SizedBox(
                 height: 100,
                 child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor:
+                      isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -536,13 +580,19 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  Widget _buildReviewItem(BuildContext context, ProductReview review) {
+  Widget _buildReviewItem(
+    BuildContext context,
+    ProductReview review,
+    bool isDarkMode,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[200]!),
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -553,9 +603,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             children: [
               Text(
                 review.reviewerName ?? 'Anonymous',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
               Row(
@@ -566,7 +617,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                     size: 14,
                     color: index < review.rating.toInt()
                         ? Colors.amber[700]
-                        : Colors.grey[300],
+                        : isDarkMode
+                            ? Colors.grey[600]
+                            : Colors.grey[300],
                   ),
                 ),
               ),
@@ -577,7 +630,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
             Text(
               review.reviewText!,
               style: TextStyle(
-                color: Colors.grey[700],
+                color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
                 fontSize: 12,
                 height: 1.4,
               ),
@@ -587,7 +640,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, Merchandise product) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    Merchandise product,
+    bool isDarkMode,
+  ) {
     final isOutOfStock = (product.stock ?? 0) <= 0;
 
     return FadeTransition(
@@ -607,28 +664,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                 onPressed: isOutOfStock
                     ? null
                     : () {
-                        // Add to cart logic
-                        final cartItems = ref.read(cartItemsProvider);
-                        final updatedCart = [...cartItems];
-
-                        final existingIndex = updatedCart.indexWhere(
-                          (item) => item['productId'] == product.id,
-                        );
-
-                        if (existingIndex >= 0) {
-                          updatedCart[existingIndex]['quantity'] += _quantity;
-                        } else {
-                          updatedCart.add({
-                            'productId': product.id,
-                            'productName': product.name,
-                            'price': product.price,
-                            'quantity': _quantity,
-                            'imageUrl': product.imageUrl,
-                          });
-                        }
-
-                        ref.read(cartItemsProvider.notifier).state =
-                            updatedCart;
+                        ref.read(cartProvider.notifier).addToCart(
+                              product,
+                              quantity: _quantity,
+                            );
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -673,6 +712,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF751F),
+                  disabledBackgroundColor: Colors.grey[400],
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -693,16 +733,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(bool isDarkMode) {
     return SingleChildScrollView(
       child: Column(
         children: [
           Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+            highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
             child: Container(
               height: 300,
-              color: Colors.grey[300],
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
             ),
           ),
           const SizedBox(height: 20),
@@ -712,22 +752,24 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor:
+                      isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
                   child: Container(
                     height: 24,
                     width: 200,
-                    color: Colors.grey[300],
+                    color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor:
+                      isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
                   child: Container(
                     height: 20,
                     width: 150,
-                    color: Colors.grey[300],
+                    color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                   ),
                 ),
               ],

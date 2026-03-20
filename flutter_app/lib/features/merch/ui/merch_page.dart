@@ -558,28 +558,36 @@ class _MerchPageState extends ConsumerState<MerchPage>
 
   Widget _buildProductImage(String? imageUrl) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return Center(
-        child: Icon(
-          Icons.shopping_bag_outlined,
-          size: 48,
-          color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-        ),
-      );
-    }
+    // Use a working placeholder if imageUrl is invalid or empty
+    final validImageUrl = (imageUrl == null || imageUrl.isEmpty)
+        ? 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'
+        : imageUrl;
 
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: validImageUrl,
       fit: BoxFit.cover,
-      placeholder: (context, url) => Shimmer.fromColors(
-        baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-        highlightColor: isDarkMode ? Colors.grey[600]! : Colors.grey[100]!,
-        child:
-            Container(color: isDarkMode ? Colors.grey[700] : Colors.grey[300]),
+      httpHeaders: const {
+        'Content-Type': 'image/jpeg',
+        'User-Agent': 'Mozilla/5.0'
+      },
+      placeholder: (context, url) => Container(
+        color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[200],
+        child: Shimmer.fromColors(
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          highlightColor: isDarkMode ? Colors.grey[600]! : Colors.grey[100]!,
+          child: Container(
+              color: isDarkMode ? Colors.grey[700] : Colors.grey[300]),
+        ),
       ),
-      errorWidget: (context, url, error) => Icon(
-        Icons.image_not_supported,
-        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+      errorWidget: (context, url, error) => Container(
+        color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[300],
+        child: Center(
+          child: Icon(
+            Icons.shopping_bag_outlined,
+            size: 64,
+            color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+          ),
+        ),
       ),
     );
   }
