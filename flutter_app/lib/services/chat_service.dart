@@ -1,15 +1,22 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart'; // for kIsWeb
 import '../models/chat_model.dart';
 
 /// Service to handle chatbot API communication
 class ChatService {
   static final ChatService _instance = ChatService._internal();
-  // For Android emulator: use 10.0.2.2 to access host machine
-  // For physical device: use your machine's actual IP
-  // For iOS simulator: use localhost or 127.0.0.1
-  static const String _baseUrl = 'http://10.0.2.2:5001/api';
+
+  // ✅ Smart base URL (Web vs Mobile)
+  static String get _baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:5001/api'; // Web
+    } else {
+      return 'http://10.0.2.2:5001/api'; // Android emulator
+    }
+  }
+
   static const String _chatEndpoint = '/chat';
 
   late String _sessionId;
@@ -23,10 +30,13 @@ class ChatService {
     _sessionId = const Uuid().v4();
   }
 
+  /// 🔥 Toggle here (ONLY CHANGE THIS)
+  static const bool useFakeAI = true;
+
   /// Send message to chatbot and get response
   Future<ChatResponse> sendMessage(String userMessage) async {
     try {
-      // Add user message to history
+      // ✅ Add user message
       final userMsg = ChatMessage(
         id: const Uuid().v4(),
         content: userMessage,
@@ -35,7 +45,33 @@ class ChatService {
       );
       _conversationHistory.add(userMsg);
 
-      // Prepare request body
+      // ==================================================
+      // 🤖 FAKE AI MODE (SAFE - NO BACKEND REQUIRED)
+      // ==================================================
+      if (useFakeAI) {
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        final chatResponse = ChatResponse(
+          reply: "AI says: $userMessage",
+          messageId: const Uuid().v4(),
+          success: true,
+        );
+
+        final botMsg = ChatMessage(
+          id: chatResponse.messageId,
+          content: chatResponse.reply,
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+
+        _conversationHistory.add(botMsg);
+
+        return chatResponse;
+      }
+
+      // ==================================================
+      // 🌐 REAL API MODE (UNCHANGED)
+      // ==================================================
       final requestBody = {
         'sessionId': _sessionId,
         'message': userMessage,
@@ -44,7 +80,6 @@ class ChatService {
         'timestamp': DateTime.now().toIso8601String(),
       };
 
-      // Make API call
       final response = await http
           .post(
             Uri.parse('$_baseUrl$_chatEndpoint'),
@@ -54,50 +89,52 @@ class ChatService {
             },
             body: jsonEncode(requestBody),
           )
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () => http.Response(
-              jsonEncode({'success': false, 'error': 'Request timeout'}),
-              408,
-            ),
-          );
+          .timeout(const Duration(seconds: 20));
 
+      // ✅ SUCCESS
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        print('[ChatService] Response: $jsonResponse');
+
         final chatResponse = ChatResponse.fromJson(jsonResponse);
 
-        // Add bot response to history
         if (chatResponse.success) {
           final botMsg = ChatMessage(
-            id: chatResponse.messageId,
+            id: chatResponse.messageId.isNotEmpty
+                ? chatResponse.messageId
+                : const Uuid().v4(),
             content: chatResponse.reply,
             isUser: false,
             timestamp: DateTime.now(),
           );
+
           _conversationHistory.add(botMsg);
         }
 
         return chatResponse;
-      } else {
-        print(
-            '[ChatService] Error: Status code ${response.statusCode}, Body: ${response.body}');
-        return ChatResponse(
-          reply: 'Error: Unable to get response',
-          messageId: '',
-          success: false,
-          error: 'HTTP ${response.statusCode}',
-        );
       }
-    } catch (e) {
-      print('[ChatService] Exception: $e');
-      return ChatResponse(
-        reply: 'Error: ${e.toString()}',
-        messageId: '',
-        success: false,
-        error: e.toString(),
-      );
+
+      // ❌ SERVER ERROR
+      return _errorResponse('Server error (${response.statusCode})');
     }
+
+    // ⏱ NETWORK ERROR
+    on http.ClientException catch (_) {
+      return _errorResponse('Network error. Check backend.');
+    } catch (e) {
+      return _errorResponse(e.toString());
+    }
+  }
+
+  /// ✅ Centralized error handler
+  ChatResponse _errorResponse(String message) {
+    final fallbackReply = "⚠️ $message\n\nTry again later.";
+
+    return ChatResponse(
+      reply: fallbackReply,
+      messageId: const Uuid().v4(),
+      success: false,
+      error: message,
+    );
   }
 
   /// Get conversation history
@@ -105,7 +142,7 @@ class ChatService {
     return _conversationHistory;
   }
 
-  /// Clear conversation history and start new session
+  /// Clear conversation history
   void clearHistory() {
     _conversationHistory.clear();
     _sessionId = const Uuid().v4();
@@ -116,7 +153,7 @@ class ChatService {
     return _sessionId;
   }
 
-  /// Restore conversation from previous session
+  /// Restore conversation
   void restoreConversation(List<ChatMessage> messages, String sessionId) {
     _conversationHistory = messages;
     _sessionId = sessionId;
