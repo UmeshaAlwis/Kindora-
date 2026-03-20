@@ -1,9 +1,71 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import '../models/payment_model.dart';
-import '../services/stripe_service.dart';
 import 'package:kindora/services/wallet_service.dart';
+import 'package:kindora/config/app_env.dart';
 import 'bank_transfer_page.dart';
+
+class _CardNumberInputFormatter extends TextInputFormatter {
+  /// Formats card numbers as `1234 5678 9012 3456` while keeping only digits.
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final trimmedDigits =
+        digitsOnly.length > 19 ? digitsOnly.substring(0, 19) : digitsOnly;
+
+    final formatted = _format(trimmedDigits);
+
+    // Preserve cursor position based on digit count before the cursor.
+    final selectionBaseOffset = newValue.selection.baseOffset;
+    final beforeCursor = newValue.text.substring(
+      0,
+      selectionBaseOffset.clamp(0, newValue.text.length),
+    );
+    final digitsBeforeCursor = beforeCursor.replaceAll(RegExp(r'\D'), '');
+    final digitsCount = digitsBeforeCursor.length;
+
+    final formattedCursorOffset = _cursorOffsetFromDigits(
+      trimmedDigits: trimmedDigits,
+      digitsBeforeCursorCount: digitsCount,
+      formatted: formatted,
+    );
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formattedCursorOffset),
+    );
+  }
+
+  String _format(String digits) {
+    if (digits.isEmpty) return '';
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      buffer.write(digits[i]);
+      final isGroupEnd = (i + 1) % 4 == 0;
+      final isLastDigit = i == digits.length - 1;
+      if (isGroupEnd && !isLastDigit) buffer.write(' ');
+    }
+    return buffer.toString();
+  }
+
+  int _cursorOffsetFromDigits({
+    required String trimmedDigits,
+    required int digitsBeforeCursorCount,
+    required String formatted,
+  }) {
+    final count = digitsBeforeCursorCount.clamp(0, trimmedDigits.length);
+    // Build the formatted prefix for `count` digits.
+    final prefix = _format(trimmedDigits.substring(0, count));
+    return prefix.length;
+  }
+}
 
 class PaymentPage extends StatefulWidget {
   final Campaign campaign;
@@ -31,8 +93,6 @@ class _PaymentPageState extends State<PaymentPage> {
   bool _isProcessing = false;
   bool _isAnonymous = false;
   double _walletBalance = 0.0;
-  bool _loadingWallet = true;
-  late StripeService _stripeService;
   late WalletService _walletService;
 
   final List<PaymentMethod> paymentMethods = [
@@ -64,7 +124,6 @@ class _PaymentPageState extends State<PaymentPage> {
     _donorEmailController = TextEditingController();
     _donorPhoneController = TextEditingController();
     _wishController = TextEditingController();
-    _stripeService = StripeService();
     _walletService = WalletService();
 
     // Set pre-selected amount if provided
@@ -78,18 +137,15 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _fetchWalletBalance() async {
     if (!mounted) return;
 
-    setState(() => _loadingWallet = true);
     try {
       final balance = await _walletService.getWalletBalance();
       if (mounted) {
         setState(() {
           _walletBalance = balance;
-          _loadingWallet = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loadingWallet = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load wallet: $e'),
@@ -247,97 +303,509 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Future<void> _processStripePayment(Payment payment, String orderId) async {
     try {
-      // Step 1: Create payment intent on backend
-      final intentData = await _stripeService.createPaymentIntent(
-        amount: _donationAmount,
-        donorName: _donorNameController.text,
-        donorEmail: _donorEmailController.text,
-        campaignId: widget.campaign.id,
-        currency: 'USD', // Change to LKR if Stripe supports it
-      );
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('User not authenticated');
 
-      final clientSecret = intentData['client_secret'] ?? '';
-      final customerId = intentData['customer_id'] ?? '';
+      final token = await user.getIdToken();
+      final isBeneficiaryDonation = widget.beneficiaryCampaignId != null &&
+          widget.beneficiaryCampaignId!.isNotEmpty;
 
-      if (clientSecret.isEmpty) {
-        throw Exception('Failed to get client secret from server');
+      // Step 1: Create card intent (creates donation row as "pending")
+      final createIntentUrl = isBeneficiaryDonation
+          ? '${AppEnv.apiBaseUrl}/beneficiary-donations/card/create-intent'
+          : '${AppEnv.apiBaseUrl}/donations/card/create-intent';
+
+      final message = _wishController.text.trim();
+
+      final createBody = isBeneficiaryDonation
+          ? {
+              'beneficiary_campaign_id': widget.beneficiaryCampaignId,
+              'amount': _donationAmount,
+              'donor_name': _donorNameController.text.trim(),
+              'donor_email': _donorEmailController.text.trim(),
+              'is_anonymous': _isAnonymous,
+            }
+          : {
+              'campaign_id': widget.campaign.id,
+              'amount': _donationAmount,
+              'donor_name': _donorNameController.text.trim(),
+              'donor_email': _donorEmailController.text.trim(),
+              'is_anonymous': _isAnonymous,
+            };
+
+      // `donor_phone` is optional and your card UI doesn't ask for it.
+      // Omit it when empty to satisfy backend Joi validation.
+      final phone = _donorPhoneController.text.trim();
+      if (phone.isNotEmpty) {
+        createBody['donor_phone'] = phone;
       }
 
-      // Step 2: Initialize payment sheet
-      await _stripeService.initPaymentSheet(
-        clientSecret: clientSecret,
-        customerId: customerId,
+      if (message.isNotEmpty) {
+        createBody['message'] = message;
+      }
+
+      final createResponse = await http.post(
+        Uri.parse(createIntentUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(createBody),
       );
 
-      // Step 3: Present payment sheet to user
-      final success = await _stripeService.presentPaymentSheet();
+      final createJson = jsonDecode(createResponse.body);
+      if (createResponse.statusCode != 200 || createJson['success'] != true) {
+        throw Exception(createJson['error'] ?? 'Failed to create card intent');
+      }
 
-      if (success) {
+      final donationId = createJson['data']?['donation_id']?.toString();
+      if (donationId == null || donationId.isEmpty) {
+        throw Exception('Failed to get donation_id for card payment');
+      }
+
+      // Step 2: Show a Stripe-like card form (simulated payment UI)
+      final shouldPay = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          bool isValidLuhn(String digits) {
+            if (digits.length < 12) return false;
+            int sum = 0;
+            bool alternate = false;
+            for (int i = digits.length - 1; i >= 0; i--) {
+              int n = int.tryParse(digits[i]) ?? 0;
+              if (alternate) {
+                n *= 2;
+                if (n > 9) n -= 9;
+              }
+              sum += n;
+              alternate = !alternate;
+            }
+            return sum % 10 == 0;
+          }
+
+          String digitsOnly(String s) => s.replaceAll(RegExp(r'\D'), '');
+
+          bool isExpiryValid(String exp) {
+            final match =
+                RegExp(r'^(\d{2})/(\d{2})$').firstMatch(exp.trim());
+            if (match == null) return false;
+            final month = int.tryParse(match.group(1) ?? '') ?? 0;
+            final yy = int.tryParse(match.group(2) ?? '') ?? -1;
+            if (month < 1 || month > 12 || yy < 0) return false;
+
+            final now = DateTime.now();
+            final fullYear = 2000 + yy;
+            final lastDayOfMonth = DateTime(fullYear, month + 1, 0);
+            return !lastDayOfMonth.isBefore(DateTime(now.year, now.month, 1));
+          }
+
+          String normalizeExpiry(String v) {
+            final raw = digitsOnly(v);
+            if (raw.length <= 2) return raw;
+            if (raw.length <= 4) {
+              return '${raw.substring(0, 2)}/${raw.substring(2)}';
+            }
+            return v;
+          }
+
+          final formKey = GlobalKey<FormState>();
+          final cardNumberController = TextEditingController();
+          final nameController = TextEditingController();
+          final expController = TextEditingController();
+          final cvcController = TextEditingController();
+          final zipController = TextEditingController();
+
+          Widget _fieldLabel(String text) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  text,
+                  style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                ),
+              );
+
+          InputDecoration _inputDecoration(String hint) => InputDecoration(
+                hintText: hint,
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFFF751F)),
+                ),
+              );
+
+          return Dialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    final brand = 'CARD';
+                    final cardDigits = digitsOnly(cardNumberController.text);
+                    final masked = cardDigits.length >= 4
+                        ? '•••• ${cardDigits.substring(cardDigits.length - 4)}'
+                        : '•••• •••• •••• ••••';
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Card Payments',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.pop(dialogContext, false),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF0C0C79), Color(0xFF001A4D)],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                brand,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Text(
+                                masked,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                nameController.text.isNotEmpty
+                                    ? nameController.text.trim().toUpperCase()
+                                    : 'CARD HOLDER',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Form(
+                          key: formKey,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          child: Column(
+                            children: [
+                              _fieldLabel('Card number'),
+                              TextFormField(
+                                controller: cardNumberController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  _CardNumberInputFormatter(),
+                                ],
+                                decoration: _inputDecoration('4242 4242 4242 4242'),
+                                validator: (v) {
+                                  final digits = digitsOnly(v ?? '');
+                                  if (digits.isEmpty) {
+                                    return 'Card number is required';
+                                  }
+                                  if (digits.length < 12 || digits.length > 19) {
+                                    return 'Card number length is invalid';
+                                  }
+                                  if (!isValidLuhn(digits)) {
+                                    return 'Card number is invalid';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (_) => setState(() {}),
+                              ),
+                              const SizedBox(height: 12),
+                              _fieldLabel('Name on card'),
+                              TextFormField(
+                                controller: nameController,
+                                decoration: _inputDecoration('e.g. John Doe'),
+                                textCapitalization: TextCapitalization.words,
+                                validator: (v) {
+                                  final t = (v ?? '').trim();
+                                  if (t.isEmpty) return 'Name on card is required';
+                                  if (t.length < 3) return 'Name is too short';
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _fieldLabel('Expiry'),
+                                        TextFormField(
+                                          controller: expController,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
+                                          ],
+                                          decoration:
+                                              _inputDecoration('MM/YY'),
+                                          onChanged: (v) {
+                                            final normalized =
+                                                normalizeExpiry(v);
+                                            if (normalized != expController.text) {
+                                              expController.value =
+                                                  TextEditingValue(
+                                                      text: normalized,
+                                                      selection: TextSelection
+                                                          .fromPosition(
+                                                              TextPosition(
+                                                                  offset: normalized.length)));
+                                            }
+                                          },
+                                          validator: (v) {
+                                            final exp = expController.text.trim();
+                                            if (exp.isEmpty) {
+                                              return 'Expiry is required';
+                                            }
+                                            if (!RegExp(r'^\d{2}/\d{2}$')
+                                                .hasMatch(exp)) {
+                                              return 'Use MM/YY format';
+                                            }
+                                            if (!isExpiryValid(exp)) {
+                                              return 'Card is expired';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _fieldLabel('CVC'),
+                                        TextFormField(
+                                          controller: cvcController,
+                                          keyboardType: TextInputType.number,
+                                          obscureText: true,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.digitsOnly,
+                                          ],
+                                          decoration: _inputDecoration('123'),
+                                          validator: (v) {
+                                            final cvc = digitsOnly(v ?? '');
+                                            if (cvc.isEmpty) {
+                                              return 'CVC is required';
+                                            }
+                                            if (cvc.length < 3 || cvc.length > 4) {
+                                              return 'CVC must be 3-4 digits';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _fieldLabel('Billing ZIP (optional)'),
+                              TextFormField(
+                                controller: zipController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: _inputDecoration('e.g. 10001'),
+                                validator: (v) {
+                                  final zip = digitsOnly(v ?? '');
+                                  if (zip.isEmpty) return null; // optional
+                                  if (zip.length < 4 || zip.length > 10) {
+                                    return 'ZIP looks invalid';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () =>
+                                    Navigator.pop(dialogContext, false),
+                                style: OutlinedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final ok = formKey.currentState?.validate() ?? false;
+                                  if (!ok) return;
+                                  Navigator.pop(dialogContext, true);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  backgroundColor: const Color(0xFF0C0C79),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Pay',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      if (shouldPay == true) {
+        // Step 3a: Confirm card payment (marks donation success/completed)
+        final confirmUrl = isBeneficiaryDonation
+            ? '${AppEnv.apiBaseUrl}/beneficiary-donations/card/confirm-payment'
+            : '${AppEnv.apiBaseUrl}/donations/card/confirm-payment';
+
+        final confirmResponse = await http.post(
+          Uri.parse(confirmUrl),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'donation_id': donationId,
+            'transaction_id': orderId,
+          }),
+        );
+
+        final confirmJson = jsonDecode(confirmResponse.body);
+        if (confirmResponse.statusCode != 200 || confirmJson['success'] != true) {
+          throw Exception(confirmJson['error'] ?? 'Card payment failed');
+        }
+
         if (!mounted) return;
-
-        // Success - Payment completed
+        setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Payment successful!'),
             backgroundColor: Colors.green,
           ),
         );
-
-        if (mounted) {
-          setState(() => _isProcessing = false);
-        }
-
-        // Navigate back after a short delay
         await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          Navigator.pop(context, true);
+        if (mounted) Navigator.pop(context, true);
+      } else {
+        // Step 3b: Cancel card payment intent to avoid leaving pending rows
+        final cancelUrl = isBeneficiaryDonation
+            ? '${AppEnv.apiBaseUrl}/beneficiary-donations/card/cancel-payment'
+            : '${AppEnv.apiBaseUrl}/donations/card/cancel-payment';
+
+        try {
+          await http.post(
+            Uri.parse(cancelUrl),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'donation_id': donationId,
+              'transaction_id': orderId,
+            }),
+          );
+        } catch (_) {
+          // ignore cancel failure
         }
+
+        if (!mounted) return;
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment cancelled'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        Navigator.pop(context, false);
       }
     } on Exception catch (e) {
       if (!mounted) return;
 
       setState(() => _isProcessing = false);
 
-      final errorMessage = e.toString();
-
-      // Check if user cancelled
-      if (errorMessage.contains('cancelled')) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Payment cancelled'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-      } else if (errorMessage.contains('401') ||
-          errorMessage.contains('Unauthorized') ||
-          errorMessage.contains('authentication')) {
-        // Stripe authentication issue - suggest alternative payment method
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Card payment temporarily unavailable. Please use Bank Transfer or Wallet.'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 4),
-            ),
-          );
-          // Reset to bank transfer but user should switch method
-          setState(() => _selectedPaymentMethod = 'bank_transfer');
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Payment failed: Unable to process. Try another method.'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Card payment failed: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 

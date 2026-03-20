@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import '../../features/auth/ui/login_screen.dart';
-import '../../features/home/ui/home_screen.dart';
 import '../../repositories/supabase_repositories.dart';
 
 /// Auth Gate - Routes user based on authentication status and role
@@ -55,8 +54,11 @@ class _AuthenticatedGate extends ConsumerWidget {
         }
 
         if (snapshot.hasError) {
-          // Error fetching user data, proceed with default role
-          return const HomeScreen();
+        // Error fetching user data, proceed with default role
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.go('/dashboard');
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         final data = snapshot.data;
@@ -92,8 +94,11 @@ class _AuthenticatedGate extends ConsumerWidget {
           }
         }
 
-        // For donor and volunteer roles, go to regular dashboard
-        return const HomeScreen();
+        // For donor and volunteer roles, go to regular dashboard (with bottom nav)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.go('/dashboard');
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
   }

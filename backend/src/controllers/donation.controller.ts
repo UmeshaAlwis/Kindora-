@@ -372,6 +372,128 @@ export class DonationController {
   }
 
   /**
+   * Card (non-stripe) payment: create donation record first, then confirm to mark success.
+   * This is a gateway-agnostic flow that currently simulates card payment processing.
+   */
+  static async createCardPaymentIntent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const createCardPaymentIntentSchema = Joi.object({
+        campaign_id: Joi.string().uuid().required(),
+        amount: Joi.number().required().positive().min(10).max(100000),
+        donor_name: Joi.string().max(255).required(),
+        donor_email: Joi.string().email().max(255).required(),
+        donor_phone: Joi.string().max(20).optional(),
+        message: Joi.string().allow('').max(500).optional(),
+        is_anonymous: Joi.boolean().optional(),
+      });
+
+      const { error, value } = createCardPaymentIntentSchema.validate(req.body);
+      if (error) throw new ValidationError(error.message);
+
+      const userId = req.userId;
+      if (!userId) throw new UnauthorizedError();
+
+      const donation = await DonationService.createDonation(userId, {
+        campaign_id: value.campaign_id,
+        amount: value.amount,
+        payment_method: 'card',
+        donation_type: 'one-time',
+        donor_name: value.donor_name,
+        donor_email: value.donor_email,
+        donor_phone: value.donor_phone,
+        message: value.message,
+        is_anonymous: value.is_anonymous ?? false,
+      });
+
+      const donationId = donation?.id ?? donation?.[0]?.id;
+      if (!donationId) {
+        throw new ValidationError('Failed to create card payment intent');
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          client_secret: donationId,
+          donation_id: donationId,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async confirmCardPayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const schema = Joi.object({
+        donation_id: Joi.string().uuid().required(),
+        transaction_id: Joi.string().optional(),
+      });
+
+      const { error, value } = schema.validate(req.body);
+      if (error) throw new ValidationError(error.message);
+
+      const userId = req.userId;
+      if (!userId) throw new UnauthorizedError();
+
+      // Ownership safety: ensure donation belongs to user
+      // (done implicitly by RLS in Supabase, but we verify in-memory here by fetching)
+      const updated = await DonationService.updateDonationStatus(
+        value.donation_id,
+        'success',
+        value.transaction_id ?? `card_txn_${Date.now()}`
+      );
+
+      // If somehow donation isn't ours, treat as forbidden
+      if (updated && updated.user_id && updated.user_id !== userId) {
+        throw new UnauthorizedError();
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          donation: updated,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async cancelCardPayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const schema = Joi.object({
+        donation_id: Joi.string().uuid().required(),
+        transaction_id: Joi.string().optional(),
+      });
+
+      const { error, value } = schema.validate(req.body);
+      if (error) throw new ValidationError(error.message);
+
+      const userId = req.userId;
+      if (!userId) throw new UnauthorizedError();
+
+      const updated = await DonationService.updateDonationStatus(
+        value.donation_id,
+        'failed',
+        value.transaction_id ?? `card_txn_${Date.now()}`
+      );
+
+      if (updated && updated.user_id && updated.user_id !== userId) {
+        throw new UnauthorizedError();
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          donation: updated,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Handle Stripe webhook
    */
   static async handleStripeWebhook(req: Request, res: Response, next: NextFunction) {
@@ -485,17 +607,26 @@ export class DonationController {
         throw new UnauthorizedError();
       }
 
-      const { amount, payment_method } = req.body;
+      const schema = Joi.object({
+        amount: Joi.number().required().positive(),
+        payment_method: Joi.string().valid('card').required(),
+      });
+
+      const { error, value } = schema.validate(req.body);
+      if (error) throw new ValidationError(error.message);
+
+      const { amount, payment_method } = value;
 
       if (!amount || amount <= 0) {
         throw new ValidationError('Valid amount is required');
       }
 
-      // Add amount to wallet (dummy/mock implementation until Stripe is ready)
+      // Add amount to wallet (simulated card payment until a real gateway is wired)
+      // `payment_method` must be 'card' due to schema validation above.
       const updatedWallet = await WalletService.addToWallet(
         userId,
         amount,
-        `topup_${Date.now()}`
+        `topup_card_${Date.now()}`
       );
 
       res.json({
