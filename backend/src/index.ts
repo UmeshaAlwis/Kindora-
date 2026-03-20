@@ -26,6 +26,7 @@ import beneficiaryRoutes from './routes/beneficiary.routes';
 import feedRoutes from './routes/feed.routes';
 import notificationRoutes from './routes/notification.routes';
 import productRoutes from './routes/product.routes';
+import adminRoutes from './routes/admin.routes';
 import { BeneficiaryDonationService } from './services/beneficiary-donation.service';
 
 // Load environment variables
@@ -62,6 +63,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`[${new Date().toISOString()}] 🟢 RESPONSE: ${req.method} ${req.path} - ${res.statusCode}`);
     return originalSend.call(this, data);
   };
+
   next();
 });
 
@@ -189,6 +191,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       beneficiary: '/api/beneficiary',
       notifications: '/api/notifications',
       products: '/api/products',
+      admin: '/api/admin',
     },
   });
 });
@@ -208,6 +211,7 @@ apiRouter.use('/storage', storageRoutes);
 apiRouter.use('/beneficiary', beneficiaryRoutes);
 apiRouter.use('/notifications', notificationRoutes);
 apiRouter.use('/products', productRoutes);
+apiRouter.use('/admin', adminRoutes);
 
 app.use('/api', apiRouter);
 

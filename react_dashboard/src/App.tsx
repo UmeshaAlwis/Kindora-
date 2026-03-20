@@ -14,6 +14,36 @@ type Product = {
   is_active: boolean;
 };
 
+type AdminUser = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  is_active: boolean;
+  created_at?: string;
+};
+
+type Campaign = {
+  id: string;
+  title: string;
+  status: string;
+  raised_amount?: number;
+  target_amount?: number;
+  created_at?: string;
+};
+
+type FeedPost = {
+  id: string;
+  user_name?: string;
+  user_email?: string;
+  content?: string;
+  media_url?: string;
+  media_type?: string;
+  likes_count?: number;
+  comments_count?: number;
+  created_at?: string;
+};
+
 type NewProduct = {
   name: string;
   description: string;
@@ -45,6 +75,14 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [newProduct, setNewProduct] = useState<NewProduct>(initialProduct);
+  const [activeTab, setActiveTab] = useState<
+    'products' | 'users' | 'campaigns' | 'beneficiary' | 'feed'
+  >('products');
+
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [beneficiaryCampaigns, setBeneficiaryCampaigns] = useState<Campaign[]>([]);
+  const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
 
   const categories = useMemo(
     () => ['T-Shirts', 'Accessories', 'Bags', 'Stationery', 'Other'],
@@ -67,8 +105,50 @@ export default function App() {
   useEffect(() => {
     if (isAuthenticated) {
       loadProducts();
+      loadUsers();
+      loadCampaigns();
+      loadBeneficiaryCampaigns();
+      loadFeedPosts();
     }
   }, [isAuthenticated]);
+
+  const loadUsers = async () => {
+    try {
+      const res = await api.getAdminUsers();
+      setUsers((res.data?.data || []) as AdminUser[]);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to fetch users');
+    }
+  };
+
+  const loadCampaigns = async () => {
+    try {
+      const res = await api.getAdminCampaigns();
+      setCampaigns((res.data?.data || []) as Campaign[]);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to fetch campaigns');
+    }
+  };
+
+  const loadBeneficiaryCampaigns = async () => {
+    try {
+      const res = await api.getAdminBeneficiaryCampaigns();
+      setBeneficiaryCampaigns((res.data?.data || []) as Campaign[]);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.error || 'Failed to fetch beneficiary campaigns'
+      );
+    }
+  };
+
+  const loadFeedPosts = async () => {
+    try {
+      const res = await api.getAdminFeedPosts(300);
+      setFeedPosts((res.data?.data || []) as FeedPost[]);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to fetch feed posts');
+    }
+  };
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -138,6 +218,67 @@ export default function App() {
     }
   };
 
+  const toggleUserStatus = async (u: AdminUser) => {
+    try {
+      await api.updateUserStatus(u.id, !u.is_active);
+      await loadUsers();
+      toast.success('User status updated');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to update user');
+    }
+  };
+
+  const setCampaignStatus = async (
+    type: 'campaign' | 'beneficiary',
+    id: string,
+    status: string
+  ) => {
+    try {
+      if (type === 'campaign') {
+        await api.updateCampaignStatus(id, status);
+        await loadCampaigns();
+      } else {
+        await api.updateBeneficiaryCampaignStatus(id, status);
+        await loadBeneficiaryCampaigns();
+      }
+      toast.success('Campaign status updated');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to update status');
+    }
+  };
+
+  const toggleMerchStatus = async (p: Product) => {
+    try {
+      await api.updateMerchandiseStatus(p.id, !p.is_active);
+      await loadProducts();
+      toast.success('Merch status updated');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to update merch');
+    }
+  };
+
+  const removeMerch = async (p: Product) => {
+    const ok = window.confirm(`Remove "${p.name}" from merchandise?`);
+    if (!ok) return;
+    try {
+      await api.deleteMerchandise(p.id);
+      await loadProducts();
+      toast.success('Merch removed');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to remove merch');
+    }
+  };
+
+  const deleteFeedPost = async (postId: string) => {
+    try {
+      await api.deleteAdminFeedPost(postId);
+      await loadFeedPosts();
+      toast.success('Feed post removed');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to remove post');
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="page centered">
@@ -185,8 +326,41 @@ export default function App() {
         </div>
       </header>
 
+      <div className="top-actions" style={{ marginBottom: 12 }}>
+        <button
+          className={`btn ${activeTab === 'products' ? 'primary' : 'ghost'}`}
+          onClick={() => setActiveTab('products')}
+        >
+          Merch
+        </button>
+        <button
+          className={`btn ${activeTab === 'users' ? 'primary' : 'ghost'}`}
+          onClick={() => setActiveTab('users')}
+        >
+          Users
+        </button>
+        <button
+          className={`btn ${activeTab === 'campaigns' ? 'primary' : 'ghost'}`}
+          onClick={() => setActiveTab('campaigns')}
+        >
+          Campaigns
+        </button>
+        <button
+          className={`btn ${activeTab === 'beneficiary' ? 'primary' : 'ghost'}`}
+          onClick={() => setActiveTab('beneficiary')}
+        >
+          Beneficiary Campaigns
+        </button>
+        <button
+          className={`btn ${activeTab === 'feed' ? 'primary' : 'ghost'}`}
+          onClick={() => setActiveTab('feed')}
+        >
+          Feed
+        </button>
+      </div>
+
       <main className="card">
-        {loadingProducts ? (
+        {activeTab === 'products' && (loadingProducts ? (
           <p>Loading products...</p>
         ) : products.length === 0 ? (
           <p>No products found.</p>
@@ -200,6 +374,7 @@ export default function App() {
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -217,10 +392,193 @@ export default function App() {
                   <td>${Number(p.price).toFixed(2)}</td>
                   <td>{p.stock_quantity}</td>
                   <td>{p.is_active ? 'Active' : 'Inactive'}</td>
+                  <td>
+                    <button className="btn ghost" onClick={() => toggleMerchStatus(p)}>
+                      {p.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button
+                      className="btn ghost"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => removeMerch(p)}
+                    >
+                      Remove
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        ))}
+
+        {activeTab === 'users' && (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>{u.full_name || '-'}</td>
+                  <td>{u.email}</td>
+                  <td>{u.role}</td>
+                  <td>{u.is_active ? 'Active' : 'Inactive'}</td>
+                  <td>
+                    <button className="btn ghost" onClick={() => toggleUserStatus(u)}>
+                      {u.is_active ? 'Disable' : 'Enable'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {activeTab === 'campaigns' && (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Raised / Target</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {campaigns.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.title}</td>
+                  <td>{c.status}</td>
+                  <td>
+                    {Number(c.raised_amount || 0).toFixed(2)} /{' '}
+                    {Number(c.target_amount || 0).toFixed(2)}
+                  </td>
+                  <td>
+                    <select
+                      value={c.status}
+                      onChange={(e) =>
+                        setCampaignStatus('campaign', c.id, e.target.value)
+                      }
+                    >
+                      <option value="active">active</option>
+                      <option value="paused">paused</option>
+                      <option value="completed">completed</option>
+                      <option value="cancelled">cancelled</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {activeTab === 'beneficiary' && (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Raised / Target</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {beneficiaryCampaigns.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.title}</td>
+                  <td>{c.status}</td>
+                  <td>
+                    {Number(c.raised_amount || 0).toFixed(2)} /{' '}
+                    {Number(c.target_amount || 0).toFixed(2)}
+                  </td>
+                  <td>
+                    <select
+                      value={c.status}
+                      onChange={(e) =>
+                        setCampaignStatus('beneficiary', c.id, e.target.value)
+                      }
+                    >
+                      <option value="active">active</option>
+                      <option value="paused">paused</option>
+                      <option value="completed">completed</option>
+                      <option value="cancelled">cancelled</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {activeTab === 'feed' && (
+          <>
+            <div className="top-actions" style={{ marginBottom: 8 }}>
+              <button className="btn ghost" onClick={loadFeedPosts}>
+                Refresh Feed
+              </button>
+            </div>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Content</th>
+                  <th>Media</th>
+                  <th>Preview</th>
+                  <th>Likes</th>
+                  <th>Comments</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {feedPosts.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.created_at ? new Date(p.created_at).toLocaleString() : '-'}</td>
+                    <td>{p.user_name || p.user_email || '-'}</td>
+                    <td>{p.content || '-'}</td>
+                    <td>{p.media_type || 'none'}</td>
+                    <td>
+                      {p.media_url ? (
+                        p.media_type === 'image' ? (
+                          <a href={p.media_url} target="_blank" rel="noreferrer">
+                            <img
+                              src={p.media_url}
+                              alt="Post media"
+                              style={{
+                                width: 56,
+                                height: 56,
+                                objectFit: 'cover',
+                                borderRadius: 8,
+                                border: '1px solid #e5e7eb',
+                              }}
+                            />
+                          </a>
+                        ) : (
+                          <a href={p.media_url} target="_blank" rel="noreferrer">
+                            View
+                          </a>
+                        )
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                    <td>{p.likes_count ?? 0}</td>
+                    <td>{p.comments_count ?? 0}</td>
+                    <td>
+                      <button className="btn ghost" onClick={() => deleteFeedPost(p.id)}>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </main>
 

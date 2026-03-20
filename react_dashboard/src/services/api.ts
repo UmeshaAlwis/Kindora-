@@ -65,6 +65,52 @@ class ApiClient {
       },
     });
   }
+
+  getAdminUsers() {
+    return this.client.get('/admin/users');
+  }
+
+  updateUserStatus(userId: string, is_active: boolean) {
+    return this.client.patch(`/admin/users/${userId}/status`, { is_active });
+  }
+
+  getAdminCampaigns() {
+    return this.client.get('/admin/campaigns');
+  }
+
+  updateCampaignStatus(campaignId: string, status: string) {
+    return this.client.patch(`/admin/campaigns/${campaignId}/status`, { status });
+  }
+
+  getAdminBeneficiaryCampaigns() {
+    return this.client.get('/admin/beneficiary-campaigns');
+  }
+
+  updateBeneficiaryCampaignStatus(campaignId: string, status: string) {
+    return this.client.patch(`/admin/beneficiary-campaigns/${campaignId}/status`, {
+      status,
+    });
+  }
+
+  getAdminMerchandise() {
+    return this.client.get('/admin/merchandise');
+  }
+
+  updateMerchandiseStatus(id: string, is_active: boolean) {
+    return this.client.patch(`/admin/merchandise/${id}/status`, { is_active });
+  }
+
+  deleteMerchandise(id: string) {
+    return this.client.delete(`/admin/merchandise/${id}`);
+  }
+
+  getAdminFeedPosts(limit = 200) {
+    return this.client.get(`/admin/feed-posts?limit=${limit}`);
+  }
+
+  deleteAdminFeedPost(postId: string) {
+    return this.client.delete(`/admin/feed-posts/${postId}`);
+  }
 }
 
 export default new ApiClient();
