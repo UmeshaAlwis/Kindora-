@@ -28,6 +28,8 @@ class MainLayout extends ConsumerWidget {
     // Volunteer routes
     if (location.startsWith('/volunteer/joined-campaigns')) return 3;
     if (location.startsWith('/volunteer/dashboard')) return 0;
+    if (location.startsWith('/volunteer/feed')) return 1;
+    if (location.startsWith('/volunteer/messages')) return 2;
     if (location.startsWith('/volunteer/profile')) return 4;
     if (location.startsWith('/volunteer')) return 0;
 
@@ -95,13 +97,17 @@ class MainLayout extends ConsumerWidget {
             case 1:
               if (context.mounted) {
                 context.go(
-                    isBeneficiary ? '/beneficiary/feed' : '/feed');
+                    isBeneficiary
+                        ? '/beneficiary/feed'
+                        : (isVolunteer ? '/volunteer/feed' : '/feed'));
               }
               break;
             case 2:
               if (context.mounted) {
                 context.go(
-                    isBeneficiary ? '/beneficiary/messages' : '/messages');
+                    isBeneficiary
+                        ? '/beneficiary/messages'
+                        : (isVolunteer ? '/volunteer/messages' : '/messages'));
               }
               break;
             case 3:
