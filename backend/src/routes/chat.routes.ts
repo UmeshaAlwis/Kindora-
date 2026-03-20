@@ -6,7 +6,45 @@ const router = Router();
 const logger = new Logger('CHAT');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+let cachedAvailableModels: string[] | null = null;
+let cachedAtMs = 0;
+const MODEL_CACHE_TTL_MS = 10 * 60 * 1000;
+
+async function getAvailableGeminiModels(): Promise<string[]> {
+  if (!GEMINI_API_KEY) {
+    return [];
+  }
+
+  const now = Date.now();
+  if (cachedAvailableModels && now - cachedAtMs < MODEL_CACHE_TTL_MS) {
+    return cachedAvailableModels;
+  }
+
+  try {
+    const response = await axios.get(`${GEMINI_API_BASE}?key=${GEMINI_API_KEY}`, {
+      timeout: 8000,
+    });
+
+    const models: string[] = (response.data?.models ?? [])
+      .filter((m: any) => Array.isArray(m?.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+      .map((m: any) => String(m?.name ?? '').replace(/^models\//, ''))
+      .filter((name: string) => !!name);
+
+    const preferred = GEMINI_MODELS.filter((m) => models.includes(m));
+    const ordered = [...preferred, ...models.filter((m) => !preferred.includes(m))];
+
+    cachedAvailableModels = ordered;
+    cachedAtMs = now;
+    return ordered;
+  } catch (error: any) {
+    const errorMsg = error.response?.data?.error?.message || error.message || 'Unknown error';
+    const statusCode = error.response?.status || 'N/A';
+    logger.warn(`Gemini ListModels failed (Status: ${statusCode}): ${errorMsg}`);
+    return GEMINI_MODELS;
+  }
+}
 
 // Fallback keyword responses
 const fallbackResponses: { [key: string]: string } = {
@@ -20,6 +58,16 @@ const fallbackResponses: { [key: string]: string } = {
   account: 'Manage your account in Settings to update info and view activity.',
   security: 'Kindora uses encryption and secure payment gateways to protect your information.',
   why: 'Donating helps support important causes and makes a real difference in people\'s lives.',
+  database:
+    'Kindora database includes core tables like users, campaigns, beneficiary_campaigns, donations, wallets, wallet_transactions, messages, notifications, merchandise, campaign_volunteers, feed_posts, feed_post_likes, and merchandise_orders.',
+  tables:
+    'Main Kindora tables: users, campaigns, beneficiary_campaigns, donations, wallets, wallet_transactions, messages, notifications, merchandise, campaign_volunteers, feed_posts, feed_post_likes, merchandise_orders.',
+  volunteer:
+    'Volunteers can browse campaigns that need volunteers, join them, chat with donors, and manage joined campaigns from their volunteer dashboard.',
+  beneficiary:
+    'Beneficiaries can complete profile details, create beneficiary campaigns, track progress, and receive donations to their wallet.',
+  merch:
+    'Merchandise is managed from admin dashboard and shown in mobile Merch page. Donors can purchase items with wallet or card.',
 };
 
 /**
@@ -62,43 +110,72 @@ router.post('/', async (req: Request, res: Response) => {
  * Get response from Google Gemini API with fallback to keyword matching
  */
 async function getGeminiResponse(userMessage: string, conversationHistory: any[] = []): Promise<string> {
+  const appKnowledge = `
+Kindora app/domain knowledge:
+- Roles: donor, beneficiary, volunteer (charity), admin.
+- Donor: campaign donations, beneficiary donations, wallet top-up, notifications, merch purchase.
+- Beneficiary: profile completion, beneficiary campaigns, wallet earnings.
+- Volunteer: view campaigns needing volunteers, join/leave, chat with donor.
+- Admin dashboard: manage users, campaigns, beneficiary campaigns, merchandise, feed moderation.
+- Common database tables: users, campaigns, beneficiary_campaigns, donations, wallets, wallet_transactions, messages, notifications, merchandise, campaign_volunteers, feed_posts, feed_post_likes, merchandise_orders.
+- Storage: campaign/merch images are uploaded to Supabase Storage and stored as URLs.
+`;
+
+  const historyText = (conversationHistory || [])
+    .slice(-8)
+    .map((m: any) => `${m?.isUser ? 'User' : 'Assistant'}: ${m?.content ?? ''}`)
+    .join('\n');
+
   // Try Gemini API if key is available
   if (GEMINI_API_KEY) {
-    try {
-      const response = await axios.post(
-        `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [
-                {
-                  text: `You are Kindora Assistant for a charity platform. Answer briefly (1-2 sentences) about campaigns, donations, payments, and accounts. User: ${userMessage}`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 150,
-          },
-        },
-        {
-          timeout: 5000,
-        }
-      );
+    const modelsToTry = await getAvailableGeminiModels();
+    for (const model of modelsToTry) {
+      try {
+        const response = await axios.post(
+          `${GEMINI_API_BASE}/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are Kindora Assistant for a charity platform.
+Use only known Kindora context below. If unsure, say what information is missing.
+Keep answers practical, clear, and concise.
 
-      const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-      
-      if (reply) {
-        logger.info(`Gemini response: ${reply.substring(0, 50)}...`);
-        return reply;
+${appKnowledge}
+
+Conversation:
+${historyText || '(none)'}
+
+User question: ${userMessage}`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.4,
+              maxOutputTokens: 300,
+            },
+          },
+          {
+            timeout: 8000,
+          }
+        );
+
+        const reply =
+          response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (reply) {
+          logger.info(`Gemini response using ${model}: ${reply.substring(0, 50)}...`);
+          return reply;
+        }
+      } catch (error: any) {
+        const errorMsg =
+          error.response?.data?.error?.message || error.message || 'Unknown error';
+        const statusCode = error.response?.status || 'N/A';
+        logger.warn(`Gemini API error with ${model} (Status: ${statusCode}): ${errorMsg}`);
+        logger.debug(`Full error response:`, error.response?.data);
       }
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.error?.message || error.message || 'Unknown error';
-      const statusCode = error.response?.status || 'N/A';
-      logger.warn(`Gemini API error (Status: ${statusCode}): ${errorMsg}. Falling back to keyword matching.`);
-      logger.debug(`Full error response:`, error.response?.data);
-      // Fall through to keyword matching
     }
   }
 
@@ -112,7 +189,7 @@ async function getGeminiResponse(userMessage: string, conversationHistory: any[]
     }
   }
 
-  return 'I\'m not sure about that. You can ask me about campaigns, donations, payments, creating campaigns, or managing your account.';
+  return 'I can help with Kindora app features and database topics (roles, campaigns, donations, wallet, feed, merch, admin). Please ask a specific question.';
 }
 
 /**
@@ -163,6 +240,22 @@ router.delete('/session/:sessionId', async (req: Request, res: Response) => {
       error: error.message || 'Failed to clear session',
     });
   }
+});
+
+/**
+ * GET /api/chat/health
+ * Quick health/status for chatbot integration mode.
+ */
+router.get('/health', async (_req: Request, res: Response) => {
+  const available_models = GEMINI_API_KEY ? await getAvailableGeminiModels() : [];
+  res.json({
+    success: true,
+    provider: GEMINI_API_KEY ? 'gemini' : 'fallback',
+    gemini_configured: !!GEMINI_API_KEY,
+    model_candidates: GEMINI_MODELS,
+    available_models,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 export default router;

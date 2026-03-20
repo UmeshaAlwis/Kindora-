@@ -227,8 +227,8 @@ class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
       final beneficiaryRepo = BeneficiaryDetailsRepository();
       var beneficiaryDetails;
       int beneficiaryRetries = 0;
-      // Make this long enough so first login doesn't incorrectly route to donor UI.
-      const maxBeneficiaryRetries = 20;
+      // Keep this short to avoid long loading loops.
+      const maxBeneficiaryRetries = 5;
       const beneficiaryRetryDelayMs = 600;
 
       while (beneficiaryDetails == null &&

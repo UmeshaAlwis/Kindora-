@@ -15,6 +15,7 @@ import '../../features/notifications/ui/notifications_page.dart';
 import '../../features/wallet/ui/beneficiary_wallet_page.dart';
 import '../../features/volunteer/ui/volunteer_dashboard_screen.dart';
 import '../../features/volunteer/ui/volunteer_joined_campaigns_screen.dart';
+import '../../features/volunteer/ui/volunteer_profile_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_completion_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
@@ -171,7 +172,7 @@ class AppRouter {
           GoRoute(
             path: '/volunteer/profile',
             name: 'volunteer-profile',
-            builder: (context, state) => const ProfilePage(),
+            builder: (context, state) => const VolunteerProfileScreen(),
           ),
           GoRoute(
             path: '/beneficiary/create-campaign',

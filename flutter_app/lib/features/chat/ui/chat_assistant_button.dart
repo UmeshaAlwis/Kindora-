@@ -79,6 +79,9 @@ class _ChatAssistantButtonState extends ConsumerState<ChatAssistantButton>
                 child: Material(
                   child: ChatWindow(
                     onClose: () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
                       setState(() {
                         _isChatOpen = false;
                       });

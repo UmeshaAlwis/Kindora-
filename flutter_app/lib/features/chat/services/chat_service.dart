@@ -1,15 +1,14 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
+import 'package:kindora/config/app_env.dart';
 import '../models/chat_model.dart';
 
 /// Service to handle chatbot API communication
 class ChatService {
   static final ChatService _instance = ChatService._internal();
-  // For Android emulator: use 10.0.2.2 to access host machine
-  // For physical device: use your machine's actual IP
-  // For iOS simulator: use localhost or 127.0.0.1
-  static const String _baseUrl = 'http://10.0.2.2:5001/api';
+  // Keep chat base URL aligned with app-wide API environment.
+  static String get _baseUrl => AppEnv.apiBaseUrl;
   static const String _chatEndpoint = '/chat';
 
   late String _sessionId;

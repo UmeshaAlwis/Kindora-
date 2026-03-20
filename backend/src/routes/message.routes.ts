@@ -148,7 +148,7 @@ router.get('/conversations', async (req: Request, res: Response) => {
       limit: 200,
     });
     const received = await supabase.select<any>('messages', {
-      select: 'id,sender_id,recipient_id,content,created_at',
+      select: 'id,sender_id,recipient_id,content,created_at,is_read',
       filters: { recipient_id: userId },
       orderBy: { column: 'created_at', ascending: false },
       limit: 200,
@@ -172,6 +172,8 @@ router.get('/conversations', async (req: Request, res: Response) => {
       partnerName: string;
       lastMessage: string;
       lastMessageAt: string;
+      lastMessageSenderId: string;
+      unreadCount: number;
     }> = [];
 
     for (const [partnerId, msg] of latestByPartner.entries()) {
@@ -186,6 +188,10 @@ router.get('/conversations', async (req: Request, res: Response) => {
         partnerName: partner?.full_name || partner?.email || 'User',
         lastMessage: msg.content || '',
         lastMessageAt: msg.created_at,
+        lastMessageSenderId: msg.sender_id || '',
+        unreadCount: received.filter(
+          (r) => r.sender_id === partnerId && r.is_read === false
+        ).length,
       });
     }
 
