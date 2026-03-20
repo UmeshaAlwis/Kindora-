@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Added Supabase
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
+// Ensure these paths match your actual folder structure in Android Studio
 import 'screens/news_feed_screen.dart';
 import 'screens/recommendation_screen.dart';
 import 'screens/rewards_screen.dart';
 
 Future<void> main() async {
-  // 1. Ensure Flutter bindings are initialized
+  // 1. Mandatory for async initializations
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Initialize Supabase with your dashboard credentials
+  // 2. Initialize Supabase
+  // 💡 Tip: Keep these keys safe. If you haven't replaced them, the app will
+  // load but won't fetch data.
   await Supabase.initialize(
-    // REPLACE these strings with the values from your Supabase screenshot
-    url: 'https://your-project-id.supabase.co',
-    anonKey: 'your-anon-public-key-here',
+    url: 'https://your-project-url.supabase.co',
+    anonKey: 'your-anon-key-here',
   );
 
   runApp(const KindoraApp());
@@ -24,14 +27,20 @@ class KindoraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color kindoraBlue = Color(0xFF0C0C79); // Matches your Feed Screen
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Kindora',
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: const Color(0xFF1A1A40),
-        // Adding a global color scheme for consistency
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1A1A40)),
+        primaryColor: kindoraBlue,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: kindoraBlue,
+          primary: kindoraBlue,
+        ),
+        // Ensures your AppBar and BottomNav use consistent fonts
+        fontFamily: 'Poppins',
       ),
       home: const MainParent(),
     );
@@ -46,19 +55,21 @@ class MainParent extends StatefulWidget {
 }
 
 class _MainParentState extends State<MainParent> {
-  int _selectedIndex = 1; // Default to 'Feed' (Center Tab)
+  // We start at index 1 (NewsFeedScreen) as the home tab
+  int _selectedIndex = 1;
 
-  // This list holds the actual screens for navigation
+  // List of screens connected to the Bottom Navigation Bar
   final List<Widget> _screens = [
     const RecommendationScreen(),
-    const NewsFeedScreen(), // Changed FeedScreen to NewsFeedScreen to match your backend setup
+    const NewsFeedScreen(),
     const RewardsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack preserves the state (scroll position, etc.) of each tab
+      // IndexedStack is great because it doesn't "reset" the screen
+      // when you switch tabs.
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -70,10 +81,12 @@ class _MainParentState extends State<MainParent> {
             _selectedIndex = index;
           });
         },
-        selectedItemColor: const Color(0xFF1A1A40),
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: const Color(0xFF0C0C79),
+        unselectedItemColor: Colors.grey[600],
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
+        elevation: 10,
+        backgroundColor: Colors.white,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(LucideIcons.sparkles),
