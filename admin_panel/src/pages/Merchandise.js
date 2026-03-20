@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../supabaseClient';
 import {
   Box,
   Card,
@@ -16,121 +15,156 @@ import {
   Chip,
   TextField,
   InputAdornment,
-  MenuItem,
+  IconButton,
+  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Grid,
+  Avatar,
+  Badge,
 } from '@mui/material';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import EyeIcon from '@mui/icons-material/Visibility';
+import EyeOffIcon from '@mui/icons-material/VisibilityOff';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import toast from 'react-hot-toast';
+import ProductFormDialog from '../components/ProductFormDialog';
+import { productService } from '../services/productService';
 
 const Merchandise = () => {
-  const [merchandise, setMerchandise] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    quantity_available: '',
-    quantity_sold: '',
-    status: 'Available',
-  });
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [realtimeActive, setRealtimeActive] = useState(false);
+  let subscription = null;
 
   useEffect(() => {
-    fetchMerchandise();
+    fetchProducts();
+    setupRealTimeListener();
+
+    return () => {
+      if (subscription) {
+        productService.unsubscribeFromProducts(subscription);
+      }
+    };
   }, []);
 
-  const fetchMerchandise = async () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('merchandise')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await productService.fetchAllProducts();
 
       if (error) throw error;
-      setMerchandise(data || []);
+      setProducts(data || []);
     } catch (err) {
-      toast.error('Failed to fetch merchandise');
+      toast.error('Failed to fetch products');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenDialog = (item = null) => {
-    if (item) {
-      setEditingId(item.id);
-      setFormData({
-        name: item.name,
-        description: item.description || '',
-        price: item.price,
-        quantity_available: item.quantity_available,
-        quantity_sold: item.quantity_sold || 0,
-        status: item.status,
+  const setupRealTimeListener = () => {
+    try {
+      subscription = productService.subscribeToProducts((payload) => {
+        console.log('Real-time update received:', payload);
+        setRealtimeActive(true);
+
+        if (payload.eventType === 'INSERT') {
+          setProducts((prev) => [payload.new, ...prev]);
+          toast.success('New product added!');
+        } else if (payload.eventType === 'UPDATE') {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === payload.new.id ? payload.new : p))
+          );
+          toast.success('Product updated!');
+        } else if (payload.eventType === 'DELETE') {
+          setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
+          toast.success('Product deleted!');
+        }
       });
-    } else {
-      setEditingId(null);
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        quantity_available: '',
-        quantity_sold: '',
-        status: 'Available',
-      });
+    } catch (err) {
+      console.error('Error setting up real-time listener:', err);
+      toast.error('Real-time updates may not work');
     }
-    setDialogOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!formData.name || !formData.price) {
-      toast.error('Please fill all required fields');
-      return;
-    }
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setFormDialogOpen(true);
+  };
 
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setFormDialogOpen(true);
+  };
+
+  const handleSaveProduct = async (productData) => {
     try {
-      if (editingId) {
-        const { error } = await supabase
-          .from('merchandise')
-          .update(formData)
-          .eq('id', editingId);
+      if (editingProduct) {
+        const { error } = await productService.updateProduct(
+          editingProduct.id,
+          productData
+        );
         if (error) throw error;
-        toast.success('Item updated');
+        toast.success('Product updated successfully!');
       } else {
-        const { error } = await supabase.from('merchandise').insert([formData]);
+        const { error } = await productService.createProduct(productData);
         if (error) throw error;
-        toast.success('Item created');
+        toast.success('Product created successfully!');
       }
-      setDialogOpen(false);
-      fetchMerchandise();
+      fetchProducts();
     } catch (err) {
-      toast.error('Failed to save item');
-      console.error(err);
+      console.error('Error saving product:', err);
+      toast.error('Failed to save product');
     }
   };
 
-  const handleDeleteItem = async (id) => {
-    if (!window.confirm('Delete this item?')) return;
+  const handleDeleteClick = (id) => {
+    setDeletingId(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      const { error } = await supabase.from('merchandise').delete().eq('id', id);
+      const { error } = await productService.deleteProduct(deletingId);
       if (error) throw error;
-      toast.success('Item deleted');
-      fetchMerchandise();
+      toast.success('Product deleted successfully!');
+      setDeleteConfirmOpen(false);
+      setDeletingId(null);
+      fetchProducts();
     } catch (err) {
-      toast.error('Failed to delete item');
+      console.error('Error deleting product:', err);
+      toast.error('Failed to delete product');
     }
   };
 
-  const filteredMerchandise = merchandise.filter((m) =>
-    (m?.name || '').toLowerCase().includes(search.toLowerCase())
+  const handleToggleStatus = async (product) => {
+    try {
+      const { error } = await productService.updateProduct(product.id, {
+        is_active: !product.is_active,
+      });
+      if (error) throw error;
+      toast.success(`Product ${product.is_active ? 'deactivated' : 'activated'}!`);
+      fetchProducts();
+    } catch (err) {
+      console.error('Error toggling status:', err);
+      toast.error('Failed to update product status');
+    }
+  };
+
+  const filteredProducts = products.filter((p) =>
+    (p?.name || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
@@ -144,24 +178,78 @@ const Merchandise = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
       <Box>
+        {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
           <Box>
             <Typography variant="h4" fontWeight={800} color="text.primary">
-              Merchandise Management
+              Product Management
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={1}>
-              Manage merchandise inventory and orders
+              Manage products that appear on the Merch Page
             </Typography>
           </Box>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-            Add Item
-          </Button>
+          <Box display="flex" gap={1}>
+            <Tooltip title="Refresh products">
+              <IconButton
+                onClick={fetchProducts}
+                color="primary"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'action.hover' },
+                }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddProduct}
+              size="large"
+            >
+              Add Product
+            </Button>
+          </Box>
         </Box>
 
+        {/* Real-time Status */}
+        {realtimeActive && (
+          <Card
+            sx={{
+              p: 2,
+              mb: 3,
+              bgcolor: '#e8f5e9',
+              border: '1px solid #4caf50',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                bgcolor: '#4caf50',
+                animation: 'pulse 2s infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.5 },
+                },
+              }}
+            />
+            <Typography variant="body2" color="success.dark">
+              Real-time sync active - Changes will appear instantly
+            </Typography>
+          </Card>
+        )}
+
+        {/* Search Bar */}
         <Card sx={{ p: 3, mb: 3 }}>
           <TextField
             fullWidth
-            placeholder="Search merchandise..."
+            placeholder="Search products by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -174,151 +262,174 @@ const Merchandise = () => {
           />
         </Card>
 
+        {/* Products Table */}
         <Card>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell fontWeight={800}>Item Name</TableCell>
-                  <TableCell>Price</TableCell>
-                  <TableCell>Available</TableCell>
-                  <TableCell>Sold</TableCell>
-                  <TableCell>Stock %</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>Image</TableCell>
+                  <TableCell>Product Name</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell align="right">Price</TableCell>
+                  <TableCell align="center">Stock</TableCell>
+                  <TableCell align="center">Rating</TableCell>
+                  <TableCell align="center">Status</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredMerchandise.length === 0 ? (
+                {filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                       <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
-                        <ShoppingBagIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
-                        <Typography color="text.secondary">No merchandise found</Typography>
+                        <ShoppingBagIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+                        <Typography variant="h6" color="text.secondary">
+                          No products found
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Add your first product to get started
+                        </Typography>
                       </Box>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredMerchandise.map((item) => {
-                    const total = Number(item.quantity_available) + Number(item.quantity_sold);
-                    const stockPercent =
-                      total > 0
-                        ? Math.round((Number(item.quantity_available) / total) * 100)
-                        : 0;
-                    return (
-                      <TableRow key={item.id} hover>
-                        <TableCell fontWeight={600}>{item.name}</TableCell>
-                        <TableCell>${Number(item.price).toFixed(2)}</TableCell>
-                        <TableCell>{item.quantity_available}</TableCell>
-                        <TableCell>{item.quantity_sold}</TableCell>
-                        <TableCell>
-                          <Box
-                            sx={{
-                              background: `linear-gradient(90deg, #FF751F ${100 - stockPercent}%, #f5f5f5 ${100 - stockPercent}%)`,
-                              borderRadius: 1,
-                              px: 2,
-                              py: 0.5,
-                              textAlign: 'center',
-                              fontWeight: 600,
-                              color: 100 - stockPercent > 50 ? '#fff' : '#000',
-                            }}
-                          >
-                            {100 - stockPercent}%
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={item.status}
-                            color={item.status === 'Available' ? 'success' : 'default'}
-                            variant="outlined"
-                            size="small"
+                  filteredProducts.map((product) => (
+                    <TableRow key={product.id} hover>
+                      {/* Product Image */}
+                      <TableCell>
+                        {product.image_url ? (
+                          <Avatar
+                            variant="rounded"
+                            src={product.image_url}
+                            sx={{ width: 50, height: 50 }}
                           />
-                        </TableCell>
-                        <TableCell align="right">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<EditIcon />}
-                            onClick={() => handleOpenDialog(item)}
-                            sx={{ mr: 1 }}
+                        ) : (
+                          <Avatar
+                            variant="rounded"
+                            sx={{ width: 50, height: 50, bgcolor: 'action.disabledBackground' }}
                           >
-                            Edit
-                          </Button>
-                          <Button
+                            <ShoppingBagIcon />
+                          </Avatar>
+                        )}
+                      </TableCell>
+
+                      {/* Product Name */}
+                      <TableCell>
+                        <Typography fontWeight={600}>{product.name}</Typography>
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {product.description?.substring(0, 50)}...
+                        </Typography>
+                      </TableCell>
+
+                      {/* Category */}
+                      <TableCell>
+                        <Chip label={product.category} variant="outlined" size="small" />
+                      </TableCell>
+
+                      {/* Price */}
+                      <TableCell align="right">
+                        <Typography fontWeight={600} color="primary.main">
+                          ${Number(product.price).toFixed(2)}
+                        </Typography>
+                      </TableCell>
+
+                      {/* Stock */}
+                      <TableCell align="center">
+                        <Badge
+                          badgeContent={product.stock_quantity}
+                          color={product.stock_quantity > 0 ? 'success' : 'error'}
+                        >
+                          <ShoppingBagIcon fontSize="small" />
+                        </Badge>
+                      </TableCell>
+
+                      {/* Rating */}
+                      <TableCell align="center">
+                        {product.average_rating > 0 ? (
+                          <Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {product.average_rating.toFixed(1)}★
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              ({product.review_count})
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            No reviews
+                          </Typography>
+                        )}
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell align="center">
+                        <Chip
+                          label={product.is_active ? 'Active' : 'Inactive'}
+                          color={product.is_active ? 'success' : 'default'}
+                          variant="outlined"
+                          size="small"
+                        />
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell align="right">
+                        <Tooltip title={product.is_active ? 'Deactivate' : 'Activate'}>
+                          <IconButton
                             size="small"
-                            variant="outlined"
+                            onClick={() => handleToggleStatus(product)}
+                            color="primary"
+                          >
+                            {product.is_active ? <EyeIcon /> : <EyeOffIcon />}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditProduct(product)}
+                            color="primary"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteClick(product.id)}
                             color="error"
-                            onClick={() => handleDeleteItem(item.id)}
                           >
-                            Delete
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
           </TableContainer>
         </Card>
 
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>{editingId ? 'Edit Item' : 'Add Merchandise Item'}</DialogTitle>
+        {/* Product Form Dialog */}
+        <ProductFormDialog
+          open={formDialogOpen}
+          onClose={() => setFormDialogOpen(false)}
+          onSave={handleSaveProduct}
+          editingProduct={editingProduct}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+          <DialogTitle>Delete Product</DialogTitle>
           <DialogContent>
-            <Box display="flex" flexDirection="column" gap={2.5} pt={1}>
-              <TextField
-                label="Item Name"
-                fullWidth
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-              <TextField
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-              <TextField
-                label="Price"
-                type="number"
-                fullWidth
-                inputProps={{ step: '0.01' }}
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              />
-              <TextField
-                label="Quantity Available"
-                type="number"
-                fullWidth
-                value={formData.quantity_available}
-                onChange={(e) => setFormData({ ...formData, quantity_available: e.target.value })}
-              />
-              <TextField
-                label="Quantity Sold"
-                type="number"
-                fullWidth
-                value={formData.quantity_sold}
-                onChange={(e) => setFormData({ ...formData, quantity_sold: e.target.value })}
-              />
-              <TextField
-                select
-                label="Status"
-                fullWidth
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              >
-                <MenuItem value="Available">Available</MenuItem>
-                <MenuItem value="Out of Stock">Out of Stock</MenuItem>
-                <MenuItem value="Discontinued">Discontinued</MenuItem>
-              </TextField>
-            </Box>
+            <Typography>
+              Are you sure you want to delete this product? This action cannot be undone.
+            </Typography>
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button variant="contained" onClick={handleSave}>
-              Save
+          <DialogActions>
+            <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmDelete} color="error" variant="contained">
+              Delete
             </Button>
           </DialogActions>
         </Dialog>
