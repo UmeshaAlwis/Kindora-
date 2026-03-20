@@ -88,4 +88,133 @@ class AppLocalizationsSi extends AppLocalizations {
 
   @override
   String get editProfile => 'පැතිකඩ සංස්කරණය';
+
+  @override
+  String get home => 'මුල් පිටුව';
+
+  @override
+  String get feed => 'ප්‍රවෘත්ති';
+
+  @override
+  String get messages => 'පණිවිඩ';
+
+  @override
+  String get merch => 'වෙළඳ';
+
+  @override
+  String get yourBalance => 'ඔබගේ ශේෂය';
+
+  @override
+  String get topUp => 'ටොප් අප්';
+
+  @override
+  String get transfer => 'මාරු';
+
+  @override
+  String get donate => 'පරිත්‍යාග';
+
+  @override
+  String get history => 'ඉතිහාසය';
+
+  @override
+  String get shareKindnessToday => 'අද සෙනෙහස බෙදාගන්න';
+
+  @override
+  String get startCampaign => 'ව්‍යාපාරයක් ආරම්භ කරන්න';
+
+  @override
+  String get supportCampaign => 'ව්‍යාපාරයකට සහාය දෙන්න';
+
+  @override
+  String get urgentDonations => 'හදිසි පරිත්‍යාග';
+
+  @override
+  String get seeAll => 'සියල්ල';
+
+  @override
+  String get noUrgentCampaigns => 'හදිසි ව්‍යාපාර නොමැත';
+
+  @override
+  String get noDeadline => 'අවසාන දිනයක් නැත';
+
+  @override
+  String get endingToday => 'අද අවසන් වේ';
+
+  @override
+  String get daysLeft => 'දින ඉතිරි';
+
+  @override
+  String get createPost => 'පෝස්ට් එකක් සාදන්න';
+
+  @override
+  String get whatsOnYourMind => 'ඔබ සිතන්නේ කුමක්ද?';
+
+  @override
+  String get photo => 'ඡායාරූපය';
+
+  @override
+  String get video => 'වීඩියෝව';
+
+  @override
+  String get post => 'පළ කරන්න';
+
+  @override
+  String get noPostsYet => 'තව පළ කිරීම් නැත.';
+
+  @override
+  String get beFirstToPost => 'පළමුව පළ කරන්න!';
+
+  @override
+  String get tapToOpenVideo => 'වීඩියෝව විවෘත කිරීමට තට්ටු කරන්න';
+
+  @override
+  String get failedToLoadFeed => 'ප්‍රවෘත්ති පූරණය කිරීමට අසමත් විය';
+
+  @override
+  String get failedToCreatePost => 'පෝස්ට් එක සෑදීමට අසමත් විය';
+
+  @override
+  String get failedToLikePost => 'Like කිරීමට අසමත් විය';
+
+  @override
+  String get writeSomethingOrAddMedia => 'යමක් ලියන්න හෝ මාධ්‍ය එක් කරන්න';
+
+  @override
+  String get failedToLoadMessages => 'පණිවිඩ පූරණය කළ නොහැකි විය';
+
+  @override
+  String get noMessagesYetStartConversation => 'තව පණිවිඩ නැත. සංවාදය ආරම්භ කරන්න.';
+
+  @override
+  String get campaignDetails => 'ව්‍යාපාර විස්තර';
+
+  @override
+  String get campaignerName => 'ව්‍යාපාර කළමනාකරුගේ නම';
+
+  @override
+  String get campaignEndDate => 'ව්‍යාපාර අවසන් දිනය';
+
+  @override
+  String get mainCategory => 'ප්‍රධාන කාණ්ඩය';
+
+  @override
+  String get campaignType => 'ව්‍යාපාර වර්ගය';
+
+  @override
+  String get campaignDescriptionOptional => 'ව්‍යාපාර විස්තරය (විකල්ප)';
+
+  @override
+  String get chooseCampaignImage => 'ව්‍යාපාර ඡායාරූපය තෝරන්න';
+
+  @override
+  String get createCampaign => 'ව්‍යාපාරය සාදන්න';
+
+  @override
+  String get achievements => 'ජයග්‍රහණ';
+
+  @override
+  String get loading => 'පූරණය වෙමින්...';
+
+  @override
+  String get noBadgesYet => 'තව බැජ් නැත';
 }

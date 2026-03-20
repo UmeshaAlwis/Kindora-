@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/chat/ui/chat_assistant_button.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Main layout wrapper with persistent bottom navigation bar and chat assistant
 class MainLayout extends ConsumerWidget {
@@ -58,6 +59,7 @@ class MainLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // Get the current route location to determine active nav index
     String location = '/dashboard'; // Default fallback
     try {
@@ -123,30 +125,45 @@ class MainLayout extends ConsumerWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
             activeIcon: Icon(Icons.home, color: Color(0xFF0C0C79)),
-            label: 'Home',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.rss_feed),
             activeIcon: Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
-            label: 'Feed',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.near_me_outlined),
             activeIcon: Icon(Icons.near_me, color: Color(0xFF0C0C79)),
-            label: 'Messages',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.volunteer_activism_outlined),
             activeIcon:
                 Icon(Icons.volunteer_activism, color: Color(0xFF0C0C79)),
-            label: 'Merch',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person, color: Color(0xFF0C0C79)),
-            label: 'Profile',
+            label: '',
           ),
-        ],
+        ].asMap().entries.map((entry) {
+          final i = entry.key;
+          final item = entry.value;
+          final labels = [
+            l10n.home,
+            l10n.feed,
+            l10n.messages,
+            l10n.merch,
+            l10n.profile,
+          ];
+          return BottomNavigationBarItem(
+            icon: item.icon,
+            activeIcon: item.activeIcon,
+            label: labels[i],
+          );
+        }).toList(),
       ),
     );
   }

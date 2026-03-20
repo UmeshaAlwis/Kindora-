@@ -258,6 +258,50 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit Profile'**
   String get editProfile;
+
+  String get home;
+  String get feed;
+  String get messages;
+  String get merch;
+  String get yourBalance;
+  String get topUp;
+  String get transfer;
+  String get donate;
+  String get history;
+  String get shareKindnessToday;
+  String get startCampaign;
+  String get supportCampaign;
+  String get urgentDonations;
+  String get seeAll;
+  String get noUrgentCampaigns;
+  String get noDeadline;
+  String get endingToday;
+  String get daysLeft;
+  String get createPost;
+  String get whatsOnYourMind;
+  String get photo;
+  String get video;
+  String get post;
+  String get noPostsYet;
+  String get beFirstToPost;
+  String get tapToOpenVideo;
+  String get failedToLoadFeed;
+  String get failedToCreatePost;
+  String get failedToLikePost;
+  String get writeSomethingOrAddMedia;
+  String get failedToLoadMessages;
+  String get noMessagesYetStartConversation;
+  String get campaignDetails;
+  String get campaignerName;
+  String get campaignEndDate;
+  String get mainCategory;
+  String get campaignType;
+  String get campaignDescriptionOptional;
+  String get chooseCampaignImage;
+  String get createCampaign;
+  String get achievements;
+  String get loading;
+  String get noBadgesYet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

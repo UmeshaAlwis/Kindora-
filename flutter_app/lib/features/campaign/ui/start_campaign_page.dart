@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kindora/l10n/app_localizations.dart';
 
 class StartCampaignPage extends ConsumerStatefulWidget {
   const StartCampaignPage({super.key});
@@ -201,9 +202,10 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Start a Campaign"),
+        title: Text(l10n.startCampaign),
         centerTitle: true,
         titleTextStyle: const TextStyle(
           fontSize: 20,
@@ -239,7 +241,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                                   size: 48, color: Colors.grey[400]),
                               const SizedBox(height: 8),
                               Text(
-                                'Tap to select image',
+                                l10n.chooseCampaignImage,
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
                             ],
@@ -250,8 +252,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
               const SizedBox(height: 16),
 
-              const Text(
-                "Campaign Details",
+              Text(
+                l10n.campaignDetails,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -281,8 +283,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
               /// Campaigner Name
               TextFormField(
                 controller: campaignerNameController,
-                decoration: const InputDecoration(
-                  labelText: "Campaigner Name",
+                decoration: InputDecoration(
+                  labelText: l10n.campaignerName,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -333,10 +335,10 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 child: AbsorbPointer(
                   child: TextFormField(
                     controller: dateController,
-                    decoration: const InputDecoration(
-                      labelText: "Campaign End Date",
+                    decoration: InputDecoration(
+                      labelText: l10n.campaignEndDate,
                       border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today),
+                      suffixIcon: const Icon(Icons.calendar_today),
                     ),
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
@@ -353,8 +355,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
               /// Category Dropdown
               DropdownButtonFormField<String>(
                 initialValue: category,
-                decoration: const InputDecoration(
-                  labelText: "Main Category",
+                decoration: InputDecoration(
+                  labelText: l10n.mainCategory,
                   border: OutlineInputBorder(),
                 ),
                 items: ["Charity", "Campaign", "Donation"]
@@ -375,8 +377,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
               /// Campaign Category Dropdown
               DropdownButtonFormField<String>(
                 initialValue: campaignCategory,
-                decoration: const InputDecoration(
-                  labelText: "Campaign Type",
+                decoration: InputDecoration(
+                  labelText: l10n.campaignType,
                   border: OutlineInputBorder(),
                 ),
                 items: ["Organization", "Personal"]
@@ -398,8 +400,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
               TextFormField(
                 controller: descriptionController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: "Campaign Description (Optional)",
+                decoration: InputDecoration(
+                  labelText: l10n.campaignDescriptionOptional,
                   hintText: "Share details about your campaign...",
                   border: OutlineInputBorder(),
                 ),
@@ -416,7 +418,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                   label: Text(
                     selectedImageFile != null
                         ? 'Change Image (${selectedImageFile!.name})'
-                        : 'Choose Campaign Image',
+                        : l10n.chooseCampaignImage,
                   ),
                 ),
               ),
@@ -480,7 +482,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text("Cancel"),
+                      child: Text(l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -503,7 +505,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                                     AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text("Create Campaign"),
+                          : Text(l10n.createCampaign),
                     ),
                   ),
                 ],
