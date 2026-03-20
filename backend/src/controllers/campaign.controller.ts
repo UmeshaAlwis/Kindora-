@@ -8,6 +8,7 @@ const createCampaignSchema = Joi.object({
   campaigner_name: Joi.string().optional(),
   category: Joi.string().optional(),
   campaign_category: Joi.string().optional(),
+  needs_volunteers: Joi.boolean().optional(),
   target_amount: Joi.number().required().positive(),
   image_url: Joi.string().uri().optional().allow(null, ''),
   start_date: Joi.date().optional(),

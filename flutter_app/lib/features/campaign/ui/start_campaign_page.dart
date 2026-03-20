@@ -22,6 +22,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
   String category = "Campaign";
   String campaignCategory = "Personal";
+  bool _needsVolunteers = false;
   DateTime selectedDate = DateTime.now();
 
   XFile? selectedImageFile;
@@ -156,6 +157,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
         campaignerName: campaignerNameController.text,
         category: category,
         campaignCategory: campaignCategory,
+        needsVolunteers: _needsVolunteers,
         targetAmount: targetAmount,
         image: imageUrl,
         description: descriptionController.text.isNotEmpty
@@ -395,6 +397,21 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
               ),
 
               const SizedBox(height: 16),
+
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _needsVolunteers,
+                onChanged: (value) {
+                  setState(() {
+                    _needsVolunteers = value ?? false;
+                  });
+                },
+                title: const Text('Need volunteers for this campaign'),
+                subtitle: const Text('Donors can see if volunteer support is needed.'),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+
+              const SizedBox(height: 8),
 
               /// Description (Optional)
               TextFormField(
