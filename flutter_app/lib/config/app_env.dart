@@ -10,6 +10,18 @@ class AppEnv {
   static String get apiBaseUrl =>
       dotenv.env['API_BASE_URL'] ?? 'http://localhost:5001/api';
 
+  /// Stripe Configuration
+  static String get stripeCreateIntentUrl =>
+      dotenv.env['STRIPE_CREATE_INTENT_URL'] ??
+      'http://localhost:5001/api/payments/create-intent';
+
+  static String get stripeConfirmPaymentUrl =>
+      dotenv.env['STRIPE_CONFIRM_PAYMENT_URL'] ??
+      'http://localhost:5001/api/payments/confirm-payment';
+
+  static String get stripePublishableKey =>
+      dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+
   /// Validation
   static bool isConfigured() {
     return supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;

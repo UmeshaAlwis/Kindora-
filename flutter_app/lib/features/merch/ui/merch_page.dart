@@ -38,9 +38,11 @@ class _MerchPageState extends ConsumerState<MerchPage>
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor:
+          isDarkMode ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -103,12 +105,19 @@ class _MerchPageState extends ConsumerState<MerchPage>
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
         controller: _searchController,
+        style: TextStyle(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         decoration: InputDecoration(
           hintText: 'Search products...',
+          hintStyle: TextStyle(
+            color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
+          ),
           prefixIcon: const Icon(Icons.search, color: Color(0xFF0C0C79)),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -120,14 +129,20 @@ class _MerchPageState extends ConsumerState<MerchPage>
                 )
               : null,
           filled: true,
-          fillColor: Colors.white,
+          fillColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            borderSide: BorderSide(
+                color: isDarkMode
+                    ? const Color(0xFF333333)
+                    : const Color(0xFFE0E0E0)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            borderSide: BorderSide(
+                color: isDarkMode
+                    ? const Color(0xFF333333)
+                    : const Color(0xFFE0E0E0)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -142,6 +157,7 @@ class _MerchPageState extends ConsumerState<MerchPage>
   }
 
   Widget _buildBestsellersSection(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -176,8 +192,13 @@ class _MerchPageState extends ConsumerState<MerchPage>
           child: ref.watch(bestsellersProvider).when(
                 data: (bestsellers) {
                   if (bestsellers.isEmpty) {
-                    return const Center(
-                        child: Text('No bestsellers available'));
+                    return Center(
+                        child: Text(
+                      'No bestsellers available',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ));
                   }
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -197,7 +218,12 @@ class _MerchPageState extends ConsumerState<MerchPage>
                 },
                 loading: () => _buildShimmerLoader(horizontal: true),
                 error: (error, stack) => Center(
-                  child: Text('Error loading bestsellers: $error'),
+                  child: Text(
+                    'Error loading bestsellers: $error',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.red[300] : Colors.red[700],
+                    ),
+                  ),
                 ),
               ),
         ),
@@ -206,6 +232,7 @@ class _MerchPageState extends ConsumerState<MerchPage>
   }
 
   Widget _buildAllProductsSection(BuildContext context, bool isMobile) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,14 +263,20 @@ class _MerchPageState extends ConsumerState<MerchPage>
                           Icon(
                             Icons.shopping_bag_outlined,
                             size: 48,
-                            color: Colors.grey[400],
+                            color: isDarkMode
+                                ? Colors.grey[600]
+                                : Colors.grey[400],
                           ),
                           const SizedBox(height: 16),
                           Text(
                             _searchController.text.isEmpty
                                 ? 'No products available'
                                 : 'No products found',
-                            style: TextStyle(color: Colors.grey[600]),
+                            style: TextStyle(
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
+                            ),
                           ),
                         ],
                       ),
@@ -276,7 +309,12 @@ class _MerchPageState extends ConsumerState<MerchPage>
               error: (error, stack) => Padding(
                 padding: const EdgeInsets.all(16),
                 child: Center(
-                  child: Text('Error loading products: $error'),
+                  child: Text(
+                    'Error loading products: $error',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.red[300] : Colors.red[700],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -289,6 +327,7 @@ class _MerchPageState extends ConsumerState<MerchPage>
     Merchandise product,
     int index,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return TweenAnimationBuilder(
       duration: Duration(milliseconds: 300 + (index * 100)),
       tween: Tween<double>(begin: 0, end: 1),
@@ -304,11 +343,11 @@ class _MerchPageState extends ConsumerState<MerchPage>
               child: Container(
                 width: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -322,7 +361,9 @@ class _MerchPageState extends ConsumerState<MerchPage>
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: isDarkMode
+                              ? const Color(0xFF2A2A2A)
+                              : Colors.grey[200],
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12),
                             topRight: Radius.circular(12),
@@ -341,9 +382,10 @@ class _MerchPageState extends ConsumerState<MerchPage>
                             product.name ?? 'Unknown',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
+                              color: isDarkMode ? Colors.white : Colors.black,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -370,7 +412,12 @@ class _MerchPageState extends ConsumerState<MerchPage>
                                     Text(
                                       (product.averageRating ?? 0)
                                           .toStringAsFixed(1),
-                                      style: const TextStyle(fontSize: 12),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDarkMode
+                                            ? Colors.white70
+                                            : Colors.black87,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -394,6 +441,7 @@ class _MerchPageState extends ConsumerState<MerchPage>
     Merchandise product,
     int index,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return TweenAnimationBuilder(
       duration: Duration(milliseconds: 300 + (index * 50)),
       tween: Tween<double>(begin: 0, end: 1),
@@ -408,11 +456,11 @@ class _MerchPageState extends ConsumerState<MerchPage>
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -426,7 +474,9 @@ class _MerchPageState extends ConsumerState<MerchPage>
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: isDarkMode
+                              ? const Color(0xFF2A2A2A)
+                              : Colors.grey[200],
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12),
                             topRight: Radius.circular(12),
@@ -445,9 +495,10 @@ class _MerchPageState extends ConsumerState<MerchPage>
                             product.name ?? 'Unknown',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
+                              color: isDarkMode ? Colors.white : Colors.black,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -472,14 +523,21 @@ class _MerchPageState extends ConsumerState<MerchPage>
                                 Text(
                                   (product.averageRating ?? 0)
                                       .toStringAsFixed(1),
-                                  style: const TextStyle(fontSize: 11),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDarkMode
+                                        ? Colors.white70
+                                        : Colors.black87,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '(${product.reviewCount})',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[600],
+                                    color: isDarkMode
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                               ],
@@ -499,12 +557,13 @@ class _MerchPageState extends ConsumerState<MerchPage>
   }
 
   Widget _buildProductImage(String? imageUrl) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     if (imageUrl == null || imageUrl.isEmpty) {
       return Center(
         child: Icon(
           Icons.shopping_bag_outlined,
           size: 48,
-          color: Colors.grey[400],
+          color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
         ),
       );
     }
@@ -513,18 +572,23 @@ class _MerchPageState extends ConsumerState<MerchPage>
       imageUrl: imageUrl,
       fit: BoxFit.cover,
       placeholder: (context, url) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(color: Colors.grey[300]),
+        baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+        highlightColor: isDarkMode ? Colors.grey[600]! : Colors.grey[100]!,
+        child:
+            Container(color: isDarkMode ? Colors.grey[700] : Colors.grey[300]),
       ),
       errorWidget: (context, url, error) => Icon(
         Icons.image_not_supported,
-        color: Colors.grey[400],
+        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
       ),
     );
   }
 
   Widget _buildShimmerLoader({required bool horizontal}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+    final highlightColor = isDarkMode ? Colors.grey[600]! : Colors.grey[100]!;
+
     if (horizontal) {
       return SizedBox(
         height: 280,
@@ -536,12 +600,12 @@ class _MerchPageState extends ConsumerState<MerchPage>
             return Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+                baseColor: baseColor,
+                highlightColor: highlightColor,
                 child: Container(
                   width: 180,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -564,11 +628,11 @@ class _MerchPageState extends ConsumerState<MerchPage>
         itemCount: 6,
         itemBuilder: (context, index) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: baseColor,
+            highlightColor: highlightColor,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: baseColor,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
