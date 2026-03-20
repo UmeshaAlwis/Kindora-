@@ -96,7 +96,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Kindora Assistant',
+                      'Chat',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -105,7 +105,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Online - Ready to help',
+                      'Online',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -131,20 +131,6 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF667eea).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Icon(
-                              Icons.support_agent,
-                              color: Color(0xFF667eea),
-                              size: 32,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
                           const Text(
                             'How can we help?',
                             style: TextStyle(
@@ -248,18 +234,6 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         mainAxisAlignment:
             message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!message.isUser) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: const Color(0xFF667eea).withOpacity(0.2),
-              child: const Icon(
-                Icons.support_agent,
-                size: 18,
-                color: Color(0xFF667eea),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
