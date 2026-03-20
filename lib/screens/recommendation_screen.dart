@@ -1,4 +1,3 @@
-// Updated recommendation screen UI
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +7,8 @@ class RecommendationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color darkNavy = Color(0xFF1A1A40);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
       appBar: AppBar(
@@ -17,7 +18,7 @@ class RecommendationScreen extends StatelessWidget {
         title: Text(
           'AI Recommendations',
           style: GoogleFonts.poppins(
-            color: const Color(0xFF1A1A40),
+            color: darkNavy,
             fontWeight: FontWeight.bold,
             fontSize: 24,
           ),
@@ -28,11 +29,12 @@ class RecommendationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // AI Info Header
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF1A1A40), Color(0xFF2E2E6E)],
+                  colors: [darkNavy, Color(0xFF2E2E6E)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -57,10 +59,12 @@ class RecommendationScreen extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF1A1A40),
+                color: darkNavy,
               ),
             ),
             const SizedBox(height: 20),
+
+            // Recommendation Cards
             _buildRecommendationCard(
               context,
               "Clean Water Initiative",
@@ -104,8 +108,8 @@ class RecommendationScreen extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         onTap: () {
+          // Navigate to Details
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -124,10 +128,7 @@ class RecommendationScreen extends StatelessWidget {
         ),
         title: Text(
             title,
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1A1A40),
-            )
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: const Color(0xFF1A1A40))
         ),
         subtitle: Text(
             reason,
@@ -139,6 +140,7 @@ class RecommendationScreen extends StatelessWidget {
   }
 }
 
+// --- DETAIL SCREEN ---
 class CauseDetailScreen extends StatelessWidget {
   final String title;
   final String reason;
@@ -156,25 +158,30 @@ class CauseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1A40),
         elevation: 0,
+        foregroundColor: const Color(0xFF1A1A40),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Center(child: Icon(icon, size: 80, color: color)),
             const SizedBox(height: 20),
-            Text(title, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold)),
+            Icon(icon, size: 100, color: color),
+            const SizedBox(height: 30),
+            Text(title, style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text(reason, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey)),
-            const SizedBox(height: 40),
+            Text(
+              "Every donation helps provide resources for this cause. $reason.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 15, color: Colors.grey[600]),
+            ),
+            const Spacer(),
+            // ✅ THE BUTTON IS NOW FULLY FUNCTIONAL
             ElevatedButton(
               onPressed: () {
-                // NAVIGATION: Go to Amount Selection
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -184,11 +191,16 @@ class CauseDetailScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1A1A40),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 0,
               ),
-              child: const Text("Donate Now", style: TextStyle(color: Colors.white)),
-            )
+              child: Text(
+                "Donate Now",
+                style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -196,16 +208,24 @@ class CauseDetailScreen extends StatelessWidget {
   }
 }
 
-// NEW: Donation Amount Screen
-class DonationAmountScreen extends StatelessWidget {
+// --- AMOUNT SELECTION SCREEN ---
+class DonationAmountScreen extends StatefulWidget {
   final String campaignTitle;
   const DonationAmountScreen({super.key, required this.campaignTitle});
 
   @override
+  State<DonationAmountScreen> createState() => _DonationAmountScreenState();
+}
+
+class _DonationAmountScreenState extends State<DonationAmountScreen> {
+  final TextEditingController _amountController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Choose Amount"),
+        title: Text("Select Amount", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF1A1A40),
         elevation: 0,
@@ -215,33 +235,67 @@ class DonationAmountScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Donating to:", style: GoogleFonts.poppins(color: Colors.grey)),
-            Text(campaignTitle, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 30),
-            const TextField(
+            Text("Your contribution to:", style: GoogleFonts.poppins(color: Colors.grey)),
+            Text(widget.campaignTitle, style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 40),
+            TextField(
+              controller: _amountController,
               keyboardType: TextInputType.number,
+              autofocus: true,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
-                labelText: "Enter Amount",
+                labelText: "Donation Amount",
                 prefixText: "\$ ",
-                border: OutlineInputBorder(),
+                hintText: "0.00",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: Color(0xFF1A1A40), width: 2),
+                ),
               ),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: () {
-                // Success message or payment logic
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Thank you for your donation!")),
+                if (_amountController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter an amount")),
+                  );
+                  return;
+                }
+
+                // Show Success Message
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Icon(LucideIcons.checkCircle, color: Colors.green, size: 50),
+                    content: Text(
+                      "Thank you! Your donation of \$${_amountController.text} to ${widget.campaignTitle} was successful.",
+                      textAlign: TextAlign.center,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          // Go back to the very beginning (The Recommendation Feed)
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
+                        child: const Text("Done"),
+                      )
+                    ],
+                  ),
                 );
-                Navigator.popUntil(context, (route) => route.isFirst);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A1A40),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: const Color(0xFFFF751F), // Brand Orange
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: const Text("Confirm Donation", style: TextStyle(color: Colors.white)),
-            )
+              child: const Text(
+                "Confirm & Pay",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
