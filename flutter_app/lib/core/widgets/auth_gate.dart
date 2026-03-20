@@ -35,15 +35,28 @@ class AuthGate extends ConsumerWidget {
   }
 }
 
-class _AuthenticatedGate extends ConsumerWidget {
+class _AuthenticatedGate extends ConsumerStatefulWidget {
   final User user;
 
   const _AuthenticatedGate({required this.user});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AuthenticatedGate> createState() => _AuthenticatedGateState();
+}
+
+class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
+  late final Future<Map<String, dynamic>?> _roleFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _roleFuture = _getUserRoleAndStatus(widget.user.uid);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>?>(
-      future: _getUserRoleAndStatus(user.uid),
+      future: _roleFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -59,7 +72,7 @@ class _AuthenticatedGate extends ConsumerWidget {
           // and route based on what we find.
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             try {
-              final data = await _getUserRoleAndStatus(user.uid);
+              final data = await _getUserRoleAndStatus(widget.user.uid);
               if (!context.mounted) return;
 
               final userRole = data?['role'] as String? ?? 'donor';
@@ -136,7 +149,8 @@ class _AuthenticatedGate extends ConsumerWidget {
       // This avoids briefly routing beneficiary users to donor screens.
       String? firebaseRoleClaim;
       try {
-        final idTokenResult = await user.getIdTokenResult();
+        // Force refresh so custom claims are available right after login.
+        final idTokenResult = await widget.user.getIdTokenResult(true);
         final claim = idTokenResult.claims?['role'];
         if (claim is String) firebaseRoleClaim = claim;
       } catch (_) {
@@ -199,27 +213,50 @@ class _AuthenticatedGate extends ConsumerWidget {
       final userRole = profileResponse['role'] as String? ?? 'donor';
       print('[AuthGate DEBUG] ✓ Successfully fetched user role: $userRole');
 
-      // If Firebase says beneficiary, trust it (Supabase may still be syncing).
-      final resolvedRole =
-          firebaseRoleClaim == 'beneficiary' ? 'beneficiary' : userRole;
+      // Supabase can take a moment to sync `beneficiary_details` right after login.
+      // If we query once and get null, we might incorrectly route to donor UI.
+      final beneficiaryRepo = BeneficiaryDetailsRepository();
+      var beneficiaryDetails;
+      int beneficiaryRetries = 0;
+      // Make this long enough so first login doesn't incorrectly route to donor UI.
+      const maxBeneficiaryRetries = 20;
+      const beneficiaryRetryDelayMs = 600;
 
-      // If beneficiary, check if profile is completed
-      if (resolvedRole == 'beneficiary') {
-        print(
-            '[AuthGate DEBUG] User is beneficiary, checking profile completion...');
-        bool profileCompleted = true;
-        try {
-          final details = await BeneficiaryDetailsRepository()
-              .getBeneficiaryDetails(supabaseUserId);
-          print('[AuthGate DEBUG] Beneficiary details: $details');
-          profileCompleted = details != null && details.profileCompleted;
-        } catch (e) {
-          // If beneficiary details isn't ready yet, still route to beneficiary
-          // dashboard rather than incorrectly defaulting to donor UI.
+      while (beneficiaryDetails == null &&
+          beneficiaryRetries < maxBeneficiaryRetries) {
+        beneficiaryDetails =
+            await beneficiaryRepo.getBeneficiaryDetails(supabaseUserId);
+
+        if (beneficiaryDetails != null) break;
+
+        if (beneficiaryRetries < maxBeneficiaryRetries - 1) {
           print(
-              '[AuthGate DEBUG] Failed to fetch beneficiary details, defaulting profileCompleted=true: $e');
-          profileCompleted = true;
+              '[AuthGate DEBUG] beneficiary_details not ready yet, retrying... (${beneficiaryRetries + 1}/$maxBeneficiaryRetries)');
+          await Future.delayed(
+            const Duration(milliseconds: beneficiaryRetryDelayMs),
+          );
         }
+        beneficiaryRetries++;
+      }
+
+      final hasBeneficiaryDetails = beneficiaryDetails != null;
+
+      // If claims weren't ready earlier, try one more refresh after waiting.
+      if (firebaseRoleClaim == null) {
+        try {
+          final idTokenResult = await widget.user.getIdTokenResult(true);
+          final claim = idTokenResult.claims?['role'];
+          if (claim is String) firebaseRoleClaim = claim;
+        } catch (_) {}
+      }
+
+      // If Firebase says beneficiary, trust it; otherwise use beneficiary_details if available.
+      final resolvedRole = firebaseRoleClaim == 'beneficiary'
+          ? 'beneficiary'
+          : (hasBeneficiaryDetails ? 'beneficiary' : userRole);
+
+      if (resolvedRole == 'beneficiary') {
+        final profileCompleted = beneficiaryDetails?.profileCompleted ?? true;
 
         return {
           'role': resolvedRole,
@@ -238,7 +275,7 @@ class _AuthenticatedGate extends ConsumerWidget {
 
       String? firebaseRoleClaim;
       try {
-        final idTokenResult = await user.getIdTokenResult();
+        final idTokenResult = await widget.user.getIdTokenResult();
         final claim = idTokenResult.claims?['role'];
         if (claim is String) firebaseRoleClaim = claim;
       } catch (_) {

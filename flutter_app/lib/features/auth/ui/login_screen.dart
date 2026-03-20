@@ -38,12 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      // Show success message
-      _showSnackBar("Login successful!", Colors.green);
-
-      // Navigate to Dashboard using GoRouter
+      // Let AuthGate decide donor vs beneficiary routing
       if (mounted) {
-        context.go('/dashboard');
+        context.go('/auth');
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -87,9 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      if (mounted) {
-        context.go('/dashboard');
-      }
+      if (mounted) context.go('/auth');
     } on FirebaseAuthException catch (e) {
       _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
     } catch (e) {
@@ -116,13 +111,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showSnackBar(String message, Color color) {
     if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-      ),
-    );
+    try {
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: color,
+        ),
+      );
+    } catch (_) {
+      // Ignore snackbar errors when widget tree is disposing during navigation.
+    }
   }
 
   @override

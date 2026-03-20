@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/chat/ui/chat_assistant_button.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -15,10 +13,13 @@ class MainLayout extends ConsumerWidget {
     required this.child,
   });
 
+ 
   int _getSelectedIndex(String location) {
     // Beneficiary routes
     if (location.startsWith('/beneficiary/wallet')) return 3;
     if (location.startsWith('/beneficiary/dashboard')) return 0;
+    if (location.startsWith('/beneficiary/feed')) return 1;
+    if (location.startsWith('/beneficiary/messages')) return 2;
     if (location.startsWith('/beneficiary/profile')) return 4;
     if (location.startsWith('/beneficiary/create-campaign')) return 0;
     if (location.startsWith('/beneficiary/campaign')) return 0;
@@ -35,29 +36,6 @@ class MainLayout extends ConsumerWidget {
     return 0;
   }
 
-  Future<bool> _isBeneficiaryUser() async {
-    try {
-      final firebaseUser = FirebaseAuth.instance.currentUser;
-      if (firebaseUser == null) return false;
-
-      final supabase = Supabase.instance.client;
-      final userResponse = await supabase
-          .from('users')
-          .select('role')
-          .eq('firebase_uid', firebaseUser.uid)
-          .maybeSingle();
-
-      if (userResponse == null) return false;
-
-      final role = userResponse['role'] as String?;
-      debugPrint('[MainLayout] User role from database: $role');
-      return role == 'beneficiary';
-    } catch (e) {
-      debugPrint('[MainLayout] Error checking user role: $e');
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -71,7 +49,7 @@ class MainLayout extends ConsumerWidget {
     }
 
     final selectedIndex = _getSelectedIndex(location);
-    final isBeneficiaryRoute = location.startsWith('/beneficiary');
+    final isBeneficiary = location.startsWith('/beneficiary');
     debugPrint(
         '[MainLayout] Location: $location, SelectedIndex: $selectedIndex');
 
@@ -94,12 +72,9 @@ class MainLayout extends ConsumerWidget {
         selectedFontSize: 15,
         unselectedFontSize: 14,
         onTap: (index) async {
-          // Check user role from database
-          final isBeneficiary = await _isBeneficiaryUser();
-
           print('[MainLayout] Tapped index: $index');
           print('[MainLayout] Current location: $location');
-          print('[MainLayout] Is beneficiary (from DB): $isBeneficiary');
+          print('[MainLayout] Is beneficiary (resolved): $isBeneficiary');
 
           switch (index) {
             case 0:
@@ -109,10 +84,15 @@ class MainLayout extends ConsumerWidget {
               if (context.mounted) context.go(route);
               break;
             case 1:
-              if (context.mounted) context.go('/feed');
+              if (context.mounted) {
+                context.go(isBeneficiary ? '/beneficiary/feed' : '/feed');
+              }
               break;
             case 2:
-              if (context.mounted) context.go('/messages');
+              if (context.mounted) {
+                context.go(
+                    isBeneficiary ? '/beneficiary/messages' : '/messages');
+              }
               break;
             case 3:
               if (context.mounted) {
@@ -144,12 +124,12 @@ class MainLayout extends ConsumerWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              isBeneficiaryRoute
+              isBeneficiary
                   ? Icons.account_balance_wallet_outlined
                   : Icons.volunteer_activism_outlined,
             ),
             activeIcon: Icon(
-              isBeneficiaryRoute
+              isBeneficiary
                   ? Icons.account_balance_wallet
                   : Icons.volunteer_activism,
               color: const Color(0xFF0C0C79),
@@ -168,7 +148,7 @@ class MainLayout extends ConsumerWidget {
             l10n.home,
             l10n.feed,
             l10n.messages,
-            isBeneficiaryRoute ? l10n.wallet : l10n.merch,
+            isBeneficiary ? l10n.wallet : l10n.merch,
             l10n.profile,
           ];
           return BottomNavigationBarItem(
