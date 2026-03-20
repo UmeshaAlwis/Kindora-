@@ -12,7 +12,48 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   static const Color kindoraBlue = Color(0xFF0C0C79);
 
-  // 1. Plus Button Logic: Show a Bottom Sheet to create a post
+  // Controllers to capture user input from the bottom sheet
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  // 1. DATA LIST: We move cards here so we can add new ones dynamically
+  final List<Map<String, dynamic>> _feedItems = [
+    {
+      "name": "Sarah Jenkins",
+      "initials": "SJ",
+      "status": "SUCCESS",
+      "title": "Clean Water Success!",
+      "color": Colors.green
+    },
+    {
+      "name": "Kindora Team",
+      "initials": "KT",
+      "status": "ONGOING",
+      "title": "Kandy School Drive",
+      "color": kindoraBlue
+    },
+  ];
+
+  // 2. LOGIC: Add a new post to the top of the list
+  void _addNewPost() {
+    if (_titleController.text.isNotEmpty) {
+      setState(() {
+        _feedItems.insert(0, {
+          "name": "You", // Mocking the current user
+          "initials": "ME",
+          "status": "NEW",
+          "title": _titleController.text,
+          "color": kindoraBlue,
+        });
+      });
+      // Clear controllers and close sheet
+      _titleController.clear();
+      _descController.clear();
+      Navigator.pop(context);
+    }
+  }
+
+  // 3. UI: The Create Post Bottom Sheet
   void _showCreatePostSheet() {
     showModalBottomSheet(
       context: context,
@@ -32,11 +73,17 @@ class _FeedScreenState extends State<FeedScreen> {
           children: [
             Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)))),
             const SizedBox(height: 20),
-            Text("Create New Update", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: kindoraBlue)),
+            Text("Create New Update",
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: kindoraBlue)),
             const SizedBox(height: 15),
-            TextField(decoration: InputDecoration(hintText: "Title", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
+            TextField(
+                controller: _titleController,
+                decoration: InputDecoration(hintText: "Title", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
             const SizedBox(height: 12),
-            TextField(maxLines: 3, decoration: InputDecoration(hintText: "What's happening?", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
+            TextField(
+                controller: _descController,
+                maxLines: 3,
+                decoration: InputDecoration(hintText: "What's happening?", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -44,8 +91,9 @@ class _FeedScreenState extends State<FeedScreen> {
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
               ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Post Update", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onPressed: _addNewPost, // Now calls the logic function
+              child: const Text("Post Update",
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 30),
           ],
@@ -72,7 +120,8 @@ class _FeedScreenState extends State<FeedScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Community Feed', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+                    Text('Community Feed',
+                        style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
                     const Icon(LucideIcons.bell, color: Colors.white),
                   ],
                 ),
@@ -91,20 +140,26 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
 
-          // Feed List
+          // 4. DYNAMIC FEED LIST: This now builds from the _feedItems list
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.all(20),
-              children: [
-                _buildFeedCard("Sarah Jenkins", "SJ", "SUCCESS", "Clean Water Success!", Colors.green),
-                _buildFeedCard("Kindora Team", "KT", "ONGOING", "Kandy School Drive", kindoraBlue),
-              ],
+              itemCount: _feedItems.length,
+              itemBuilder: (context, index) {
+                final item = _feedItems[index];
+                return _buildFeedCard(
+                    item["name"],
+                    item["initials"],
+                    item["status"],
+                    item["title"],
+                    item["color"]
+                );
+              },
             ),
           ),
         ],
       ),
 
-      // 2. The working Plus Button
       floatingActionButton: FloatingActionButton(
         backgroundColor: kindoraBlue,
         elevation: 6,
@@ -131,7 +186,9 @@ class _FeedScreenState extends State<FeedScreen> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(backgroundColor: kindoraBlue.withOpacity(0.1), child: Text(initials, style: const TextStyle(color: kindoraBlue, fontWeight: FontWeight.bold))),
+                  CircleAvatar(
+                      backgroundColor: kindoraBlue.withOpacity(0.1),
+                      child: Text(initials, style: const TextStyle(color: kindoraBlue, fontWeight: FontWeight.bold))),
                   const SizedBox(width: 12),
                   Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ],
@@ -144,7 +201,8 @@ class _FeedScreenState extends State<FeedScreen> {
             ],
           ),
           const SizedBox(height: 15),
-          Text(title, style: GoogleFonts.poppins(color: kindoraBlue, fontWeight: FontWeight.bold, fontSize: 17)),
+          Text(title,
+              style: GoogleFonts.poppins(color: kindoraBlue, fontWeight: FontWeight.bold, fontSize: 17)),
           const SizedBox(height: 10),
           const Row(
             children: [
