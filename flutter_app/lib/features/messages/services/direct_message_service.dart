@@ -48,12 +48,16 @@ class ConversationPreview {
   final String partnerName;
   final String lastMessage;
   final DateTime lastMessageAt;
+  final String lastMessageSenderId;
+  final int unreadCount;
 
   const ConversationPreview({
     required this.partnerId,
     required this.partnerName,
     required this.lastMessage,
     required this.lastMessageAt,
+    required this.lastMessageSenderId,
+    required this.unreadCount,
   });
 }
 
@@ -164,6 +168,10 @@ class DirectMessageService {
             lastMessageAt: row['lastMessageAt'] != null
                 ? DateTime.parse(row['lastMessageAt'].toString())
                 : DateTime.now(),
+            lastMessageSenderId: (row['lastMessageSenderId'] ?? '').toString(),
+            unreadCount: row['unreadCount'] is int
+                ? row['unreadCount'] as int
+                : int.tryParse((row['unreadCount'] ?? '0').toString()) ?? 0,
           );
         })
         .toList();

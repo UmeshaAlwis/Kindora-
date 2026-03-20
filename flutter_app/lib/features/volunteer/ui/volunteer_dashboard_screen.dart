@@ -16,6 +16,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   bool _loading = true;
   String? _error;
   List<VolunteerCampaign> _campaigns = [];
+  bool _joining = false;
 
   Future<void> _load() async {
     setState(() {
@@ -40,28 +41,105 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primary = const Color(0xFF0C0C79);
+    final accent = const Color(0xFFFF751F);
+    final joinedCount = _campaigns.where((c) => c.isJoined).length;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.home),
-        backgroundColor: const Color(0xFF0C0C79),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: const Color(0xFFF6F7FB),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _load,
               child: _error != null
-                  ? Center(child: Text(_error!))
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _campaigns.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  ? ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    _error!,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(color: Colors.black54),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton(
+                                    onPressed: _load,
+                                    style: ElevatedButton.styleFrom(backgroundColor: primary),
+                                    child: const Text('Retry'),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                      itemCount: _campaigns.length + 1,
                       itemBuilder: (context, index) {
-                        final c = _campaigns[index];
-                        return Card(
-                          elevation: 1,
+                        if (index == 0) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xFF0C0C79), Color(0xFF3A42A3)],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.home,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Find campaigns that need your help and join as a volunteer.',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 14),
+                                Row(
+                                  children: [
+                                    _statTile('Available', '${_campaigns.length}'),
+                                    const SizedBox(width: 10),
+                                    _statTile('Joined', '$joinedCount'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        final c = _campaigns[index - 1];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Column(
@@ -72,40 +150,66 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
                                       c.imageUrl!,
-                                      height: 150,
+                                      height: 160,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) => Container(
-                                        height: 150,
+                                        height: 160,
                                         color: Colors.grey.shade200,
                                         child: const Icon(Icons.image_not_supported),
                                       ),
                                     ),
                                   ),
                                 const SizedBox(height: 10),
-                                Text(
-                                  c.title,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        c.title,
+                                        style: const TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: c.isJoined
+                                            ? Colors.green.withOpacity(0.12)
+                                            : accent.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        c.isJoined ? 'Joined' : 'Open',
+                                        style: TextStyle(
+                                          color: c.isJoined ? Colors.green.shade700 : accent,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   'Donor: ${c.donorFullName}',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
+                                  style: const TextStyle(fontSize: 13, color: Colors.black54),
                                 ),
                                 if (c.endDate != null) ...[
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    'End: ${c.endDate!.toLocal().toString().split(' ').first}',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                    ),
+                                    'End date: ${c.endDate!.toLocal().toString().split(' ').first}',
+                                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                                  ),
+                                ],
+                                if ((c.description ?? '').trim().isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    c.description!.trim(),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.black87),
                                   ),
                                 ],
                                 const SizedBox(height: 12),
@@ -113,47 +217,66 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                   children: [
                                     Expanded(
                                       child: ElevatedButton(
-                                        onPressed: c.isJoined
+                                        onPressed: (c.isJoined || _joining)
                                             ? null
                                             : () async {
-                                                await _service
-                                                    .joinCampaign(c.id);
-                                                await _load();
+                                                setState(() => _joining = true);
+                                                try {
+                                                  await _service.joinCampaign(c.id);
+                                                  if (!mounted) return;
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text('Joined campaign successfully'),
+                                                      backgroundColor: Colors.green,
+                                                    ),
+                                                  );
+                                                  await _load();
+                                                } catch (e) {
+                                                  if (!mounted) return;
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('$e'),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                } finally {
+                                                  if (mounted) setState(() => _joining = false);
+                                                }
                                               },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xFF0C0C79),
+                                          backgroundColor: primary,
                                           foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 12),
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(10),
                                           ),
                                         ),
-                                        child: Text(c.isJoined
-                                            ? 'Joined'
-                                            : 'Join as Volunteer'),
+                                        child: Text(c.isJoined ? 'Joined' : 'Join as Volunteer'),
                                       ),
                                     ),
                                     if (c.isJoined) ...[
                                       const SizedBox(width: 10),
-                                      IconButton(
-                                        tooltip: 'Chat with donor',
+                                      OutlinedButton.icon(
                                         onPressed: () {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (_) => DirectChatPage(
                                                 receiverId: c.donorId,
-                                                receiverName:
-                                                    c.donorFullName,
+                                                receiverName: c.donorFullName,
                                               ),
                                             ),
                                           );
                                         },
-                                        icon: const Icon(Icons.chat_bubble),
-                                      )
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(color: primary.withOpacity(0.35)),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                                        label: const Text('Chat'),
+                                      ),
                                     ],
                                   ],
                                 ),
@@ -164,6 +287,36 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                       },
                     ),
             ),
+    );
+  }
+
+  Widget _statTile(String label, String value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
