@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+<<<<<<< HEAD
 import 'news_detail_screen.dart';
+=======
+import 'news_detail_screen.dart'; // This import will now work!
+>>>>>>> rewards
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -157,6 +161,10 @@ class _FeedScreenState extends State<FeedScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
+<<<<<<< HEAD
+=======
+          // NAVIGATE to the details page
+>>>>>>> rewards
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -195,6 +203,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   style: GoogleFonts.poppins(
                       fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
+<<<<<<< HEAD
               Text(subtitle,
                   style: const TextStyle(
                       fontSize: 14, color: Colors.black54, height: 1.4)),
@@ -207,6 +216,22 @@ class _FeedScreenState extends State<FeedScreen> {
                             fontWeight: FontWeight.bold, fontSize: 12)),
                     SizedBox(width: 4),
                     Icon(LucideIcons.arrowRight, size: 14),
+=======
+              Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.4)
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  children: [
+                    Text(
+                        "Read more",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(LucideIcons.arrowRight, size: 14, color: color),
+>>>>>>> rewards
                   ],
                 ),
               ),
