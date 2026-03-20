@@ -79,7 +79,6 @@ class _BeneficiaryCreateCampaignScreenState
     try {
       print('[CreateCampaign] Starting image upload: ${imageFile.name}');
 
-      final file = File(imageFile.path);
       final firebaseUser = FirebaseAuth.instance.currentUser;
 
       if (firebaseUser == null) {
@@ -98,8 +97,15 @@ class _BeneficiaryCreateCampaignScreenState
       request.headers['Authorization'] = 'Bearer $token';
 
       // Add file
+      // Using fromBytes avoids `PathNotFoundException` that can happen when
+      // image_picker returns a temp/cropped file path that disappears quickly.
+      final bytes = await imageFile.readAsBytes();
       request.files.add(
-        await http.MultipartFile.fromPath('image', file.path),
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
+        ),
       );
 
       print('[CreateCampaign] Sending multipart request to: $uri');
