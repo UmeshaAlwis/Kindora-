@@ -12,6 +12,7 @@ const createBeneficiaryDonationSchema = Joi.object({
     .required(),
   donation_type: Joi.string().valid('one-time', 'recurring'),
   recurring_frequency: Joi.string().valid('daily', 'weekly', 'monthly', 'yearly'),
+  recurring_end_date: Joi.date().iso().optional(),
   message: Joi.string().max(500),
   is_anonymous: Joi.boolean(),
   donor_name: Joi.string().max(255),
@@ -33,6 +34,17 @@ export class BeneficiaryDonationController {
       const userId = req.userId;
       if (!userId) {
         throw new UnauthorizedError();
+      }
+
+      // Recurring beneficiary donations currently support wallet only.
+      // (Card/bank transfer recurring would require payment method tokens/subscriptions.)
+      if (value.donation_type === 'recurring') {
+        if (!value.recurring_frequency) {
+          throw new ValidationError('recurring_frequency is required for recurring donations');
+        }
+        if (value.payment_method !== 'wallet') {
+          throw new ValidationError('Recurring beneficiary donations are only supported with wallet payments');
+        }
       }
 
       // Check wallet balance if wallet payment method is selected
