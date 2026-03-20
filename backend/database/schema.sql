@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   campaigner_name VARCHAR(255),
   category VARCHAR(100),
   campaign_category VARCHAR(100),
+  needs_volunteers BOOLEAN NOT NULL DEFAULT FALSE,
   target_amount DECIMAL(15, 2),
   raised_amount DECIMAL(15, 2) DEFAULT 0.00,
   image_url TEXT,

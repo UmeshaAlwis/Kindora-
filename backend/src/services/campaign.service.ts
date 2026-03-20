@@ -96,6 +96,7 @@ export class CampaignService {
         campaigner_name: data.campaigner_name,
         category: data.category,
         campaign_category: data.campaign_category,
+        needs_volunteers: data.needs_volunteers ?? false,
         target_amount: data.target_amount,
         image_url: data.image_url || null,
         end_date: data.end_date || null,
