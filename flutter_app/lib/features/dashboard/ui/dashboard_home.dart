@@ -7,6 +7,7 @@ import 'package:kindora/services/wallet_service.dart';
 import 'package:kindora/repositories/supabase_repositories.dart';
 import 'package:kindora/models/supabase_models.dart';
 import 'package:kindora/l10n/app_localizations.dart';
+import 'package:kindora/features/notifications/services/notification_service.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -17,10 +18,14 @@ class DashboardHome extends StatefulWidget {
 
 class _DashboardHomeState extends State<DashboardHome> {
   late WalletService _walletService;
+  final NotificationService _notificationService = NotificationService();
   double _walletBalance = 0.0;
   bool _loadingWallet = true;
   bool _loadingUrgent = true;
   List<Campaign> _urgentCampaigns = [];
+
+  int _unreadNotifications = 0;
+  bool _loadingNotifications = true;
 
   @override
   void initState() {
@@ -28,6 +33,7 @@ class _DashboardHomeState extends State<DashboardHome> {
     _walletService = WalletService();
     _fetchWalletBalance();
     _fetchUrgentCampaigns();
+    _fetchUnreadNotifications();
   }
 
   Future<void> _fetchWalletBalance() async {
@@ -47,6 +53,20 @@ class _DashboardHomeState extends State<DashboardHome> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _fetchUnreadNotifications() async {
+    try {
+      final unread = await _notificationService.getUnreadCount();
+      if (!mounted) return;
+      setState(() {
+        _unreadNotifications = unread;
+        _loadingNotifications = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingNotifications = false);
     }
   }
 
@@ -107,10 +127,41 @@ class _DashboardHomeState extends State<DashboardHome> {
                         style: TextStyle(color: Colors.white),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.person,
-                            color: Colors.white, size: 32),
+                        icon: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.notifications_outlined,
+                                color: Colors.white, size: 32),
+                            if (!_loadingNotifications &&
+                                _unreadNotifications > 0)
+                              Positioned(
+                                top: -2,
+                                right: -2,
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFF751F),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      _unreadNotifications > 99
+                                          ? '99+'
+                                          : _unreadNotifications.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                         onPressed: () {
-                          context.push('/profile');
+                          context.go('/notifications');
                         },
                       ),
                     ],

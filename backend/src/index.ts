@@ -24,6 +24,7 @@ import walletRoutes from './routes/wallet.routes';
 import storageRoutes from './routes/storage.routes';
 import beneficiaryRoutes from './routes/beneficiary.routes';
 import feedRoutes from './routes/feed.routes';
+import notificationRoutes from './routes/notification.routes';
 import { BeneficiaryDonationService } from './services/beneficiary-donation.service';
 
 // Load environment variables
@@ -185,6 +186,7 @@ apiRouter.get('/', (req: Request, res: Response) => {
       feed: '/api/feed',
       storage: '/api/storage',
       beneficiary: '/api/beneficiary',
+      notifications: '/api/notifications',
     },
   });
 });
@@ -202,6 +204,7 @@ apiRouter.use('/chat', chatRoutes);
 apiRouter.use('/feed', feedRoutes);
 apiRouter.use('/storage', storageRoutes);
 apiRouter.use('/beneficiary', beneficiaryRoutes);
+apiRouter.use('/notifications', notificationRoutes);
 
 app.use('/api', apiRouter);
 

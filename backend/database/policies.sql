@@ -9,6 +9,7 @@ ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallet_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- USERS POLICIES
@@ -125,6 +126,19 @@ FOR UPDATE USING (auth.uid() = recipient_id)
 WITH CHECK (auth.uid() = recipient_id);
 
 -- ============================================
+-- NOTIFICATIONS POLICIES
+-- ============================================
+
+-- Users can view their own notifications
+CREATE POLICY "notifications_view_own" ON notifications
+FOR SELECT USING (auth.uid() = user_id);
+
+-- Users can mark their notifications as read
+CREATE POLICY "notifications_update_own" ON notifications
+FOR UPDATE USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- ============================================
 -- SECURE RLS SETUP FUNCTIONS
 -- ============================================
 
@@ -159,6 +173,7 @@ GRANT SELECT, INSERT ON donations TO authenticated;
 GRANT SELECT, UPDATE ON wallets TO authenticated;
 GRANT SELECT ON wallet_transactions TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON messages TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON notifications TO authenticated;
 
 -- Anonymous users can only view public data
 GRANT SELECT ON campaigns TO anon;
