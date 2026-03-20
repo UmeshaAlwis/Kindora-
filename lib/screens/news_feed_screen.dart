@@ -216,3 +216,4 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 }
+// This function handles the automated scroll to the top of the feed.
