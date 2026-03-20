@@ -86,6 +86,7 @@ dependencies:
   # Stripe Payment Integration
   flutter_stripe: ^9.4.0
 
+  flutter_localizations: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

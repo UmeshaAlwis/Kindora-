@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kindora/screens/news_detail_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   testWidgets('News Detail Screen displays correct campaign information', (WidgetTester tester) async {

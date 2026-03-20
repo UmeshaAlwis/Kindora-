@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 // 1. Make sure this import matches your actual file path
 import 'package:kindora/screens/news_feed_screen.dart';
-import 'package:kindora/screens/news_detail_screen.dart';
 
 void main() {
   testWidgets('News Feed renders all campaign types', (WidgetTester tester) async {
