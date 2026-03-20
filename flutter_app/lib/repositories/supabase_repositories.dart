@@ -492,8 +492,9 @@ class MerchandiseRepository {
   Future<List<Merchandise>> getAllMerchandise() async {
     try {
       final response = await _supabase
-          .from('merchandise')
+          .from('products')
           .select()
+          .eq('is_active', true)
           .order('created_at', ascending: false);
       return (response as List)
           .map((data) => Merchandise.fromJson(data))
@@ -507,9 +508,10 @@ class MerchandiseRepository {
   Future<Merchandise?> getMerchandiseById(String productId) async {
     try {
       final response = await _supabase
-          .from('merchandise')
+          .from('products')
           .select()
           .eq('id', productId)
+          .eq('is_active', true)
           .single();
       return Merchandise.fromJson(response);
     } catch (e) {
@@ -521,9 +523,10 @@ class MerchandiseRepository {
   Future<List<Merchandise>> getMerchandiseByCategory(String category) async {
     try {
       final response = await _supabase
-          .from('merchandise')
+          .from('products')
           .select()
           .eq('category', category)
+          .eq('is_active', true)
           .order('created_at', ascending: false);
       return (response as List)
           .map((data) => Merchandise.fromJson(data))
@@ -537,9 +540,10 @@ class MerchandiseRepository {
   Future<List<Merchandise>> searchMerchandise(String query) async {
     try {
       final response = await _supabase
-          .from('merchandise')
+          .from('products')
           .select()
           .ilike('name', '%$query%')
+          .eq('is_active', true)
           .order('created_at', ascending: false);
       return (response as List)
           .map((data) => Merchandise.fromJson(data))
@@ -553,8 +557,9 @@ class MerchandiseRepository {
   Future<List<Merchandise>> getBestsellers({int limit = 5}) async {
     try {
       final response = await _supabase
-          .from('merchandise')
+          .from('products')
           .select()
+          .eq('is_active', true)
           .order('average_rating', ascending: false)
           .order('review_count', ascending: false)
           .limit(limit);

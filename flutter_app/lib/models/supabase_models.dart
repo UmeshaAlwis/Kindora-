@@ -295,7 +295,7 @@ class Merchandise extends Equatable {
       price: json['price'] != null
           ? double.tryParse(json['price'].toString())
           : null,
-      stock: json['stock'],
+      stock: json['stock_quantity'] ?? json['stock'],
       imageUrl: json['image_url'],
       description: json['description'],
       category: json['category'],
