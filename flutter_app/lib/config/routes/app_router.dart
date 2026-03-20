@@ -10,6 +10,7 @@ import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
 import '../../features/merch/ui/merch_page.dart';
+import '../../features/notifications/ui/notifications_page.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_completion_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_dashboard_screen.dart';
 import '../../features/beneficiary/ui/beneficiary_profile_screen.dart';
@@ -74,6 +75,11 @@ class AppRouter {
             path: '/messages',
             name: 'messages',
             builder: (context, state) => const MessagesPage(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            name: 'notifications',
+            builder: (context, state) => const NotificationsPage(),
           ),
           GoRoute(
             path: '/merch',

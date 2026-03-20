@@ -2,6 +2,7 @@ import { WalletService } from './wallet.service';
 import { supabase } from './supabase.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ValidationError } from '../utils/errors';
+import { NotificationService } from './notification.service';
 
 export class BeneficiaryDonationService {
   /**
@@ -54,6 +55,43 @@ export class BeneficiaryDonationService {
           amount
         );
         await this.awardDonationPoints(donorId, amount);
+
+        // Create notifications (best-effort)
+        try {
+          // Notify donor
+          await NotificationService.createNotification({
+            userId: donorId,
+            type: 'beneficiary_donation_success',
+            title: 'Donation successful',
+            body: `Thank you for supporting LKR ${amount}.`,
+            metadata: {
+              amount,
+              beneficiary_campaign_id: data.beneficiary_campaign_id,
+            },
+          });
+
+          // Notify beneficiary owner
+          const campaigns = await supabase.select<any>('beneficiary_campaigns', {
+            select: 'beneficiary_user_id',
+            filters: { id: data.beneficiary_campaign_id },
+          });
+          const beneficiaryOwnerId = campaigns?.[0]?.beneficiary_user_id;
+          if (beneficiaryOwnerId) {
+            await NotificationService.createNotification({
+              userId: beneficiaryOwnerId,
+              type: 'beneficiary_donation_success',
+              title: 'You received a new donation',
+              body: `Someone donated LKR ${amount} to your beneficiary campaign.`,
+              metadata: {
+                amount,
+                beneficiary_campaign_id: data.beneficiary_campaign_id,
+                donor_id: donorId,
+              },
+            });
+          }
+        } catch (e) {
+          console.error('[BeneficiaryDonationService] Failed to create wallet donation notifications:', e);
+        }
       }
 
       return donation;
@@ -321,6 +359,45 @@ export class BeneficiaryDonationService {
       // Award points to donor (gamification)
       if (donationRow.user_id) {
         await this.awardDonationPoints(donationRow.user_id, donationRow.amount);
+      }
+
+      // Create notifications (best-effort)
+      try {
+        if (donationRow.user_id) {
+          await NotificationService.createNotification({
+            userId: donationRow.user_id,
+            type: 'beneficiary_donation_success',
+            title: 'Donation successful',
+            body: `Thank you for supporting LKR ${donationRow.amount}.`,
+            metadata: {
+              amount: donationRow.amount,
+              beneficiary_campaign_id: donationRow.beneficiary_campaign_id ?? null,
+            },
+          });
+        }
+
+        if (donationRow.beneficiary_campaign_id) {
+          const campaigns = await supabase.select<any>('beneficiary_campaigns', {
+            select: 'beneficiary_user_id',
+            filters: { id: donationRow.beneficiary_campaign_id },
+          });
+          const beneficiaryOwnerId = campaigns?.[0]?.beneficiary_user_id;
+          if (beneficiaryOwnerId) {
+            await NotificationService.createNotification({
+              userId: beneficiaryOwnerId,
+              type: 'beneficiary_donation_success',
+              title: 'You received a new donation',
+              body: `Someone donated LKR ${donationRow.amount} to your beneficiary campaign.`,
+              metadata: {
+                amount: donationRow.amount,
+                beneficiary_campaign_id: donationRow.beneficiary_campaign_id,
+                donor_id: donationRow.user_id,
+              },
+            });
+          }
+        }
+      } catch (e) {
+        console.error('[BeneficiaryDonationService] Failed to create card donation notifications:', e);
       }
     }
 
