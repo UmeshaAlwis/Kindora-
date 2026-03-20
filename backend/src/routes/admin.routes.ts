@@ -113,6 +113,18 @@ router.patch('/campaigns/:campaignId/status', async (req: Request, res: Response
   }
 });
 
+router.delete('/campaigns/:campaignId', async (req: Request, res: Response) => {
+  const admin = requireAdmin(req, res);
+  if (!admin) return;
+
+  try {
+    await supabase.delete('campaigns', { id: req.params.campaignId });
+    return res.json({ success: true, message: 'Campaign deleted' });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 router.get('/beneficiary-campaigns', async (req: Request, res: Response) => {
   const admin = requireAdmin(req, res);
   if (!admin) return;
@@ -153,6 +165,18 @@ router.patch(
     }
   }
 );
+
+router.delete('/beneficiary-campaigns/:campaignId', async (req: Request, res: Response) => {
+  const admin = requireAdmin(req, res);
+  if (!admin) return;
+
+  try {
+    await supabase.delete('beneficiary_campaigns', { id: req.params.campaignId });
+    return res.json({ success: true, message: 'Beneficiary campaign deleted' });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 router.get('/merchandise', async (req: Request, res: Response) => {
   const admin = requireAdmin(req, res);
