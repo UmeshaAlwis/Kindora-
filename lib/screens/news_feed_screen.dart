@@ -1,7 +1,9 @@
-/// FeedScreen: The main community engagement hub for Kindora.
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+/// FeedScreen: The main community engagement hub for Kindora.
+/// Updated with brand colors (#0C0C79 & #FF751F) and notification logic.
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -11,13 +13,16 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  // Brand Colors
   static const Color kindoraBlue = Color(0xFF0C0C79);
+  static const Color kindoraOrange = Color(0xFFFF751F);
 
-  // Controllers to capture user input from the bottom sheet
+  // Controllers
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // For auto-scroll
 
-  // 1. DATA LIST: We move cards here so we can add new ones dynamically
+  // Data List
   final List<Map<String, dynamic>> _feedItems = [
     {
       "name": "Sarah Jenkins",
@@ -35,26 +40,52 @@ class _FeedScreenState extends State<FeedScreen> {
     },
   ];
 
-  // 2. LOGIC: Add a new post to the top of the list
+  // Logic: Notification Button Action
+  void _showNotifications() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('No new notifications at the moment.'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // Logic: Add a new post
   void _addNewPost() {
     if (_titleController.text.isNotEmpty) {
       setState(() {
         _feedItems.insert(0, {
-          "name": "You", // Mocking the current user
+          "name": "You",
           "initials": "ME",
           "status": "NEW",
           "title": _titleController.text,
-          "color": kindoraBlue,
+          "color": kindoraOrange,
         });
       });
-      // Clear controllers and close sheet
+
+      // Auto-scroll to top to see the new post
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+
       _titleController.clear();
       _descController.clear();
       Navigator.pop(context);
+
+      // Success Feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Update posted successfully!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
-  // 3. UI: The Create Post Bottom Sheet
   void _showCreatePostSheet() {
     showModalBottomSheet(
       context: context,
@@ -88,11 +119,11 @@ class _FeedScreenState extends State<FeedScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: kindoraBlue,
+                  backgroundColor: kindoraOrange, // Updated to Orange
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
               ),
-              onPressed: _addNewPost, // Now calls the logic function
+              onPressed: _addNewPost,
               child: const Text("Post Update",
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -109,7 +140,6 @@ class _FeedScreenState extends State<FeedScreen> {
       backgroundColor: const Color(0xFFF8F9FE),
       body: Column(
         children: [
-          // Blue Header with Search
           Container(
             padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 25),
             decoration: const BoxDecoration(
@@ -123,7 +153,10 @@ class _FeedScreenState extends State<FeedScreen> {
                   children: [
                     Text('Community Feed',
                         style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
-                    const Icon(LucideIcons.bell, color: Colors.white),
+                    IconButton(
+                      icon: const Icon(LucideIcons.bell, color: Colors.white),
+                      onPressed: _showNotifications, // Notification logic
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -141,9 +174,9 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
 
-          // 4. DYNAMIC FEED LIST: This now builds from the _feedItems list
           Expanded(
             child: ListView.builder(
+              controller: _scrollController, // Added Controller
               padding: const EdgeInsets.all(20),
               itemCount: _feedItems.length,
               itemBuilder: (context, index) {
@@ -162,7 +195,7 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: kindoraBlue,
+        backgroundColor: kindoraOrange, // Updated to Orange
         elevation: 6,
         onPressed: _showCreatePostSheet,
         child: const Icon(LucideIcons.plus, color: Colors.white, size: 30),
@@ -217,4 +250,3 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 }
-// This function handles the automated scroll to the top of the feed.
