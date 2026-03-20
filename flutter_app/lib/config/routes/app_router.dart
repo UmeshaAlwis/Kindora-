@@ -78,6 +78,16 @@ class AppRouter {
             builder: (context, state) => const MessagesPage(),
           ),
           GoRoute(
+            path: '/beneficiary/feed',
+            name: 'beneficiary-feed',
+            builder: (context, state) => const FeedPage(),
+          ),
+          GoRoute(
+            path: '/beneficiary/messages',
+            name: 'beneficiary-messages',
+            builder: (context, state) => const MessagesPage(),
+          ),
+          GoRoute(
             path: '/notifications',
             name: 'notifications',
             builder: (context, state) => const NotificationsPage(),
