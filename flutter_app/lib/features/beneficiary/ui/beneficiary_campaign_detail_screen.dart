@@ -516,8 +516,23 @@ class ClipRounded extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percentage = (campaign.raisedAmount / campaign.targetAmount) * 100;
-    final displayPercentage = percentage > 100 ? 100.0 : percentage;
+    final percentage = campaign.targetAmount <= 0
+        ? 0.0
+        : (campaign.raisedAmount / campaign.targetAmount) * 100;
+    final displayPercentage = percentage.isFinite
+        ? (percentage > 100 ? 100.0 : percentage)
+        : 0.0;
+    final value = (campaign.targetAmount <= 0)
+        ? 0.0
+        : (campaign.raisedAmount / campaign.targetAmount).clamp(0.0, 1.0);
+    // If someone has donated but the ratio is extremely small, the bar can
+    // appear "stuck" visually. Add a minimal visual fill in that case.
+    final displayValue = campaign.raisedAmount > 0 && value < 0.01
+        ? 0.01
+        : value;
+    final decimals = displayPercentage < 1
+        ? 5
+        : (displayPercentage < 10 ? 2 : 1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,7 +541,7 @@ class ClipRounded extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${displayPercentage.toStringAsFixed(1)}% Funded',
+              '${displayPercentage.toStringAsFixed(decimals)}% Funded',
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -538,7 +553,7 @@ class ClipRounded extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
-            value: displayPercentage / 100,
+            value: displayValue,
             minHeight: 8,
             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF751F)),
             backgroundColor: Colors.grey[300],

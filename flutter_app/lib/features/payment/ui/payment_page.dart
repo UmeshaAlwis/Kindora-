@@ -229,7 +229,7 @@ class _PaymentPageState extends State<PaymentPage> {
       // Navigate back after a short delay
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (!mounted) return;
@@ -290,7 +290,7 @@ class _PaymentPageState extends State<PaymentPage> {
         // Navigate back after a short delay
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         }
       }
     } on Exception catch (e) {

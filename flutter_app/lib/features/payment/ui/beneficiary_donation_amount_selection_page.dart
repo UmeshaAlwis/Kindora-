@@ -36,7 +36,7 @@ class _BeneficiaryDonationAmountSelectionModalState
     super.dispose();
   }
 
-  void _proceedToPayment() {
+  Future<void> _proceedToPayment() async {
     final amount =
         _selectedAmount ?? double.tryParse(_customAmountController.text);
 
@@ -50,9 +50,8 @@ class _BeneficiaryDonationAmountSelectionModalState
       return;
     }
 
-    // Close the modal and navigate to payment page
-    Navigator.pop(context);
-    Navigator.push(
+    // Navigate to payment page; keep the bottom sheet open until payment completes.
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PaymentPage(
@@ -62,6 +61,9 @@ class _BeneficiaryDonationAmountSelectionModalState
         ),
       ),
     );
+
+    if (!mounted) return;
+    Navigator.pop(context, result == true);
   }
 
   @override
