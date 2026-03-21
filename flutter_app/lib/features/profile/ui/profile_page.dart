@@ -3,6 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../services/donor_badge_service.dart';
+import '../services/donor_donation_history_service.dart';
+import 'donation_history_list_tile.dart';
+import 'donation_history_full_page.dart';
+
+class _ProfileBundle {
+  final DonorBadgeSummary summary;
+  final List<DonationHistoryEntry> history;
+  final int historyTotal;
+  final String? historyError;
+
+  const _ProfileBundle({
+    required this.summary,
+    required this.history,
+    required this.historyTotal,
+    this.historyError,
+  });
+}
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,17 +30,38 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final DonorBadgeService _badgeService = DonorBadgeService();
-  late Future<DonorBadgeSummary> _summaryFuture;
+  final DonorDonationHistoryService _historyService = DonorDonationHistoryService();
+  late Future<_ProfileBundle> _profileFuture;
 
   @override
   void initState() {
     super.initState();
-    _summaryFuture = _badgeService.getSummary();
+    _profileFuture = _loadProfile();
+  }
+
+  Future<_ProfileBundle> _loadProfile() async {
+    final summary = await _badgeService.getSummary();
+    List<DonationHistoryEntry> history = [];
+    int historyTotal = 0;
+    String? historyError;
+    try {
+      final page = await _historyService.fetchHistoryPage(page: 1, limit: 3);
+      history = page.items;
+      historyTotal = page.total;
+    } catch (e) {
+      historyError = e.toString();
+    }
+    return _ProfileBundle(
+      summary: summary,
+      history: history,
+      historyTotal: historyTotal,
+      historyError: historyError,
+    );
   }
 
   void _refresh() {
     setState(() {
-      _summaryFuture = _badgeService.getSummary();
+      _profileFuture = _loadProfile();
     });
   }
 
@@ -68,8 +106,8 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder<DonorBadgeSummary>(
-          future: _summaryFuture,
+        child: FutureBuilder<_ProfileBundle>(
+          future: _profileFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: Text(l10n.loading));
@@ -93,13 +131,12 @@ class _ProfilePageState extends State<ProfilePage> {
               );
             }
 
-            final summary = snapshot.data ??
-                const DonorBadgeSummary(
-                  totalDonated: 0,
-                  campaignsSupported: 0,
-                  successfulDonations: 0,
-                  badges: [],
-                );
+            final bundle = snapshot.data!;
+            final summary = bundle.summary;
+            final history = bundle.history;
+            final historyTotal = bundle.historyTotal;
+            final historyError = bundle.historyError;
+
             final unlocked = summary.badges.where((b) => b.unlocked).toList();
 
             return SingleChildScrollView(
@@ -179,7 +216,60 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Donation history',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (historyError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'Could not load history: $historyError',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                      ),
+                    if (history.isEmpty && historyError == null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'No donations yet. Support a campaign to see your history here.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      )
+                    else if (history.isNotEmpty) ...[
+                      ...history.map(
+                        (d) => DonationHistoryListTile(entry: d),
+                      ),
+                      if (historyError == null && historyTotal > 3)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push<void>(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const DonationHistoryFullPage(),
+                                ),
+                              );
+                            },
+                            child: const Text('See more'),
+                          ),
+                        ),
+                    ],
+                    const SizedBox(height: 32),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
