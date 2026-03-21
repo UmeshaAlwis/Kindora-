@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../services/direct_message_service.dart';
 
 class DirectChatPage extends StatefulWidget {
@@ -41,7 +42,7 @@ class _DirectChatPageState extends State<DirectChatPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to send message: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     } finally {
@@ -63,8 +64,8 @@ class _DirectChatPageState extends State<DirectChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF0C0C79);
-    const accentColor = Color(0xFFFF751F);
+    const primaryColor = AppColors.primaryBlue;
+    const accentColor = AppColors.primaryOrange;
 
     return Scaffold(
       appBar: AppBar(
@@ -119,8 +120,9 @@ class _DirectChatPageState extends State<DirectChatPage> {
                             ),
                             constraints: const BoxConstraints(maxWidth: 300),
                             decoration: BoxDecoration(
-                              color:
-                                  isMe ? accentColor.withValues(alpha: 0.2) : Colors.grey[200],
+                              color: isMe
+                                  ? accentColor.withValues(alpha: 0.2)
+                                  : AppColors.scaffoldLight,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -130,9 +132,9 @@ class _DirectChatPageState extends State<DirectChatPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   _formatTime(msg.createdAt),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[600],
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],

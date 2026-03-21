@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
@@ -17,8 +18,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool obscurePassword = true;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFFF751F);
+  final Color primaryColor = AppColors.primaryBlue;
+  final Color accentColor = AppColors.primaryOrange;
 
   // EMAIL LOGIN
   Future<void> login() async {
@@ -27,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar("Please fill all fields", Colors.orange);
+      _showSnackBar("Please fill all fields", AppColors.primaryOrange);
       return;
     }
 
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Show success message
-      _showSnackBar("Login successful!", Colors.green);
+      _showSnackBar("Login successful!", AppColors.primaryBlue);
 
       // Navigate to Dashboard after successful login
       if (mounted) {
@@ -73,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
           message = e.message ?? "Login failed.";
       }
 
-      _showSnackBar(message, Colors.red);
+      _showSnackBar(message, AppColors.error);
 
     } finally {
 
@@ -104,11 +105,11 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      _showSnackBar(e.message ?? "Google sign-in failed.", Colors.red);
+      _showSnackBar(e.message ?? "Google sign-in failed.", AppColors.error);
 
     } catch (_) {
 
-      _showSnackBar("Google sign-in failed.", Colors.red);
+      _showSnackBar("Google sign-in failed.", AppColors.error);
 
     }
   }
@@ -119,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      _showSnackBar("Enter your email first.", Colors.orange);
+      _showSnackBar("Enter your email first.", AppColors.primaryOrange);
       return;
     }
 
@@ -129,11 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
         email: email,
       );
 
-      _showSnackBar("Password reset email sent.", Colors.green);
+      _showSnackBar("Password reset email sent.", AppColors.primaryBlue);
 
     } catch (_) {
 
-      _showSnackBar("Failed to send reset email.", Colors.red);
+      _showSnackBar("Failed to send reset email.", AppColors.error);
 
     }
   }
@@ -170,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
 

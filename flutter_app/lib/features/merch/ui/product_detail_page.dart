@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kindora/config/app_env.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:kindora/services/wallet_service.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -197,14 +198,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Purchase successful!'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.primaryBlue,
         ),
       );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('$e'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isBuying = false);
@@ -218,8 +222,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final description = (widget.product['description'] ?? '').toString();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F8),
-      appBar: AppBar(backgroundColor: const Color(0xFFF6F6F8), elevation: 0),
+      backgroundColor: AppColors.scaffoldLight,
+      appBar: AppBar(
+        backgroundColor: AppColors.scaffoldLight,
+        elevation: 0,
+      ),
       body: Column(
         children: [
           Expanded(
@@ -254,7 +261,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       const Text(
                         'Free Delivery',
                         style: TextStyle(
-                          color: Color(0xFF6B7280),
+                          color: AppColors.textSecondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -268,7 +275,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   const SizedBox(height: 8),
                   if (description.isNotEmpty) ...[
-                    Text(description, style: const TextStyle(color: Color(0xFF374151))),
+                    Text(
+                      description,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                    ),
                     const SizedBox(height: 12),
                   ],
                   Container(
@@ -367,7 +377,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3E4F0),
+                      color: AppColors.blueSurface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text('Good Quality & Good Packing\n★★★★★ D.E.Wijewardana'),
@@ -377,7 +387,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3E4F0),
+                      color: AppColors.blueSurface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text('Good Material\n★★★★★ K.Shahan'),
@@ -388,13 +398,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-            color: const Color(0xFFF6F6F8),
+            color: AppColors.scaffoldLight,
             child: SizedBox(
               height: 48,
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1D2AA7),
+                  backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: _isBuying ? null : _buyNow,

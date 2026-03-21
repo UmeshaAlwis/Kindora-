@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +32,7 @@ class _BeneficiaryCreateCampaignScreenState
 
   XFile? _selectedImageFile;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
+  final Color primaryColor = AppColors.primaryBlue;
   final Color accentColor = const Color(0xFFFF751F);
 
   @override
@@ -198,7 +199,7 @@ class _BeneficiaryCreateCampaignScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Campaign created successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
             duration: Duration(seconds: 2),
           ),
         );
@@ -214,7 +215,7 @@ class _BeneficiaryCreateCampaignScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

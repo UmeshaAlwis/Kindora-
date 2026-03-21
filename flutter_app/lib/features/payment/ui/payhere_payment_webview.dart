@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../models/payment_model.dart';
 import '../services/payhere_service.dart';
@@ -237,7 +238,7 @@ class _PayHerePaymentWebViewState extends State<PayHerePaymentWebView> {
       appBar: AppBar(
         title: const Text('PayHere Payment'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF667eea),
+        backgroundColor: AppColors.primaryBlue,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),

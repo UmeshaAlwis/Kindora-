@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -381,7 +382,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: const Color(0xFF0C0C79),
+            activeThumbColor: AppColors.primaryBlue,
           ),
         ],
       ),
@@ -498,7 +499,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return ListTile(
       title: Text(languageName),
       trailing: currentLanguageCode == languageCode
-          ? const Icon(Icons.check, color: Color(0xFF0C0C79))
+          ? const Icon(Icons.check, color: AppColors.primaryBlue)
           : null,
       onTap: () {
         Navigator.pop(dialogContext);

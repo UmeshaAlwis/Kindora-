@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:kindora/features/messages/ui/direct_chat_page.dart';
 import 'package:kindora/l10n/app_localizations.dart';
@@ -45,7 +46,7 @@ class _VolunteerJoinedCampaignsScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.joinedCampaigns),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,

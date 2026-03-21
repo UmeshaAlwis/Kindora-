@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../models/payment_model.dart';
 import 'payment_page.dart';
 
@@ -288,7 +289,7 @@ class _DonationAmountSelectionModalState
                     child: ElevatedButton(
                       onPressed: _proceedToPayment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF001A4D),
+                        backgroundColor: AppColors.blueDeep,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),

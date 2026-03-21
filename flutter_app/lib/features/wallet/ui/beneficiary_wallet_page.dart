@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:kindora/l10n/app_localizations.dart';
 import 'package:kindora/models/wallet_model.dart';
@@ -49,7 +50,7 @@ class _BeneficiaryWalletPageState extends State<BeneficiaryWalletPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.wallet),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
       body: _loading
@@ -62,7 +63,7 @@ class _BeneficiaryWalletPageState extends State<BeneficiaryWalletPage> {
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0C0C79),
+                      color: AppColors.primaryBlue,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Column(
@@ -106,11 +107,11 @@ class _BeneficiaryWalletPageState extends State<BeneficiaryWalletPage> {
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: t.type == 'credit'
-                                ? Colors.green.withValues(alpha: 0.14)
+                                ? AppColors.primaryBlue.withValues(alpha: 0.14)
                                 : Colors.red.withValues(alpha: 0.14),
                             child: Icon(
                               t.type == 'credit' ? Icons.add : Icons.remove,
-                              color: t.type == 'credit' ? Colors.green : Colors.red,
+                              color: t.type == 'credit' ? AppColors.primaryBlue : AppColors.error,
                             ),
                           ),
                           title: Text(t.description),
@@ -119,7 +120,7 @@ class _BeneficiaryWalletPageState extends State<BeneficiaryWalletPage> {
                             '${t.type == 'credit' ? '+' : '-'}LKR ${t.amount.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: t.type == 'credit' ? Colors.green : Colors.red,
+                              color: t.type == 'credit' ? AppColors.primaryBlue : AppColors.error,
                             ),
                           ),
                         ),

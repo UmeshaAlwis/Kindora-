@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -21,8 +22,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool obscureConfirmPassword = true;
   String selectedRole = 'donor';
 
-  final Color primaryColor = const Color(0xFF0C0C79);
-  final Color accentColor = const Color(0xFFFF751F);
+  final Color primaryColor = AppColors.primaryBlue;
+  final Color accentColor = AppColors.primaryOrange;
 
   String passwordStrength = "";
   Color strengthColor = Colors.grey;
@@ -37,17 +38,17 @@ class _SignupScreenState extends State<SignupScreen> {
   void checkPasswordStrength(String password) {
     if (password.length < 6) {
       passwordStrength = "Weak";
-      strengthColor = Colors.red;
+      strengthColor = AppColors.error;
     } else if (password.length < 10) {
       passwordStrength = "Medium";
-      strengthColor = Colors.orange;
+      strengthColor = AppColors.primaryOrange;
     } else if (RegExp(r'[0-9]').hasMatch(password) &&
         RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
       passwordStrength = "Strong";
-      strengthColor = Colors.green;
+      strengthColor = AppColors.primaryBlue;
     } else {
       passwordStrength = "Medium";
-      strengthColor = Colors.orange;
+      strengthColor = AppColors.primaryOrange;
     }
   }
 
@@ -65,12 +66,12 @@ class _SignupScreenState extends State<SignupScreen> {
         password.isEmpty ||
         confirmPassword.isEmpty ||
         selectedRole.isEmpty) {
-      _showSnackBar("Please fill all fields", Colors.orange);
+      _showSnackBar("Please fill all fields", AppColors.primaryOrange);
       return;
     }
 
     if (password != confirmPassword) {
-      _showSnackBar("Passwords do not match", Colors.orange);
+      _showSnackBar("Passwords do not match", AppColors.primaryOrange);
       return;
     }
 
@@ -108,17 +109,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
       _showSnackBar(
         "Verification email sent. Please check your inbox.",
-        Colors.green,
+        AppColors.primaryBlue,
       );
 
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       print('FirebaseAuthException: ${e.message}');
-      _showSnackBar(e.message ?? "Signup failed.", Colors.red);
+      _showSnackBar(e.message ?? "Signup failed.", AppColors.error);
     } catch (e) {
       print('[Signup] ERROR CAUGHT: $e');
       print('[Signup] Error type: ${e.runtimeType}');
-      _showSnackBar("Something went wrong: $e", Colors.red);
+      _showSnackBar("Something went wrong: $e", AppColors.error);
     }
 
     if (mounted) {
@@ -180,9 +181,9 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      _showSnackBar(e.message ?? "Google sign-up failed.", Colors.red);
+      _showSnackBar(e.message ?? "Google sign-up failed.", AppColors.error);
     } catch (_) {
-      _showSnackBar("Something went wrong.", Colors.red);
+      _showSnackBar("Something went wrong.", AppColors.error);
     }
   }
 
@@ -217,7 +218,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -327,7 +328,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ? "Passwords match ✓"
                       : "Passwords do not match",
                   style: TextStyle(
-                    color: passwordsMatch ? Colors.green : Colors.red,
+                    color: passwordsMatch ? AppColors.primaryBlue : AppColors.error,
                   ),
                 ),
               ),

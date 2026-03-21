@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'direct_chat_page.dart';
 import '../services/direct_message_service.dart';
@@ -36,8 +37,8 @@ class _MessagesPageState extends State<MessagesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.messages),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.scaffoldLight,
+        foregroundColor: AppColors.primaryBlue,
         centerTitle: true,
         elevation: 0,
       ),
@@ -53,7 +54,7 @@ class _MessagesPageState extends State<MessagesPage> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0C0C79)),
+                child: CircularProgressIndicator(color: AppColors.primaryBlue),
               );
             }
 
@@ -82,7 +83,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.blueGrey.shade100),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Text(
                       l10n.noMessagesYetStartConversation,
@@ -129,7 +130,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       hintText: 'Search conversations',
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
-                      fillColor: const Color(0xFFF5F7FB),
+                      fillColor: AppColors.blueSurface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
@@ -152,7 +153,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.blueGrey.shade700,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -188,7 +189,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                 children: [
                                   CircleAvatar(
                                     radius: 22,
-                                    backgroundColor: const Color(0xFF0C0C79),
+                                    backgroundColor: AppColors.primaryBlue,
                                     child: Text(
                                       avatarText,
                                       style:
@@ -208,7 +209,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                           horizontal: 4,
                                         ),
                                         decoration: const BoxDecoration(
-                                          color: Colors.red,
+                                          color: AppColors.primaryOrange,
                                           shape: BoxShape.circle,
                                         ),
                                         child: Center(
@@ -232,7 +233,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                 _formatRecent(c.lastMessageAt),
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.blueGrey.shade600,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -248,7 +249,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       child: Text(
                         'No conversations for selected filter.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.blueGrey.shade600),
+                        style: TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
                   ...filtered.map((c) {
@@ -279,7 +280,7 @@ class _MessagesPageState extends State<MessagesPage> {
                         ),
                         leading: CircleAvatar(
                           radius: 23,
-                          backgroundColor: const Color(0xFF0C0C79),
+                          backgroundColor: AppColors.primaryBlue,
                           child: Text(
                             avatarText,
                             style: const TextStyle(color: Colors.white),
@@ -301,7 +302,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               _formatTime(c.lastMessageAt),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.blueGrey.shade500,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -316,7 +317,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: Colors.blueGrey.shade700,
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -328,11 +329,17 @@ class _MessagesPageState extends State<MessagesPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: hasUnread
-                                      ? const Color(0xFFE3F2FD)
+                                      ? AppColors.blueSurface
                                       : (replied
-                                          ? const Color(0xFFE8F5E9)
-                                          : const Color(0xFFFFF3E0)),
+                                          ? AppColors.orangeSurface
+                                          : AppColors.scaffoldLight),
                                   borderRadius: BorderRadius.circular(10),
+                                  border: !hasUnread && !replied
+                                      ? Border.all(
+                                          color: AppColors.primaryOrange
+                                              .withOpacity(0.45),
+                                        )
+                                      : null,
                                 ),
                                 child: Text(
                                   hasUnread
@@ -342,10 +349,8 @@ class _MessagesPageState extends State<MessagesPage> {
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w600,
                                     color: hasUnread
-                                        ? const Color(0xFF1565C0)
-                                        : (replied
-                                            ? const Color(0xFF2E7D32)
-                                            : const Color(0xFFEF6C00)),
+                                        ? AppColors.primaryBlue
+                                        : AppColors.primaryOrange,
                                   ),
                                 ),
                               ),
@@ -381,15 +386,15 @@ class _MessagesPageState extends State<MessagesPage> {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => setState(() => _selectedFilter = value),
-      selectedColor: const Color(0xFF0C0C79).withOpacity(0.12),
+      selectedColor: AppColors.primaryBlue.withOpacity(0.12),
       labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFF0C0C79) : Colors.blueGrey.shade700,
+        color: isSelected ? AppColors.primaryBlue : AppColors.textSecondary,
         fontWeight: FontWeight.w600,
       ),
       side: BorderSide(
         color: isSelected
-            ? const Color(0xFF0C0C79).withOpacity(0.3)
-            : Colors.blueGrey.shade200,
+            ? AppColors.primaryBlue.withOpacity(0.3)
+            : AppColors.border,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),

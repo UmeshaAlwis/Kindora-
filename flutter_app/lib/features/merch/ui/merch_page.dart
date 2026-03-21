@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kindora/config/app_env.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 class MerchPage extends StatefulWidget {
@@ -227,9 +229,9 @@ class _MerchPageState extends State<MerchPage> {
                             'assets/images/merch_banner.png',
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Color(0xFF1E1B4B), Color(0xFF7C3AED)],
+                                  colors: AppColors.heroGradient,
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ),
@@ -270,10 +272,10 @@ class _MerchPageState extends State<MerchPage> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Bestsellers',
                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                       ),
@@ -282,7 +284,7 @@ class _MerchPageState extends State<MerchPage> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFFF59E0B),
+                          color: AppColors.primaryOrange,
                         ),
                       ),
                     ],

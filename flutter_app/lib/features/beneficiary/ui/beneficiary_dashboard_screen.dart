@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,7 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
-    const primaryColor = Color(0xFF0C0C79);
+    const primaryColor = AppColors.primaryBlue;
     const accentColor = Color(0xFFFF751F);
 
     return Scaffold(
@@ -231,7 +232,7 @@ class _GetSupabaseUserIdWrapper extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 40),
               child: Text(
                 'Error loading user data',
-                style: TextStyle(color: Colors.red[600]),
+                style: const TextStyle(color: AppColors.error),
               ),
             ),
           );
@@ -366,7 +367,7 @@ class _BeneficiaryCampaignsList extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Text(
             'Error loading campaigns: $error',
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.error),
           ),
         ),
       ),
@@ -516,8 +517,8 @@ class _CampaignCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: campaign.status == 'active'
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.orange.withValues(alpha: 0.1),
+                          ? AppColors.primaryBlue.withValues(alpha: 0.1)
+                          : AppColors.primaryOrange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -526,8 +527,8 @@ class _CampaignCard extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: campaign.status == 'active'
-                            ? Colors.green
-                            : Colors.orange,
+                            ? AppColors.primaryBlue
+                            : AppColors.primaryOrange,
                       ),
                     ),
                   ),

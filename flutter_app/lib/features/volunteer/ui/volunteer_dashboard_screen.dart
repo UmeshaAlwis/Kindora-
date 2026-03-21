@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:kindora/features/messages/ui/direct_chat_page.dart';
 import 'package:kindora/services/volunteer_campaign_service.dart';
@@ -41,7 +42,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    const primary = Color(0xFF0C0C79);
+    const primary = AppColors.primaryBlue;
     const accent = Color(0xFFFF751F);
     final joinedCount = _campaigns.where((c) => c.isJoined).length;
     return Scaffold(
@@ -94,7 +95,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF0C0C79), Color(0xFF3A42A3)],
+                                colors: AppColors.heroGradient,
                               ),
                             ),
                             child: Column(
@@ -176,14 +177,14 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
                                         color: c.isJoined
-                                            ? Colors.green.withOpacity(0.12)
+                                            ? AppColors.primaryBlue.withOpacity(0.12)
                                             : accent.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(999),
                                       ),
                                       child: Text(
                                         c.isJoined ? 'Joined' : 'Open',
                                         style: TextStyle(
-                                          color: c.isJoined ? Colors.green.shade700 : accent,
+                                          color: c.isJoined ? AppColors.primaryBlue : accent,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -227,7 +228,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                                   ScaffoldMessenger.of(context).showSnackBar(
                                                     const SnackBar(
                                                       content: Text('Joined campaign successfully'),
-                                                      backgroundColor: Colors.green,
+                                                      backgroundColor: AppColors.primaryBlue,
                                                     ),
                                                   );
                                                   await _load();
@@ -236,7 +237,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                                                   ScaffoldMessenger.of(context).showSnackBar(
                                                     SnackBar(
                                                       content: Text('$e'),
-                                                      backgroundColor: Colors.red,
+                                                      backgroundColor: AppColors.error,
                                                     ),
                                                   );
                                                 } finally {

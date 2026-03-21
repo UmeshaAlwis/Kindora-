@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../services/donor_donation_history_service.dart';
 
 class DonationHistoryListTile extends StatelessWidget {
@@ -18,14 +19,14 @@ class DonationHistoryListTile extends StatelessWidget {
     switch (status) {
       case 'completed':
       case 'success':
-        return Colors.green.shade700;
+        return AppColors.primaryBlue;
       case 'pending':
-        return Colors.orange.shade800;
+        return AppColors.primaryOrange;
       case 'failed':
       case 'refunded':
-        return Colors.red.shade700;
+        return AppColors.error;
       default:
-        return Colors.blueGrey.shade700;
+        return AppColors.textSecondary;
     }
   }
 
@@ -36,9 +37,9 @@ class DonationHistoryListTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.scaffoldLight,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,12 +47,12 @@ class DonationHistoryListTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF0C0C79).withOpacity(0.08),
+              color: AppColors.primaryBlue.withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               entry.isBeneficiary ? Icons.volunteer_activism : Icons.campaign,
-              color: const Color(0xFF0C0C79),
+              color: AppColors.primaryBlue,
               size: 22,
             ),
           ),
@@ -94,18 +95,18 @@ class DonationHistoryListTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   entry.typeLabel,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade800,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${formatDate(entry.createdAt)} · $method',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

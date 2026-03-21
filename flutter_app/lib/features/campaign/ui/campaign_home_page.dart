@@ -1,9 +1,11 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kindora/providers/supabase_providers.dart';
 import 'package:kindora/features/payment/ui/donation_amount_selection_page.dart';
 import 'package:kindora/features/payment/models/payment_model.dart'
     as payment_model;
+import 'package:kindora/features/campaign/screens/campaign_details_screen.dart';
 import 'start_campaign_page.dart';
 
 class CampaignHomePage extends ConsumerWidget {
@@ -24,7 +26,7 @@ class CampaignHomePage extends ConsumerWidget {
             ),
           ),
           bottom: const TabBar(
-            indicatorColor: Color(0xFFFF751F),
+            indicatorColor: AppColors.primaryOrange,
             labelStyle: TextStyle(
               fontWeight: FontWeight.w500,
               color: Color.fromARGB(255, 255, 255, 255),
@@ -55,7 +57,7 @@ class CampaignHomePage extends ConsumerWidget {
                   icon: const Icon(Icons.add),
                   label: const Text("Add Campaign"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF751F),
+                    backgroundColor: AppColors.primaryOrange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -97,7 +99,7 @@ class CampaignList extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(Icons.error_outline, size: 64, color: AppColors.error),
               const SizedBox(height: 16),
               Text('Error loading campaigns: $err'),
             ],
@@ -111,7 +113,7 @@ class CampaignList extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.campaign, size: 64, color: Colors.grey),
+                const Icon(Icons.campaign, size: 64, color: AppColors.textSecondary),
                 const SizedBox(height: 16),
                 const Text('No campaigns available yet'),
                 const SizedBox(height: 24),
@@ -199,7 +201,7 @@ class CampaignList extends ConsumerWidget {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF0C0C79),
+                                color: AppColors.primaryBlue,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -225,50 +227,90 @@ class CampaignList extends ConsumerWidget {
                                 value: progress,
                                 minHeight: 8,
                                 backgroundColor: Colors.grey[200],
-                                color: const Color(0xFFFF751F),
+                                color: AppColors.primaryOrange,
                               ),
                             ),
                             const SizedBox(height: 10),
 
-                            /// Support Button
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0C0C79),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                ),
-                                onPressed: () {
-                                  // Convert Supabase campaign to payment model campaign
-                                  final paymentCampaign =
-                                      payment_model.Campaign(
-                                    id: campaign.id,
-                                    title: campaign.title,
-                                    image: campaign.image ?? '',
-                                    raisedAmount: campaign.raisedAmount ?? 0.0,
-                                    targetAmount: campaign.targetAmount ?? 0.0,
-                                    description: campaign.description ?? '',
-                                  );
-
-                                  // Show donation amount selection as bottom sheet modal
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(24),
-                                        topRight: Radius.circular(24),
+                            /// Support & Details
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryBlue,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
                                       ),
                                     ),
-                                    builder: (context) =>
-                                        DonationAmountSelectionModal(
-                                      campaign: paymentCampaign,
+                                    onPressed: () {
+                                      final paymentCampaign =
+                                          payment_model.Campaign(
+                                        id: campaign.id,
+                                        title: campaign.title,
+                                        image: campaign.image ?? '',
+                                        raisedAmount:
+                                            campaign.raisedAmount ?? 0.0,
+                                        targetAmount:
+                                            campaign.targetAmount ?? 0.0,
+                                        description:
+                                            campaign.description ?? '',
+                                      );
+
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(24),
+                                            topRight: Radius.circular(24),
+                                          ),
+                                        ),
+                                        builder: (context) =>
+                                            DonationAmountSelectionModal(
+                                          campaign: paymentCampaign,
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      "Support Campaign",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
                                     ),
-                                  );
-                                },
-                                child: const Text("Support Campaign"),
-                              ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 2,
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primaryBlue,
+                                      side: const BorderSide(
+                                        color: AppColors.primaryBlue,
+                                        width: 1.5,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              CampaignDetailsScreen(
+                                            campaign: campaign,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text("Details"),
+                                  ),
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 8),
@@ -280,7 +322,7 @@ class CampaignList extends ConsumerWidget {
                                   icon: const Icon(
                                     Icons.edit,
                                     size: 20,
-                                    color: Color(0xFF0C0C79),
+                                    color: AppColors.primaryBlue,
                                   ),
                                   onPressed: () {
                                     Navigator.push(
@@ -297,7 +339,7 @@ class CampaignList extends ConsumerWidget {
                                   icon: const Icon(
                                     Icons.share,
                                     size: 20,
-                                    color: Color(0xFF0C0C79),
+                                    color: AppColors.primaryBlue,
                                   ),
                                   onPressed: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
