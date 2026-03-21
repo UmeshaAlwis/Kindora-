@@ -148,7 +148,7 @@ class _FeedPageState extends State<FeedPage> {
                   const SizedBox(height: 12),
                   Text(
                     l10n.createPost,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 10),
                   TextField(

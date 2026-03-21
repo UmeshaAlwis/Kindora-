@@ -256,7 +256,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
               Text(
                 l10n.campaignDetails,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0C0C79),
@@ -287,7 +287,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 controller: campaignerNameController,
                 decoration: InputDecoration(
                   labelText: l10n.campaignerName,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
@@ -339,7 +339,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                     controller: dateController,
                     decoration: InputDecoration(
                       labelText: l10n.campaignEndDate,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       suffixIcon: const Icon(Icons.calendar_today),
                     ),
                     validator: (value) {
@@ -359,7 +359,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 initialValue: category,
                 decoration: InputDecoration(
                   labelText: l10n.mainCategory,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: ["Charity", "Campaign", "Donation"]
                     .map((e) => DropdownMenuItem(
@@ -381,7 +381,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 initialValue: campaignCategory,
                 decoration: InputDecoration(
                   labelText: l10n.campaignType,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: ["Organization", "Personal"]
                     .map((e) => DropdownMenuItem(
@@ -420,7 +420,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 decoration: InputDecoration(
                   labelText: l10n.campaignDescriptionOptional,
                   hintText: "Share details about your campaign...",
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
 

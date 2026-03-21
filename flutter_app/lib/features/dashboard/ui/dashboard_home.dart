@@ -124,7 +124,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                     children: [
                       Text(
                         l10n.yourBalance,
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                       IconButton(
                         icon: Stack(
@@ -257,7 +257,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                 children: [
                   Text(
                     l10n.shareKindnessToday,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -322,7 +322,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                     children: [
                       Text(
                         l10n.urgentDonations,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

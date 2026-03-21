@@ -125,13 +125,13 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
           // Messages List
           Expanded(
             child: messages.isEmpty
-                ? Center(
+                ? const Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             'How can we help?',
                             style: TextStyle(
                               fontSize: 16,
@@ -139,8 +139,8 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                               color: Colors.grey,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          const Text(
+                          SizedBox(height: 8),
+                          Text(
                             'Ask any questions about Kindora',
                             style: TextStyle(
                               fontSize: 13,

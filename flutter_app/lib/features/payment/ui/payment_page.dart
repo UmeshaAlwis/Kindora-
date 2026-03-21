@@ -452,7 +452,7 @@ class _PaymentPageState extends State<PaymentPage> {
           final cvcController = TextEditingController();
           final zipController = TextEditingController();
 
-          Widget _fieldLabel(String text) => Padding(
+          Widget fieldLabel(String text) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
                   text,
@@ -463,7 +463,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
               );
 
-          InputDecoration _inputDecoration(String hint) => InputDecoration(
+          InputDecoration inputDecoration(String hint) => InputDecoration(
                 hintText: hint,
                 filled: true,
                 fillColor: Colors.grey.shade50,
@@ -492,7 +492,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 padding: const EdgeInsets.all(16),
                 child: StatefulBuilder(
                   builder: (context, setState) {
-                    final brand = 'CARD';
+                    const brand = 'CARD';
                     final cardDigits = digitsOnly(cardNumberController.text);
                     final masked = cardDigits.length >= 4
                         ? '•••• ${cardDigits.substring(cardDigits.length - 4)}'
@@ -569,14 +569,14 @@ class _PaymentPageState extends State<PaymentPage> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           child: Column(
                             children: [
-                              _fieldLabel('Card number'),
+                              fieldLabel('Card number'),
                               TextFormField(
                                 controller: cardNumberController,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
                                   _CardNumberInputFormatter(),
                                 ],
-                                decoration: _inputDecoration('4242 4242 4242 4242'),
+                                decoration: inputDecoration('4242 4242 4242 4242'),
                                 validator: (v) {
                                   final digits = digitsOnly(v ?? '');
                                   if (digits.isEmpty) {
@@ -593,10 +593,10 @@ class _PaymentPageState extends State<PaymentPage> {
                                 onChanged: (_) => setState(() {}),
                               ),
                               const SizedBox(height: 12),
-                              _fieldLabel('Name on card'),
+                              fieldLabel('Name on card'),
                               TextFormField(
                                 controller: nameController,
-                                decoration: _inputDecoration('e.g. John Doe'),
+                                decoration: inputDecoration('e.g. John Doe'),
                                 textCapitalization: TextCapitalization.words,
                                 validator: (v) {
                                   final t = (v ?? '').trim();
@@ -613,7 +613,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        _fieldLabel('Expiry'),
+                                        fieldLabel('Expiry'),
                                         TextFormField(
                                           controller: expController,
                                           keyboardType: TextInputType.number,
@@ -622,7 +622,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                                 .digitsOnly,
                                           ],
                                           decoration:
-                                              _inputDecoration('MM/YY'),
+                                              inputDecoration('MM/YY'),
                                           onChanged: (v) {
                                             final normalized =
                                                 normalizeExpiry(v);
@@ -660,7 +660,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        _fieldLabel('CVC'),
+                                        fieldLabel('CVC'),
                                         TextFormField(
                                           controller: cvcController,
                                           keyboardType: TextInputType.number,
@@ -668,7 +668,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                           inputFormatters: [
                                             FilteringTextInputFormatter.digitsOnly,
                                           ],
-                                          decoration: _inputDecoration('123'),
+                                          decoration: inputDecoration('123'),
                                           validator: (v) {
                                             final cvc = digitsOnly(v ?? '');
                                             if (cvc.isEmpty) {
@@ -686,14 +686,14 @@ class _PaymentPageState extends State<PaymentPage> {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              _fieldLabel('Billing ZIP (optional)'),
+                              fieldLabel('Billing ZIP (optional)'),
                               TextFormField(
                                 controller: zipController,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
-                                decoration: _inputDecoration('e.g. 10001'),
+                                decoration: inputDecoration('e.g. 10001'),
                                 validator: (v) {
                                   final zip = digitsOnly(v ?? '');
                                   if (zip.isEmpty) return null; // optional
