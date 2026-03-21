@@ -14,6 +14,13 @@ class MainLayout extends ConsumerWidget {
   });
 
  
+  /// Bottom nav expects index in 0..4 (strict [int] — avoid [num] from [clamp]).
+  int _clampNavIndex(int index) {
+    if (index < 0) return 0;
+    if (index > 4) return 4;
+    return index;
+  }
+
   int _getSelectedIndex(String location) {
     // Beneficiary routes
     if (location.startsWith('/beneficiary/wallet')) return 3;
@@ -56,7 +63,7 @@ class MainLayout extends ConsumerWidget {
       debugPrint('[MainLayout] Error getting location: $e');
     }
 
-    final selectedIndex = _getSelectedIndex(location);
+    final selectedIndex = _clampNavIndex(_getSelectedIndex(location));
     final isBeneficiary = location.startsWith('/beneficiary');
     final isVolunteer = location.startsWith('/volunteer');
     debugPrint(
@@ -78,7 +85,7 @@ class MainLayout extends ConsumerWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: selectedIndex.clamp(0, 4), // Safely clamp to valid range
+        currentIndex: selectedIndex,
         selectedItemColor: const Color(0xFF0C0C79),
         unselectedItemColor: Colors.blueGrey,
         selectedFontSize: 15,

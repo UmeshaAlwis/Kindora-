@@ -3,6 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:kindora/config/app_env.dart';
 
+int _parseStatInt(dynamic value, [int fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+double _parseStatDouble(dynamic value, [double fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? fallback;
+  return fallback;
+}
+
 class DonorBadge {
   final String id;
   final String name;
@@ -61,21 +78,33 @@ class DonorBadgeService {
       },
     );
 
-    final body = jsonDecode(response.body);
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map) {
+      throw Exception('Invalid badge response');
+    }
+    final body = Map<String, dynamic>.from(decoded);
     if (response.statusCode != 200 || body['success'] != true) {
       throw Exception(body['error'] ?? 'Failed to load badge summary');
     }
 
-    final data = body['data'] as Map<String, dynamic>;
-    final stats = data['stats'] as Map<String, dynamic>? ?? {};
-    final badgesRaw = (data['badges'] as List?) ?? const [];
+    final rawData = body['data'];
+    if (rawData is! Map) {
+      throw Exception('Invalid badge payload');
+    }
+    final data = Map<String, dynamic>.from(rawData);
+    final rawStats = data['stats'];
+    final stats = rawStats is Map
+        ? Map<String, dynamic>.from(rawStats)
+        : <String, dynamic>{};
+    final badgesRaw = data['badges'] is List ? data['badges'] as List : const [];
 
     return DonorBadgeSummary(
-      totalDonated: (stats['total_donated'] as num?)?.toDouble() ?? 0,
-      campaignsSupported: (stats['campaigns_supported'] as num?)?.toInt() ?? 0,
-      successfulDonations: (stats['successful_donations'] as num?)?.toInt() ?? 0,
+      totalDonated: _parseStatDouble(stats['total_donated']),
+      campaignsSupported: _parseStatInt(stats['campaigns_supported']),
+      successfulDonations: _parseStatInt(stats['successful_donations']),
       badges: badgesRaw
-          .map((e) => DonorBadge.fromJson((e as Map).cast<String, dynamic>()))
+          .whereType<Map>()
+          .map((e) => DonorBadge.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
     );
   }
