@@ -2,6 +2,58 @@ import { supabase } from './supabase.service';
 import { Campaign } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
+const VOLUNTEER_BADGE_DEFINITIONS = [
+  {
+    id: 'vol_first_step',
+    name: 'First Step',
+    description: 'Joined your first volunteer campaign.',
+    icon: 'volunteer_activism',
+    evaluate: (ctx: { joinedCount: number }) => ctx.joinedCount >= 1,
+  },
+  {
+    id: 'vol_team_player',
+    name: 'Team Player',
+    description: 'Joined 3 different campaigns as a volunteer.',
+    icon: 'groups',
+    evaluate: (ctx: { joinedCount: number }) => ctx.joinedCount >= 3,
+  },
+  {
+    id: 'vol_impact_builder',
+    name: 'Impact Builder',
+    description: 'Joined 5 volunteer campaigns.',
+    icon: 'emoji_events',
+    evaluate: (ctx: { joinedCount: number }) => ctx.joinedCount >= 5,
+  },
+  {
+    id: 'vol_super_volunteer',
+    name: 'Super Volunteer',
+    description: 'Joined 10 volunteer campaigns.',
+    icon: 'military_tech',
+    evaluate: (ctx: { joinedCount: number }) => ctx.joinedCount >= 10,
+  },
+  {
+    id: 'vol_connector',
+    name: 'Community Connector',
+    description: 'Supported campaigns from 3 different organizers.',
+    icon: 'handshake',
+    evaluate: (ctx: { distinctOrganizers: number }) => ctx.distinctOrganizers >= 3,
+  },
+  {
+    id: 'vol_quick_helper',
+    name: 'Quick Helper',
+    description: 'Joined a campaign within 24 hours of it going live.',
+    icon: 'bolt',
+    evaluate: (ctx: { hasQuickJoin: boolean }) => ctx.hasQuickJoin,
+  },
+  {
+    id: 'vol_steady_heart',
+    name: 'Steady Heart',
+    description: 'Volunteered in two consecutive calendar months.',
+    icon: 'event_repeat',
+    evaluate: (ctx: { hasTwoMonthStreak: boolean }) => ctx.hasTwoMonthStreak,
+  },
+] as const;
+
 export class CampaignService {
   /**
    * Get all campaigns with filters
@@ -316,6 +368,110 @@ export class CampaignService {
       campaign_id: campaignId,
     });
     return { left: true };
+  }
+
+  /**
+   * Volunteer achievements (badges) from campaign_volunteers + campaigns.
+   */
+  static async getVolunteerBadgeSummary(userId: string) {
+    const joinedRows = await supabase.select<any>('campaign_volunteers', {
+      select: 'campaign_id,created_at',
+      filters: { user_id: userId },
+      limit: 500,
+      orderBy: { column: 'created_at', ascending: true },
+    });
+
+    const joins = joinedRows || [];
+    const uniqueCampaignIds = [
+      ...new Set(
+        joins.map((j: any) => j.campaign_id).filter((id: any) => typeof id === 'string' && id.length > 0)
+      ),
+    ] as string[];
+
+    const campaignById = new Map<string, { id: string; created_at?: string; user_id?: string }>();
+    for (const cid of uniqueCampaignIds) {
+      const rows = await supabase.select<any>('campaigns', {
+        select: 'id,created_at,user_id',
+        filters: { id: cid },
+        limit: 1,
+      });
+      const c = rows?.[0];
+      if (c?.id) {
+        campaignById.set(String(c.id), {
+          id: String(c.id),
+          created_at: c.created_at,
+          user_id: c.user_id != null ? String(c.user_id) : undefined,
+        });
+      }
+    }
+
+    const distinctOrganizers = new Set<string>();
+    campaignById.forEach((c) => {
+      if (c.user_id && c.user_id.trim().length > 0) {
+        distinctOrganizers.add(c.user_id);
+      }
+    });
+
+    let hasQuickJoin = false;
+    for (const j of joins) {
+      const cid = String(j.campaign_id || '');
+      const campaign = campaignById.get(cid);
+      if (!campaign?.created_at || !j.created_at) continue;
+      const campaignCreated = new Date(campaign.created_at);
+      const joinedAt = new Date(j.created_at);
+      if (Number.isNaN(campaignCreated.getTime()) || Number.isNaN(joinedAt.getTime())) continue;
+      const diffMs = joinedAt.getTime() - campaignCreated.getTime();
+      if (diffMs >= 0 && diffMs <= 24 * 60 * 60 * 1000) {
+        hasQuickJoin = true;
+        break;
+      }
+    }
+
+    const joinMonths = new Set<string>();
+    joins.forEach((j: any) => {
+      if (!j.created_at) return;
+      const dt = new Date(j.created_at);
+      if (Number.isNaN(dt.getTime())) return;
+      joinMonths.add(
+        `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`
+      );
+    });
+    const sortedMonths = Array.from(joinMonths).sort();
+    let hasTwoMonthStreak = false;
+    for (let i = 0; i < sortedMonths.length - 1; i++) {
+      const [y1, m1] = sortedMonths[i].split('-').map(Number);
+      const [y2, m2] = sortedMonths[i + 1].split('-').map(Number);
+      const d1 = y1 * 12 + m1;
+      const d2 = y2 * 12 + m2;
+      if (d2 === d1 + 1) {
+        hasTwoMonthStreak = true;
+        break;
+      }
+    }
+
+    const joinedCount = uniqueCampaignIds.length;
+    const context = {
+      joinedCount,
+      distinctOrganizers: distinctOrganizers.size,
+      hasQuickJoin,
+      hasTwoMonthStreak,
+    };
+
+    const badges = VOLUNTEER_BADGE_DEFINITIONS.map((badge) => ({
+      id: badge.id,
+      name: badge.name,
+      description: badge.description,
+      icon: badge.icon,
+      unlocked: badge.evaluate(context as any),
+    }));
+
+    return {
+      stats: {
+        campaigns_joined: joinedCount,
+        distinct_organizers: distinctOrganizers.size,
+      },
+      badges,
+    };
   }
 
   /**

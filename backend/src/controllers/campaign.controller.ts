@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { CampaignService } from '../services/campaign.service';
-import { NotFoundError, ValidationError } from '../utils/errors';
+import { NotFoundError, ValidationError, UnauthorizedError } from '../utils/errors';
 import Joi from 'joi';
 
 const createCampaignSchema = Joi.object({
@@ -162,6 +162,31 @@ export class CampaignController {
       res.json({
         success: true,
         data: campaigns,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Volunteers: badge / achievement summary (joined campaigns).
+   * GET /campaigns/volunteer/badges
+   */
+  static async getVolunteerBadgeSummary(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new UnauthorizedError();
+      }
+
+      const result = await CampaignService.getVolunteerBadgeSummary(userId);
+      res.json({
+        success: true,
+        data: result,
       });
     } catch (error) {
       next(error);

@@ -11,6 +11,11 @@ router.get('/', CampaignController.getCampaigns);
 
 // Volunteer join endpoints
 router.get(
+  '/volunteer/badges',
+  authenticateToken,
+  CampaignController.getVolunteerBadgeSummary
+);
+router.get(
   '/volunteer/available',
   authenticateToken,
   CampaignController.getVolunteerAvailableCampaigns
