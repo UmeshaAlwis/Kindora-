@@ -21,6 +21,54 @@ class _ProfileBundle {
   });
 }
 
+/// Distinct modern palette per badge (no shared amber/orange for all).
+({Color accent, Color accent2, Color surface}) _badgePalette(String badgeId) {
+  switch (badgeId) {
+    case 'first_gift':
+      return (
+        accent: const Color(0xFFEC4899),
+        accent2: const Color(0xFFF43F5E),
+        surface: const Color(0xFFFFF1F2),
+      );
+    case 'starter_supporter':
+      return (
+        accent: const Color(0xFF0D9488),
+        accent2: const Color(0xFF2DD4BF),
+        surface: const Color(0xFFECFDF5),
+      );
+    case 'golden_donor':
+      return (
+        accent: const Color(0xFFC2410C),
+        accent2: const Color(0xFFF59E0B),
+        surface: const Color(0xFFFFFBEB),
+      );
+    case 'three_campaign_backer':
+      return (
+        accent: const Color(0xFF4F46E5),
+        accent2: const Color(0xFF7C3AED),
+        surface: const Color(0xFFEEF2FF),
+      );
+    case 'monthly_giver':
+      return (
+        accent: const Color(0xFF0369A1),
+        accent2: const Color(0xFF22D3EE),
+        surface: const Color(0xFFF0F9FF),
+      );
+    case 'rapid_responder':
+      return (
+        accent: const Color(0xFF7C3AED),
+        accent2: const Color(0xFFE879F9),
+        surface: const Color(0xFFFAF5FF),
+      );
+    default:
+      return (
+        accent: const Color(0xFF0C0C79),
+        accent2: const Color(0xFF6366F1),
+        surface: const Color(0xFFF8FAFC),
+      );
+  }
+}
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -288,16 +336,16 @@ class _ProfilePageState extends State<ProfilePage> {
                       )
                     else
                       Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
+                        spacing: 14,
+                        runSpacing: 14,
+                        alignment: WrapAlignment.start,
                         children: unlocked
                             .map(
                               (b) => _buildAchievementBadge(
+                                badgeId: b.id,
                                 icon: _iconFromName(b.icon),
                                 title: b.name,
                                 subtitle: b.description,
-                                backgroundColor: Colors.amber.shade100,
-                                iconColor: Colors.orange.shade700,
                               ),
                             )
                             .toList(),
@@ -366,50 +414,91 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildAchievementBadge({
+    required String badgeId,
     required IconData icon,
     required String title,
     required String subtitle,
-    required Color backgroundColor,
-    required Color iconColor,
   }) {
+    final c = _badgePalette(badgeId);
     return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
+      width: 168,
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            c.surface,
+            Colors.white,
+          ],
+        ),
+        border: Border.all(color: c.accent.withOpacity(0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: c.accent.withOpacity(0.18),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            shape: BoxShape.circle,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [c.accent, c.accent2],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: c.accent.withOpacity(0.45),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 26),
           ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 28,
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              height: 1.2,
+              color: Colors.grey.shade900,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.35,
+              color: Colors.blueGrey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
       ),
     );
   }
