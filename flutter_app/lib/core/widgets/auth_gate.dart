@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindora/models/supabase_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import '../../features/auth/ui/login_screen.dart';
 import '../../repositories/supabase_repositories.dart';
@@ -225,7 +226,7 @@ class _AuthenticatedGateState extends ConsumerState<_AuthenticatedGate> {
       // Supabase can take a moment to sync `beneficiary_details` right after login.
       // If we query once and get null, we might incorrectly route to donor UI.
       final beneficiaryRepo = BeneficiaryDetailsRepository();
-      var beneficiaryDetails;
+      BeneficiaryDetails? beneficiaryDetails;
       int beneficiaryRetries = 0;
       // Keep this short to avoid long loading loops.
       const maxBeneficiaryRetries = 5;

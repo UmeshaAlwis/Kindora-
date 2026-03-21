@@ -130,19 +130,19 @@ class MainLayout extends ConsumerWidget {
           }
         },
         items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_filled),
-            activeIcon: const Icon(Icons.home, color: Color(0xFF0C0C79)),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_filled),
+            activeIcon: Icon(Icons.home, color: Color(0xFF0C0C79)),
             label: '',
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.rss_feed),
-            activeIcon: const Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.rss_feed),
+            activeIcon: Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
             label: '',
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.near_me_outlined),
-            activeIcon: const Icon(Icons.near_me, color: Color(0xFF0C0C79)),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.near_me_outlined),
+            activeIcon: Icon(Icons.near_me, color: Color(0xFF0C0C79)),
             label: '',
           ),
           BottomNavigationBarItem(
@@ -161,9 +161,9 @@ class MainLayout extends ConsumerWidget {
             ),
             label: '',
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            activeIcon: const Icon(Icons.person, color: Color(0xFF0C0C79)),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person, color: Color(0xFF0C0C79)),
             label: '',
           ),
         ].asMap().entries.map((entry) {

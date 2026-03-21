@@ -41,8 +41,8 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final primary = const Color(0xFF0C0C79);
-    final accent = const Color(0xFFFF751F);
+    const primary = Color(0xFF0C0C79);
+    const accent = Color(0xFFFF751F);
     final joinedCount = _campaigns.where((c) => c.isJoined).length;
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),

@@ -352,7 +352,7 @@ class _BeneficiaryDonationAmountSelectionModalState
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _recurringFrequency,
+                      initialValue: _recurringFrequency,
                       items: const [
                         DropdownMenuItem(value: 'daily', child: Text('Daily')),
                         DropdownMenuItem(value: 'weekly', child: Text('Weekly')),

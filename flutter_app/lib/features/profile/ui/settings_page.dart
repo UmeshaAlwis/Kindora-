@@ -1,15 +1,115 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../config/app_env.dart';
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  final TextEditingController _nameController = TextEditingController();
+  bool _savingName = false;
+  String _role = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) return;
+      _nameController.text = (firebaseUser.displayName ?? '').trim();
+
+      final token = await firebaseUser.getIdToken();
+      final response = await http.get(
+        Uri.parse('${AppEnv.apiBaseUrl}/users/me'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 8));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200 && data['success'] == true) {
+        final me = data['data'] as Map<String, dynamic>? ?? {};
+        _role = (me['role'] ?? '').toString();
+        _nameController.text = (me['full_name'] ?? '').toString();
+      }
+    } catch (_) {
+      // Ignore load failures and keep settings usable.
+    } finally {
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _saveName() async {
+    final name = _nameController.text.trim();
+    if (name.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name must be at least 2 characters')),
+      );
+      return;
+    }
+
+    setState(() {
+      _savingName = true;
+    });
+
+    try {
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final token = await firebaseUser.getIdToken();
+      final response = await http.patch(
+        Uri.parse('${AppEnv.apiBaseUrl}/users/me/name'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'full_name': name}),
+      );
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200 && data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Name updated successfully')),
+        );
+      } else {
+        throw Exception(data['error'] ?? 'Failed to update name');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update name: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _savingName = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDarkMode = ref.watch(themeProvider);
     final currentLanguage = ref.watch(languageProvider);
@@ -65,6 +165,19 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               _buildDivider(),
+              if (_role != 'beneficiary') ...[
+                _buildActionTile(
+                  icon: Icons.person_outline,
+                  title: 'Display Name',
+                  subtitle:
+                      _nameController.text.trim().isEmpty ? 'Not set' : _nameController.text.trim(),
+                  onTap: () {
+                    _showNameDialog(context);
+                  },
+                  showArrow: true,
+                ),
+                _buildDivider(),
+              ],
               _buildActionTile(
                 icon: Icons.language,
                 title: l10n.language,
@@ -187,6 +300,48 @@ class SettingsPage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showNameDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Set your name'),
+          content: TextField(
+            controller: _nameController,
+            maxLength: 100,
+            decoration: const InputDecoration(
+              hintText: 'Enter your full name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: _savingName
+                  ? null
+                  : () async {
+                      await _saveName();
+                      if (mounted) {
+                        Navigator.pop(dialogContext);
+                        setState(() {});
+                      }
+                    },
+              child: _savingName
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -378,7 +533,7 @@ class SettingsPage extends ConsumerWidget {
               },
               child: Text(
                 l10n.delete,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           ],
