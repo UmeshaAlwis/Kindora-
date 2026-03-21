@@ -138,6 +138,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get seeAll => 'அனைத்தையும்';
 
   @override
+  String get details => 'விவரங்கள்';
+
+  @override
   String get noUrgentCampaigns => 'அவசர பிரச்சாரங்கள் இல்லை';
 
   @override

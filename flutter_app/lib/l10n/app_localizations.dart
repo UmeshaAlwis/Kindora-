@@ -285,6 +285,7 @@ abstract class AppLocalizations {
   String get supportCampaign;
   String get urgentDonations;
   String get seeAll;
+  String get details;
   String get noUrgentCampaigns;
   String get noDeadline;
   String get endingToday;
