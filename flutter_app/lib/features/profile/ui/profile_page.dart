@@ -3,6 +3,7 @@ import 'package:kindora/config/themes/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
+import '../widgets/achievement_badge_card.dart';
 import '../services/donor_badge_service.dart';
 import '../services/donor_donation_history_service.dart';
 import 'donation_history_list_tile.dart';
@@ -20,54 +21,6 @@ class _ProfileBundle {
     required this.historyTotal,
     this.historyError,
   });
-}
-
-/// Badge accents use only brand blue + orange (tints / depth variants).
-({Color accent, Color accent2, Color surface}) _badgePalette(String badgeId) {
-  switch (badgeId) {
-    case 'first_gift':
-      return (
-        accent: AppColors.primaryOrange,
-        accent2: Color.lerp(AppColors.primaryOrange, Colors.white, 0.35)!,
-        surface: AppColors.orangeSurface,
-      );
-    case 'starter_supporter':
-      return (
-        accent: AppColors.primaryBlue,
-        accent2: AppColors.blueDeep,
-        surface: AppColors.blueSurface,
-      );
-    case 'golden_donor':
-      return (
-        accent: Color.lerp(AppColors.primaryOrange, AppColors.primaryBlue, 0.25)!,
-        accent2: AppColors.primaryOrange,
-        surface: AppColors.orangeSurface,
-      );
-    case 'three_campaign_backer':
-      return (
-        accent: AppColors.blueDeep,
-        accent2: AppColors.primaryBlue,
-        surface: AppColors.blueSurface,
-      );
-    case 'monthly_giver':
-      return (
-        accent: AppColors.primaryBlue,
-        accent2: Color.lerp(AppColors.primaryBlue, AppColors.primaryOrange, 0.4)!,
-        surface: AppColors.blueSurface,
-      );
-    case 'rapid_responder':
-      return (
-        accent: AppColors.primaryOrange,
-        accent2: AppColors.primaryBlue,
-        surface: AppColors.orangeSurface,
-      );
-    default:
-      return (
-        accent: AppColors.primaryBlue,
-        accent2: AppColors.primaryOrange,
-        surface: AppColors.scaffoldLight,
-      );
-  }
 }
 
 class ProfilePage extends StatefulWidget {
@@ -112,25 +65,6 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _profileFuture = _loadProfile();
     });
-  }
-
-  IconData _iconFromName(String icon) {
-    switch (icon) {
-      case 'redeem':
-        return Icons.redeem;
-      case 'military_tech':
-        return Icons.military_tech;
-      case 'emoji_events':
-        return Icons.emoji_events;
-      case 'campaign':
-        return Icons.campaign;
-      case 'event_repeat':
-        return Icons.event_repeat;
-      case 'bolt':
-        return Icons.bolt;
-      default:
-        return Icons.verified;
-    }
   }
 
   @override
@@ -345,9 +279,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         alignment: WrapAlignment.start,
                         children: unlocked
                             .map(
-                              (b) => _buildAchievementBadge(
+                              (b) => AchievementBadgeCard(
                                 badgeId: b.id,
-                                icon: _iconFromName(b.icon),
+                                icon: iconFromBadgeName(b.icon),
                                 title: b.name,
                                 subtitle: b.description,
                               ),
@@ -417,93 +351,4 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAchievementBadge({
-    required String badgeId,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    final c = _badgePalette(badgeId);
-    return Container(
-      width: 168,
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            c.surface,
-            Colors.white,
-          ],
-        ),
-        border: Border.all(color: c.accent.withOpacity(0.22)),
-        boxShadow: [
-          BoxShadow(
-            color: c.accent.withOpacity(0.18),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-            spreadRadius: -4,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [c.accent, c.accent2],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: c.accent.withOpacity(0.45),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: Colors.white, size: 26),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-              height: 1.2,
-              color: Colors.grey.shade900,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 11.5,
-              height: 1.35,
-              color: Colors.blueGrey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
 }
