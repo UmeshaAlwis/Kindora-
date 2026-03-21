@@ -138,6 +138,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seeAll => 'See all';
 
   @override
+  String get details => 'Details';
+
+  @override
   String get noUrgentCampaigns => 'No urgent campaigns available';
 
   @override

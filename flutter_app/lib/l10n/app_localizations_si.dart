@@ -138,6 +138,9 @@ class AppLocalizationsSi extends AppLocalizations {
   String get seeAll => 'සියල්ල';
 
   @override
+  String get details => 'විස්තර';
+
+  @override
   String get noUrgentCampaigns => 'හදිසි ව්‍යාපාර නොමැත';
 
   @override

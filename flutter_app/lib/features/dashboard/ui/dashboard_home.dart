@@ -2,6 +2,7 @@ import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
+import 'package:kindora/features/campaign/screens/campaign_details_screen.dart';
 import 'package:kindora/features/wallet/ui/wallet_topup_page.dart';
 import 'package:kindora/features/wallet/ui/wallet_transaction_history_page.dart';
 import 'package:kindora/services/wallet_service.dart';
@@ -326,11 +327,18 @@ class _DashboardHomeState extends State<DashboardHome> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.primaryBlue,
                         ),
                       ),
                       GestureDetector(
                         onTap: () => context.push('/campaigns'),
-                        child: Text(l10n.seeAll),
+                        child: Text(
+                          l10n.seeAll,
+                          style: const TextStyle(
+                            color: AppColors.primaryOrange,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -346,93 +354,24 @@ class _DashboardHomeState extends State<DashboardHome> {
                       child: Center(child: Text(l10n.noUrgentCampaigns)),
                     )
                   else
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _urgentCampaigns.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.9,
-                      ),
-                      itemBuilder: (context, index) {
-                        final campaign = _urgentCampaigns[index];
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () => context.push('/campaigns'),
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (campaign.image != null && campaign.image!.isNotEmpty)
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Image.network(
-                                        campaign.image!,
-                                        height: 90,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) {
-                                          return Container(
-                                            height: 90,
-                                            width: double.infinity,
-                                            color: Colors.grey.shade200,
-                                            child: const Icon(Icons.image_not_supported),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  else
-                                    Container(
-                                      height: 90,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(Icons.campaign, color: Colors.grey),
-                                    ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    campaign.title,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    campaign.description?.isNotEmpty == true
-                                        ? campaign.description!
-                                        : l10n.supportCampaign,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        const gap = 12.0;
+                        final cellW = (constraints.maxWidth - gap) / 2;
+                        return Wrap(
+                          spacing: gap,
+                          runSpacing: gap,
+                          children: _urgentCampaigns.map((campaign) {
+                            return SizedBox(
+                              width: cellW,
+                              child: _UrgentDonationMiniCard(
+                                campaign: campaign,
+                                l10n: l10n,
+                                daysLeftText:
                                     _daysLeftLabel(campaign.endDate, l10n),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: campaign.endDate != null
-                                          ? Colors.redAccent
-                                          : Colors.grey,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
                               ),
-                            ),
-                          ),
+                            );
+                          }).toList(),
                         );
                       },
                     ),
@@ -441,6 +380,150 @@ class _DashboardHomeState extends State<DashboardHome> {
             ),
 
             const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Intrinsic height — avoids blank space from GridView [childAspectRatio].
+class _UrgentDonationMiniCard extends StatelessWidget {
+  final Campaign campaign;
+  final AppLocalizations l10n;
+  final String daysLeftText;
+
+  const _UrgentDonationMiniCard({
+    required this.campaign,
+    required this.l10n,
+    required this.daysLeftText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 2,
+      shadowColor: Colors.black26,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (campaign.image != null && campaign.image!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  campaign.image!,
+                  height: 86,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    return Container(
+                      height: 86,
+                      width: double.infinity,
+                      color: AppColors.blueSurface,
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: AppColors.textSecondary,
+                        size: 22,
+                      ),
+                    );
+                  },
+                ),
+              )
+            else
+              Container(
+                height: 86,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.blueSurface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.campaign,
+                  color: AppColors.primaryBlue,
+                  size: 32,
+                ),
+              ),
+            const SizedBox(height: 5),
+            Text(
+              campaign.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                height: 1.2,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              campaign.description?.isNotEmpty == true
+                  ? campaign.description!
+                  : l10n.supportCampaign,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                height: 1.15,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              daysLeftText,
+              style: TextStyle(
+                fontSize: 10,
+                height: 1.1,
+                color: campaign.endDate != null
+                    ? AppColors.primaryOrange
+                    : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
+              height: 28,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryBlue,
+                  side: const BorderSide(
+                    color: AppColors.primaryBlue,
+                    width: 1.2,
+                  ),
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CampaignDetailsScreen(
+                        campaign: campaign,
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  l10n.details,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
