@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -179,7 +180,7 @@ class _FeedPageState extends State<FeedPage> {
                             selectedMediaType == 'image'
                                 ? Icons.image_outlined
                                 : Icons.videocam_outlined,
-                            color: const Color(0xFF0C0C79),
+                            color: AppColors.primaryBlue,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -219,7 +220,7 @@ class _FeedPageState extends State<FeedPage> {
                       ElevatedButton(
                         onPressed: posting ? null : submitPost,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0C0C79),
+                          backgroundColor: AppColors.primaryBlue,
                           foregroundColor: Colors.white,
                         ),
                         child: posting
@@ -268,7 +269,7 @@ class _FeedPageState extends State<FeedPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.feed),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
@@ -304,7 +305,7 @@ class _FeedPageState extends State<FeedPage> {
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton.small(
           onPressed: _openCreatePostSheet,
-          backgroundColor: const Color(0xFF0C0C79),
+          backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
           child: const Icon(Icons.add),
         ),
@@ -330,7 +331,7 @@ class _FeedPageState extends State<FeedPage> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: const Color(0xFF0C0C79),
+                  backgroundColor: AppColors.primaryBlue,
                   backgroundImage:
                       post.userAvatarUrl != null ? NetworkImage(post.userAvatarUrl!) : null,
                   child: post.userAvatarUrl == null

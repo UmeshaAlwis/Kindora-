@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -86,7 +87,7 @@ class MainLayout extends ConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
-        selectedItemColor: const Color(0xFF0C0C79),
+        selectedItemColor: AppColors.primaryBlue,
         unselectedItemColor: Colors.blueGrey,
         selectedFontSize: 15,
         unselectedFontSize: 14,
@@ -139,17 +140,17 @@ class MainLayout extends ConsumerWidget {
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
-            activeIcon: Icon(Icons.home, color: Color(0xFF0C0C79)),
+            activeIcon: Icon(Icons.home, color: AppColors.primaryBlue),
             label: '',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.rss_feed),
-            activeIcon: Icon(Icons.rss_feed, color: Color(0xFF0C0C79)),
+            activeIcon: Icon(Icons.rss_feed, color: AppColors.primaryBlue),
             label: '',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.near_me_outlined),
-            activeIcon: Icon(Icons.near_me, color: Color(0xFF0C0C79)),
+            activeIcon: Icon(Icons.near_me, color: AppColors.primaryBlue),
             label: '',
           ),
           BottomNavigationBarItem(
@@ -164,13 +165,13 @@ class MainLayout extends ConsumerWidget {
               isBeneficiary
                   ? Icons.account_balance_wallet
                   : (isVolunteer ? Icons.group_add : Icons.volunteer_activism),
-              color: const Color(0xFF0C0C79),
+              color: AppColors.primaryBlue,
             ),
             label: '',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person, color: Color(0xFF0C0C79)),
+            activeIcon: Icon(Icons.person, color: AppColors.primaryBlue),
             label: '',
           ),
         ].asMap().entries.map((entry) {

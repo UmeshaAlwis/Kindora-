@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../ui/chat_window.dart';
 
 /// Floating chat button widget - add this to your app root or scaffold
@@ -141,15 +142,15 @@ class _ChatAssistantButtonState extends ConsumerState<ChatAssistantButton>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                gradient: LinearGradient(
+                  colors: AppColors.accentGradient,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF667eea).withOpacity(0.4),
+                    color: AppColors.primaryBlue.withOpacity(0.35),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -183,7 +184,7 @@ class _ChatAssistantButtonState extends ConsumerState<ChatAssistantButton>
                         width: 20,
                         height: 20,
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: AppColors.primaryOrange,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: Colors.white,

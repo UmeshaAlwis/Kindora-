@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,7 @@ class _BeneficiaryCampaignDetailScreenState
   bool _isLoading = false;
   XFile? _selectedImageFile;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
+  final Color primaryColor = AppColors.primaryBlue;
   final Color accentColor = const Color(0xFFFF751F);
 
   @override
@@ -134,7 +135,7 @@ class _BeneficiaryCampaignDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Campaign updated successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
             duration: Duration(seconds: 2),
           ),
         );
@@ -145,7 +146,7 @@ class _BeneficiaryCampaignDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -182,7 +183,7 @@ class _BeneficiaryCampaignDetailScreenState
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Campaign deleted successfully!'),
-                      backgroundColor: Colors.green,
+                      backgroundColor: AppColors.primaryBlue,
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -197,7 +198,7 @@ class _BeneficiaryCampaignDetailScreenState
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Error: $e'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.error,
                     ),
                   );
                 }
@@ -205,7 +206,7 @@ class _BeneficiaryCampaignDetailScreenState
                 setState(() => _isLoading = false);
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -253,8 +254,10 @@ class _BeneficiaryCampaignDetailScreenState
                         ),
                         const PopupMenuItem(
                           value: 'delete',
-                          child: Text('Delete Campaign',
-                              style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            'Delete Campaign',
+                            style: TextStyle(color: AppColors.error),
+                          ),
                         ),
                       ],
                     ),
@@ -303,8 +306,8 @@ class _BeneficiaryCampaignDetailScreenState
                                       horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: campaign.status == 'active'
-                                        ? Colors.green
-                                        : Colors.orange,
+                                        ? AppColors.primaryBlue
+                                        : AppColors.primaryOrange,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
@@ -334,7 +337,7 @@ class _BeneficiaryCampaignDetailScreenState
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0C0C79),
+                                      color: AppColors.primaryBlue,
                                     ),
                                   ),
                                 const SizedBox(height: 12),

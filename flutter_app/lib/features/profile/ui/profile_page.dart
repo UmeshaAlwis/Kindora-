@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
@@ -21,50 +22,50 @@ class _ProfileBundle {
   });
 }
 
-/// Distinct modern palette per badge (no shared amber/orange for all).
+/// Badge accents use only brand blue + orange (tints / depth variants).
 ({Color accent, Color accent2, Color surface}) _badgePalette(String badgeId) {
   switch (badgeId) {
     case 'first_gift':
       return (
-        accent: const Color(0xFFEC4899),
-        accent2: const Color(0xFFF43F5E),
-        surface: const Color(0xFFFFF1F2),
+        accent: AppColors.primaryOrange,
+        accent2: Color.lerp(AppColors.primaryOrange, Colors.white, 0.35)!,
+        surface: AppColors.orangeSurface,
       );
     case 'starter_supporter':
       return (
-        accent: const Color(0xFF0D9488),
-        accent2: const Color(0xFF2DD4BF),
-        surface: const Color(0xFFECFDF5),
+        accent: AppColors.primaryBlue,
+        accent2: AppColors.blueDeep,
+        surface: AppColors.blueSurface,
       );
     case 'golden_donor':
       return (
-        accent: const Color(0xFFC2410C),
-        accent2: const Color(0xFFF59E0B),
-        surface: const Color(0xFFFFFBEB),
+        accent: Color.lerp(AppColors.primaryOrange, AppColors.primaryBlue, 0.25)!,
+        accent2: AppColors.primaryOrange,
+        surface: AppColors.orangeSurface,
       );
     case 'three_campaign_backer':
       return (
-        accent: const Color(0xFF4F46E5),
-        accent2: const Color(0xFF7C3AED),
-        surface: const Color(0xFFEEF2FF),
+        accent: AppColors.blueDeep,
+        accent2: AppColors.primaryBlue,
+        surface: AppColors.blueSurface,
       );
     case 'monthly_giver':
       return (
-        accent: const Color(0xFF0369A1),
-        accent2: const Color(0xFF22D3EE),
-        surface: const Color(0xFFF0F9FF),
+        accent: AppColors.primaryBlue,
+        accent2: Color.lerp(AppColors.primaryBlue, AppColors.primaryOrange, 0.4)!,
+        surface: AppColors.blueSurface,
       );
     case 'rapid_responder':
       return (
-        accent: const Color(0xFF7C3AED),
-        accent2: const Color(0xFFE879F9),
-        surface: const Color(0xFFFAF5FF),
+        accent: AppColors.primaryOrange,
+        accent2: AppColors.primaryBlue,
+        surface: AppColors.orangeSurface,
       );
     default:
       return (
-        accent: const Color(0xFF0C0C79),
-        accent2: const Color(0xFF6366F1),
-        surface: const Color(0xFFF8FAFC),
+        accent: AppColors.primaryBlue,
+        accent2: AppColors.primaryOrange,
+        surface: AppColors.scaffoldLight,
       );
   }
 }
@@ -140,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profile),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
@@ -195,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 20),
                     CircleAvatar(
                       radius: 60,
-                      backgroundColor: const Color(0xFF0C0C79),
+                      backgroundColor: AppColors.primaryBlue,
                       child: Text(
                         (() {
                           final name = user?.displayName?.trim() ?? '';
@@ -228,14 +229,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
+                        color: AppColors.orangeSurface,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.primaryOrange.withOpacity(0.35),
+                        ),
                       ),
                       child: Text(
                         l10n.verifiedHumanitarian,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF0066CC),
+                          color: AppColors.primaryOrange,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -248,8 +252,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: Icons.favorite,
                             value: 'LKR ${summary.totalDonated.toStringAsFixed(0)}',
                             label: l10n.totalDonated,
-                            iconColor: Colors.green.shade600,
-                            iconBg: Colors.green.shade100,
+                            iconColor: AppColors.primaryOrange,
+                            iconBg: AppColors.orangeSurface,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -258,8 +262,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: Icons.campaign,
                             value: '${summary.campaignsSupported}',
                             label: l10n.campaignsSupported,
-                            iconColor: Colors.blue.shade600,
-                            iconBg: Colors.blue.shade100,
+                            iconColor: AppColors.primaryBlue,
+                            iconBg: AppColors.blueSurface,
                           ),
                         ),
                       ],
@@ -281,9 +285,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           'Could not load history: $historyError',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
-                            color: Colors.orange.shade800,
+                            color: AppColors.primaryOrange,
                           ),
                         ),
                       ),
@@ -361,7 +365,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       icon: const Icon(Icons.logout),
                       label: Text(l10n.logout),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0C0C79),
+                        backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
                       ),

@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/supabase_models.dart';
@@ -55,7 +56,7 @@ class _BeneficiaryCampaignInfoPageState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unable to open chat: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     } finally {
@@ -65,7 +66,7 @@ class _BeneficiaryCampaignInfoPageState
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF0C0C79);
+    const primaryColor = AppColors.primaryBlue;
     const accentColor = Color(0xFFFF751F);
     final campaignAsync =
         ref.watch(beneficiaryCampaignByIdProvider(widget.campaign.id));

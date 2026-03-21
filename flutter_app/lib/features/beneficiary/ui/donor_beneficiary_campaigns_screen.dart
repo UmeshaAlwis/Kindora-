@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/supabase_providers.dart';
@@ -12,7 +13,7 @@ class DonorBeneficiaryCampaignsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final campaignsAsync = ref.watch(allBeneficiaryCampaignsProvider);
-    const primaryColor = Color(0xFF0C0C79);
+    const primaryColor = AppColors.primaryBlue;
     const accentColor = Color(0xFFFF751F);
 
     return Scaffold(
@@ -85,7 +86,7 @@ class DonorBeneficiaryCampaignsScreen extends ConsumerWidget {
               Icon(
                 Icons.error_outline,
                 size: 64,
-                color: Colors.red[400],
+                color: AppColors.error,
               ),
               const SizedBox(height: 16),
               Text(
@@ -292,8 +293,8 @@ class _BeneficiaryCampaignDonorCard extends StatelessWidget {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          side: const BorderSide(color: Color(0xFF0C0C79)),
-                          foregroundColor: const Color(0xFF0C0C79),
+                          side: const BorderSide(color: AppColors.primaryBlue),
+                          foregroundColor: AppColors.primaryBlue,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

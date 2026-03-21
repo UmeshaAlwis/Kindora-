@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kindora/services/wallet_service.dart';
@@ -87,7 +88,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please enter a valid amount'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -157,7 +158,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF0C0C79), Color(0xFF001A4D)],
+                            colors: AppColors.heroGradient,
                           ),
                         ),
                         child: Column(
@@ -333,7 +334,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
                                 Navigator.pop(dialogContext, true);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0C0C79),
+                                backgroundColor: AppColors.primaryBlue,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
@@ -371,7 +372,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
           SnackBar(
             content: Text(
                 'Successfully added LKR ${amount.toStringAsFixed(0)} to wallet!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -390,7 +391,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Top-up failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -403,7 +404,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Top Up Wallet'),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
@@ -418,7 +419,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0C0C79),
+                color: AppColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 20),
@@ -446,7 +447,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            const Color(0xFF0C0C79).withOpacity(0.8),
+                            AppColors.primaryBlue.withOpacity(0.8),
                             const Color(0xFFFF751F).withOpacity(0.8),
                           ],
                         ),
@@ -486,7 +487,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0C0C79),
+                color: AppColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 12),
@@ -506,7 +507,7 @@ class _WalletTopUpPageState extends State<WalletTopUpPage> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: Color(0xFF0C0C79),
+                    color: AppColors.primaryBlue,
                     width: 2,
                   ),
                 ),

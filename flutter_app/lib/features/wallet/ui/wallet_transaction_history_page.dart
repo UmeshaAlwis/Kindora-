@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:kindora/models/wallet_model.dart';
 import 'package:kindora/services/wallet_service.dart';
@@ -26,7 +27,7 @@ class _WalletTransactionHistoryPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transaction History'),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
@@ -47,7 +48,7 @@ class _WalletTransactionHistoryPageState
                   const Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.red,
+                    color: AppColors.error,
                   ),
                   const SizedBox(height: 16),
                   Text('Error: ${snapshot.error}'),
@@ -118,14 +119,14 @@ class _WalletTransactionHistoryPageState
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isCredit
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.red.withOpacity(0.2),
+                                ? AppColors.primaryBlue.withOpacity(0.2)
+                                : AppColors.error.withOpacity(0.2),
                           ),
                           child: Icon(
                             isCredit
                                 ? Icons.arrow_downward
                                 : Icons.arrow_upward,
-                            color: isCredit ? Colors.green : Colors.red,
+                            color: isCredit ? AppColors.primaryBlue : AppColors.error,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -179,7 +180,7 @@ class _WalletTransactionHistoryPageState
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: isCredit ? Colors.green : Colors.red,
+                                color: isCredit ? AppColors.primaryBlue : AppColors.error,
                               ),
                             ),
                           ],

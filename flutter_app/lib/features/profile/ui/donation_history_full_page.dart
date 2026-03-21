@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/donor_donation_history_service.dart';
@@ -38,7 +39,7 @@ class _DonationHistoryFullPageState extends State<DonationHistoryFullPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('All donations'),
-        backgroundColor: const Color(0xFF0C0C79),
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,

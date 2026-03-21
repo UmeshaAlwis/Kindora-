@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -36,7 +37,7 @@ class VolunteerProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
-    const primary = Color(0xFF0C0C79);
+    const primary = AppColors.primaryBlue;
 
     final displayName = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim()
@@ -153,7 +154,7 @@ class VolunteerProfileScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF0C0C79)),
+          Icon(icon, color: AppColors.primaryBlue),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

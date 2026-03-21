@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -64,7 +65,7 @@ class _BankTransferPageState extends State<BankTransferPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error picking image: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -79,7 +80,7 @@ class _BankTransferPageState extends State<BankTransferPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please fill all fields and upload receipt'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -101,7 +102,7 @@ class _BankTransferPageState extends State<BankTransferPage> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          icon: const Icon(Icons.check_circle, color: Colors.green, size: 64),
+          icon: const Icon(Icons.check_circle, color: AppColors.primaryBlue, size: 64),
           title: const Text('Receipt Submitted'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -542,7 +543,7 @@ class _BankTransferPageState extends State<BankTransferPage> {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(Icons.check_circle, size: 16, color: Colors.green[700]),
+          const Icon(Icons.check_circle, size: 16, color: AppColors.primaryBlue),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

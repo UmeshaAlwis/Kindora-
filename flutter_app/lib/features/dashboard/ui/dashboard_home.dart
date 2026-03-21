@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindora/features/campaign/ui/start_campaign_page.dart';
@@ -110,7 +111,7 @@ class _DashboardHomeState extends State<DashboardHome> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color(0xFF0C0C79),
+                color: AppColors.primaryBlue,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(30),
                 ),
@@ -296,7 +297,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                       icon: const Icon(Icons.favorite_border),
                       label: Text(l10n.supportCampaign),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0C0C79),
+                        backgroundColor: AppColors.primaryBlue,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         foregroundColor: Colors.white,
                       ),

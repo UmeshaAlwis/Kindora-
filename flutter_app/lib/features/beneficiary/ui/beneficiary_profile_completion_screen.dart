@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +28,7 @@ class _BeneficiaryProfileCompletionScreenState
   late TextEditingController _bankNameController;
   late TextEditingController _bankCodeController;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
+  final Color primaryColor = AppColors.primaryBlue;
   final Color accentColor = const Color(0xFFFF751F);
 
   @override
@@ -99,7 +100,7 @@ class _BeneficiaryProfileCompletionScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile completed successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
             duration: Duration(seconds: 2),
           ),
         );
@@ -118,7 +119,7 @@ class _BeneficiaryProfileCompletionScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -490,7 +491,7 @@ class _BeneficiaryProfileCompletionScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,7 +175,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Campaign created successfully"),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
           ),
         );
 
@@ -259,7 +260,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0C0C79),
+                  color: AppColors.primaryBlue,
                 ),
               ),
 
@@ -311,13 +312,13 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                       return Theme(
                         data: Theme.of(context).copyWith(
                           colorScheme: const ColorScheme.light(
-                            primary: Color(0xFF0C0C79),
+                            primary: AppColors.primaryBlue,
                             onPrimary: Colors.white,
                             onSurface: Colors.black,
                           ),
                           textButtonTheme: TextButtonThemeData(
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF0C0C79),
+                              foregroundColor: AppColors.primaryBlue,
                             ),
                           ),
                         ),

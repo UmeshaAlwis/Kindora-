@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,7 +30,7 @@ class _BeneficiaryProfileScreenState
   late TextEditingController _bankNameController;
   late TextEditingController _bankCodeController;
 
-  final Color primaryColor = const Color(0xFF0C0C79);
+  final Color primaryColor = AppColors.primaryBlue;
   final Color accentColor = const Color(0xFFFF751F);
 
   @override
@@ -126,7 +127,7 @@ class _BeneficiaryProfileScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile updated successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.primaryBlue,
           ),
         );
         setState(() => _isEditing = false);
@@ -136,7 +137,7 @@ class _BeneficiaryProfileScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error updating profile: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -166,7 +167,7 @@ class _BeneficiaryProfileScreenState
                 context.go('/login');
               }
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            child: const Text('Logout', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -220,7 +221,7 @@ class _BeneficiaryProfileScreenState
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.error_outline, color: Colors.red[400], size: 48),
+                            const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                             const SizedBox(height: 12),
                             const Text(
                               'Failed to load profile data.',
@@ -559,7 +560,7 @@ class _BeneficiaryDetailsContent extends ConsumerWidget {
         child: Center(
           child: Text(
             'Error loading profile: $error',
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.error),
           ),
         ),
       ),

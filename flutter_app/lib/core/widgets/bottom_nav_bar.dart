@@ -1,3 +1,4 @@
+import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AppBottomNavBar extends StatelessWidget {
@@ -20,7 +21,7 @@ class AppBottomNavBar extends StatelessWidget {
       child: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF0C0C79),
+        selectedItemColor: AppColors.primaryBlue,
         unselectedItemColor: Colors.grey,
         elevation: 0,
         enableFeedback: false,

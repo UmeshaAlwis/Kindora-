@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kindora/config/themes/app_colors.dart';
 import '../models/chat_model.dart';
 import '../providers/chat_provider.dart';
 
@@ -77,13 +78,13 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         children: [
           // Header
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: AppColors.accentGradient,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
@@ -189,7 +190,7 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: const BorderSide(
-                          color: Color(0xFF667eea),
+                          color: AppColors.primaryBlue,
                         ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -203,11 +204,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      colors: AppColors.accentGradient,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(24)),
+                    borderRadius: const BorderRadius.all(Radius.circular(24)),
                   ),
                   child: FloatingActionButton(
                     onPressed: isLoading ? null : _sendMessage,
@@ -239,9 +240,12 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: message.isUser
-                    ? const Color(0xFF667eea)
-                    : Colors.grey.shade100,
+                    ? AppColors.primaryBlue
+                    : AppColors.scaffoldLight,
                 borderRadius: BorderRadius.circular(12),
+                border: message.isUser
+                    ? null
+                    : Border.all(color: AppColors.border),
               ),
               child: Text(
                 message.content,
@@ -257,11 +261,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
             const SizedBox(width: 8),
             CircleAvatar(
               radius: 16,
-              backgroundColor: const Color(0xFF4CAF50).withOpacity(0.2),
+              backgroundColor: AppColors.primaryOrange.withOpacity(0.2),
               child: const Icon(
                 Icons.person,
                 size: 18,
-                color: Color(0xFF4CAF50),
+                color: AppColors.primaryOrange,
               ),
             ),
           ],
