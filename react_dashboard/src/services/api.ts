@@ -126,6 +126,62 @@ class ApiClient {
       notes,
     });
   }
+
+  // Merchandise/Products Endpoints
+  getProducts(page: number = 1, limit: number = 20) {
+    return this.client.get('/merchandise', { params: { page, limit } });
+  }
+
+  getProductById(productId: string) {
+    return this.client.get(`/merchandise/${productId}`);
+  }
+
+  createProduct(data: any) {
+    return this.client.post('/merchandise', data);
+  }
+
+  updateProduct(productId: string, data: any) {
+    return this.client.put(`/merchandise/${productId}`, data);
+  }
+
+  deleteProduct(productId: string) {
+    return this.client.delete(`/merchandise/${productId}`);
+  }
+
+  searchProducts(query: string, category?: string, page: number = 1, limit: number = 20) {
+    return this.client.get('/merchandise/search', {
+      params: { query, category, page, limit },
+    });
+  }
+
+  getProductsByCategory(category: string, page: number = 1, limit: number = 20) {
+    return this.client.get(`/merchandise/category/${category}`, {
+      params: { page, limit },
+    });
+  }
+
+  updateProductStock(updates: Array<{ productId: string; quantityChange: number }>) {
+    return this.client.post('/merchandise/stock/update', { updates });
+  }
+
+  // Storage/Upload Endpoints
+  uploadImage(file: File, folder: string = 'products') {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', folder);
+
+    return this.client.post('/storage/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
+  deleteImage(fileName: string, bucket?: string) {
+    return this.client.delete('/storage/delete', {
+      data: { fileName, bucket },
+    });
+  }
 }
 
 export default new ApiClient();
