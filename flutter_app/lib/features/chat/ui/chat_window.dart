@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kindora/config/themes/app_colors.dart';
+import 'package:kindora/core/navigation/kindora_app_role.dart';
+import 'package:kindora/core/navigation/navigation_agent.dart';
+import 'package:kindora/providers/app_role_provider.dart';
 import '../models/chat_model.dart';
 import '../providers/chat_provider.dart';
 
@@ -48,12 +52,42 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
     });
   }
 
-  void _sendMessage() {
-    final message = _messageController.text.trim();
-    if (message.isEmpty) return;
+  Future<void> _sendMessage() async {
+    final userText = _messageController.text.trim();
+    if (userText.isEmpty) return;
 
     _messageController.clear();
-    ref.read(chatProvider.notifier).sendMessage(message);
+
+    // Role-aware navigation agent (whitelist only — never routes across roles).
+    final role = ref.read(currentAppRoleProvider).maybeWhen(
+          data: (r) => r,
+          orElse: () => KindoraAppRole.donor,
+        );
+    final nav = NavigationAgent.resolve(userText, role);
+
+    switch (nav) {
+      case NavigationNavigate(:final path, :final assistantMessage):
+        ref
+            .read(chatProvider.notifier)
+            .appendUserAndAssistant(userText, assistantMessage);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          context.go(path);
+          widget.onClose?.call();
+        });
+        _scrollToBottom();
+        return;
+      case NavigationClarify(:final message):
+        ref
+            .read(chatProvider.notifier)
+            .appendUserAndAssistant(userText, message);
+        _scrollToBottom();
+        return;
+      case NavigationForwardToChat():
+        break;
+    }
+
+    await ref.read(chatProvider.notifier).sendMessage(userText);
     _scrollToBottom();
   }
 
@@ -61,6 +95,10 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
     final isLoading = ref.watch(chatProvider.notifier).isLoading;
+    final role = ref.watch(currentAppRoleProvider).maybeWhen(
+          data: (r) => r,
+          orElse: () => KindoraAppRole.donor,
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -93,21 +131,21 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Chat',
+                    const Text(
+                      'Kindora assistant',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Online',
-                      style: TextStyle(
+                      '${role.displayLabel} • Navigate or ask',
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                       ),
@@ -126,13 +164,13 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
           // Messages List
           Expanded(
             child: messages.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          const Text(
                             'How can we help?',
                             style: TextStyle(
                               fontSize: 16,
@@ -140,14 +178,35 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                               color: Colors.grey,
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            'Ask any questions about Kindora',
-                            style: TextStyle(
+                            'Try “Open wallet” or “Go to feed” — destinations match your '
+                            '${role.displayLabel} account.',
+                            style: const TextStyle(
                               fontSize: 13,
                               color: Colors.grey,
                             ),
                             textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: NavigationAgent.quickPhrases(role)
+                                .map(
+                                  (q) => ActionChip(
+                                    label: Text(q.label),
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            _messageController.text =
+                                                q.examplePhrase;
+                                            _sendMessage();
+                                          },
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ],
                       ),

@@ -71,6 +71,23 @@ class ChatNotifier extends StateNotifier<List<ChatMessage>> {
     }
   }
 
+  /// Append a local user + assistant turn (e.g. navigation agent — no backend).
+  void appendUserAndAssistant(String userText, String assistantText) {
+    final userMsg = ChatMessage(
+      id: '${DateTime.now().millisecondsSinceEpoch}-u',
+      content: userText,
+      isUser: true,
+      timestamp: DateTime.now(),
+    );
+    final botMsg = ChatMessage(
+      id: '${DateTime.now().millisecondsSinceEpoch}-a',
+      content: assistantText,
+      isUser: false,
+      timestamp: DateTime.now(),
+    );
+    state = [...state, userMsg, botMsg];
+  }
+
   /// Clear chat history
   void clearHistory() {
     state = [];
