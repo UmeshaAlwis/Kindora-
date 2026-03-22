@@ -20,6 +20,24 @@ const createBeneficiaryDonationSchema = Joi.object({
   donor_phone: Joi.string().max(20),
 });
 
+/** Supabase `insert` may return one row or an array depending on response shape */
+function donationIdFromCreateResult(result: unknown): string | undefined {
+  if (result == null) return undefined;
+  if (Array.isArray(result)) {
+    const first = result[0];
+    if (first && typeof first === 'object' && first !== null && 'id' in first) {
+      const id = (first as { id: unknown }).id;
+      return typeof id === 'string' ? id : undefined;
+    }
+    return undefined;
+  }
+  if (typeof result === 'object' && 'id' in result) {
+    const id = (result as { id: unknown }).id;
+    return typeof id === 'string' ? id : undefined;
+  }
+  return undefined;
+}
+
 export class BeneficiaryDonationController {
   /**
    * Create beneficiary donation
@@ -174,7 +192,7 @@ export class BeneficiaryDonationController {
         is_anonymous: value.is_anonymous ?? false,
       });
 
-      const donationId = donation?.id ?? donation?.[0]?.id;
+      const donationId = donationIdFromCreateResult(donation);
       if (!donationId) throw new ValidationError('Failed to create card payment intent');
 
       res.status(200).json({

@@ -216,6 +216,40 @@ export class CampaignService {
   }
 
   /**
+   * Recommended campaigns (GET /campaigns/user/recommended):
+   * active campaigns ordered by raised_amount (simple popularity heuristic).
+   * When userId is set, excludes campaigns created by that user.
+   */
+  static async getRecommendedCampaigns(
+    userId: string | undefined,
+    limit: number = 10
+  ) {
+    try {
+      const safeLimit = Math.min(100, Math.max(1, limit));
+      const fetchLimit = Math.min(100, safeLimit * 4);
+
+      const campaigns = await supabase.select<any>('campaigns', {
+        select:
+          'id,title,description,campaigner_name,category,campaign_category,target_amount,raised_amount,image_url,created_at,end_date,user_id,status',
+        filters: { status: 'active' },
+        limit: fetchLimit,
+        orderBy: { column: 'raised_amount', ascending: false },
+      });
+
+      const list = campaigns || [];
+      const filtered = userId
+        ? list.filter((c: any) => c.user_id !== userId)
+        : list;
+
+      return filtered.slice(0, safeLimit);
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch recommended campaigns: ${error instanceof Error ? error.message : error}`
+      );
+    }
+  }
+
+  /**
    * Calculate days left until campaign end date
    */
   private static calculateDaysLeft(endDate: string | Date): number {
