@@ -229,7 +229,7 @@ class _MerchPageState extends State<MerchPage> {
                             'assets/images/merch_banner.png',
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: AppColors.heroGradient,
                                   begin: Alignment.centerLeft,
@@ -272,10 +272,10 @@ class _MerchPageState extends State<MerchPage> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Bestsellers',
                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                       ),

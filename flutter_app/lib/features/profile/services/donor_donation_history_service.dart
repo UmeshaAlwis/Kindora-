@@ -51,8 +51,8 @@ class DonationHistoryEntry {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
-      campaignId: camp == null ? null : camp.toString(),
-      beneficiaryCampaignId: bc == null ? null : bc.toString(),
+      campaignId: camp?.toString(),
+      beneficiaryCampaignId: bc?.toString(),
     );
   }
 

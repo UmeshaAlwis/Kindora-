@@ -532,9 +532,9 @@ class _PaymentPageState extends State<PaymentPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 brand,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white70,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,

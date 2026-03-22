@@ -78,13 +78,13 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
         children: [
           // Header
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: AppColors.accentGradient,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
@@ -204,11 +204,11 @@ class _ChatWindowState extends ConsumerState<ChatWindow> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: AppColors.accentGradient,
                     ),
-                    borderRadius: const BorderRadius.all(Radius.circular(24)),
+                    borderRadius: BorderRadius.all(Radius.circular(24)),
                   ),
                   child: FloatingActionButton(
                     onPressed: isLoading ? null : _sendMessage,
