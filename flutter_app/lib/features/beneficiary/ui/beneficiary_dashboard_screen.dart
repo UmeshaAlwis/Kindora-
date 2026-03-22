@@ -231,12 +231,12 @@ class _GetSupabaseUserIdWrapper extends StatelessWidget {
         }
 
         if (snapshot.hasError || snapshot.data == null) {
-          return Center(
+          return const Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
+              padding: EdgeInsets.symmetric(vertical: 40),
               child: Text(
                 'Error loading user data',
-                style: const TextStyle(color: AppColors.error),
+                style: TextStyle(color: AppColors.error),
               ),
             ),
           );

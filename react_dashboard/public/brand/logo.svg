@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="Kindora">
+  <defs>
+    <linearGradient id="kText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0c0c79"/>
+      <stop offset="72%" style="stop-color:#0c0c79"/>
+      <stop offset="100%" style="stop-color:#ff751f"/>
+    </linearGradient>
+    <linearGradient id="kHeartL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff751f"/>
+      <stop offset="55%" style="stop-color:#ff9a5c"/>
+      <stop offset="100%" style="stop-color:#0c0c79"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#0c0c79" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <!-- Heart mark: orange left, blue outline right -->
+  <g filter="url(#soft)" transform="translate(2, 6)">
+    <path
+      fill="url(#kHeartL)"
+      d="M18 6.5c-2.2-2.5-5.8-2.5-8 0l-.8.9-.8-.9c-2.2-2.5-5.8-2.5-8 0-2.3 2.6-2.3 6.8 0 9.4L18 28l9.4-12.1c2.3-2.6 2.3-6.8 0-9.4-2.2-2.5-5.8-2.5-8 0z"
+    />
+    <path
+      fill="none"
+      stroke="#0c0c79"
+      stroke-width="1.35"
+      stroke-linejoin="round"
+      d="M18 6.5c-2.2-2.5-5.8-2.5-8 0l-.8.9-.8-.9c-2.2-2.5-5.8-2.5-8 0-2.3 2.6-2.3 6.8 0 9.4L18 28l9.4-12.1c2.3-2.6 2.3-6.8 0-9.4-2.2-2.5-5.8-2.5-8 0z"
+    />
+    <!-- Small leaf accent -->
+    <path fill="#ff751f" d="M6 8c2-3 5-4 7-3.5-1.5 1.2-2.8 3.8-3.2 6.2-2-.8-3.3-1.8-3.8-2.7z" opacity="0.95"/>
+  </g>
+  <text
+    x="44"
+    y="33"
+    font-family="Plus Jakarta Sans, system-ui, Segoe UI, sans-serif"
+    font-size="26"
+    font-weight="800"
+    letter-spacing="-0.04em"
+    fill="url(#kText)"
+  >Kindora</text>
+</svg>

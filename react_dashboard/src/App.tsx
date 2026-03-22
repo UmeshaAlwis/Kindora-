@@ -1,7 +1,21 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  Package,
+  Users,
+  Megaphone,
+  HeartHandshake,
+  Rss,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Mail,
+  Lock,
+  ShieldCheck,
+} from 'lucide-react';
 import api from './services/api';
 import { useAuthStore } from './store/auth.store';
+import { BrandLogo } from './components/BrandLogo';
 
 type Product = {
   id: string;
@@ -307,90 +321,154 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="page centered">
-        <form className="card login-card" onSubmit={onLogin}>
-          <h1>Kindora Admin</h1>
-          <p className="sub">Use test admin credentials to continue.</p>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button className="btn primary" disabled={loadingLogin}>
-            {loadingLogin ? 'Signing in...' : 'Sign in'}
-          </button>
-          <p className="hint">admin@gmail.com / admin123</p>
-        </form>
+      <div className="page centered login-page">
+        <div className="login-backdrop" aria-hidden />
+        <div className="login-shell">
+          <form className="card login-card" onSubmit={onLogin}>
+            <header className="login-card__header">
+              <div className="login-logo-ring">
+                <BrandLogo variant="hero" className="login-logo-img" />
+              </div>
+              <div className="login-card__titles">
+                <span className="login-card__eyebrow">Kindora</span>
+                <h1 className="login-card__title">Admin</h1>
+                <p className="login-sub">
+                  Sign in to manage merchandise, campaigns, and the community feed.
+                </p>
+              </div>
+            </header>
+
+            <div className="login-fields">
+              <div className="login-field">
+                <label htmlFor="login-email">Email</label>
+                <div className="login-input-wrap">
+                  <Mail className="login-input-icon" size={18} strokeWidth={2} aria-hidden />
+                  <input
+                    id="login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@organization.com"
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="login-field">
+                <label htmlFor="login-password">Password</label>
+                <div className="login-input-wrap">
+                  <Lock className="login-input-icon" size={18} strokeWidth={2} aria-hidden />
+                  <input
+                    id="login-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              className="btn primary login-submit"
+              disabled={loadingLogin}
+              type="submit"
+            >
+              <ShieldCheck size={18} strokeWidth={2} aria-hidden />
+              {loadingLogin ? 'Signing in…' : 'Sign in securely'}
+            </button>
+            <p className="hint login-hint">
+              <span className="login-hint__accent">Tip:</span> Use the admin email and password
+              configured on your backend.
+            </p>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <div>
-          <h2>Product Management</h2>
-          <p className="sub">Manage merchandise for mobile app merch page.</p>
-        </div>
-        <div className="top-actions">
-          <span className="welcome">{user?.email}</span>
-          <button className="btn ghost" onClick={logout}>
-            Logout
-          </button>
-          <button className="btn primary" onClick={() => setShowModal(true)}>
-            + Add Product
-          </button>
+    <div className="page app-dashboard">
+      <header className="unified-nav" role="banner" aria-label="Kindora Admin">
+        <div className="unified-nav__inner">
+          <div className="unified-nav__brand">
+            <BrandLogo variant="compact" className="topbar-logo" />
+          </div>
+
+          <span className="unified-nav__divider" aria-hidden="true" />
+
+          <nav className="unified-nav__tabs" aria-label="Admin sections">
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+              onClick={() => setActiveTab('products')}
+            >
+              <Package size={18} strokeWidth={2} />
+              Merch
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <Users size={18} strokeWidth={2} />
+              Users
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'campaigns' ? 'active' : ''}`}
+              onClick={() => setActiveTab('campaigns')}
+            >
+              <Megaphone size={18} strokeWidth={2} />
+              Campaigns
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'beneficiary' ? 'active' : ''}`}
+              onClick={() => setActiveTab('beneficiary')}
+            >
+              <HeartHandshake size={18} strokeWidth={2} />
+              Beneficiary
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
+              onClick={() => setActiveTab('feed')}
+            >
+              <Rss size={18} strokeWidth={2} />
+              Feed
+            </button>
+          </nav>
+
+          <span className="unified-nav__divider" aria-hidden="true" />
+
+          <div className="unified-nav__actions">
+            <span className="welcome">{user?.email}</span>
+            <button type="button" className="btn btn-nav-logout" onClick={logout}>
+              <LogOut size={16} aria-hidden />
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="top-actions" style={{ marginBottom: 12 }}>
-        <button
-          className={`btn ${activeTab === 'products' ? 'primary' : 'ghost'}`}
-          onClick={() => setActiveTab('products')}
-        >
-          Merch
-        </button>
-        <button
-          className={`btn ${activeTab === 'users' ? 'primary' : 'ghost'}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Users
-        </button>
-        <button
-          className={`btn ${activeTab === 'campaigns' ? 'primary' : 'ghost'}`}
-          onClick={() => setActiveTab('campaigns')}
-        >
-          Campaigns
-        </button>
-        <button
-          className={`btn ${activeTab === 'beneficiary' ? 'primary' : 'ghost'}`}
-          onClick={() => setActiveTab('beneficiary')}
-        >
-          Beneficiary Campaigns
-        </button>
-        <button
-          className={`btn ${activeTab === 'feed' ? 'primary' : 'ghost'}`}
-          onClick={() => setActiveTab('feed')}
-        >
-          Feed
-        </button>
-      </div>
-
       <main className="card">
-        {activeTab === 'products' && (loadingProducts ? (
-          <p>Loading products...</p>
-        ) : products.length === 0 ? (
-          <p>No products found.</p>
-        ) : (
+        {activeTab === 'products' && (
+          <>
+            <div className="inline-toolbar merch-toolbar">
+              <button type="button" className="btn primary" onClick={() => setShowModal(true)}>
+                <Plus size={18} aria-hidden />
+                Add product
+              </button>
+            </div>
+            {loadingProducts ? (
+              <p>Loading products...</p>
+            ) : products.length === 0 ? (
+              <p>No products found.</p>
+            ) : (
+          <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
@@ -415,14 +493,19 @@ export default function App() {
                   </td>
                   <td>{p.name}</td>
                   <td>{p.category}</td>
-                  <td>${Number(p.price).toFixed(2)}</td>
+                  <td>LKR {Number(p.price).toFixed(2)}</td>
                   <td>{p.stock_quantity}</td>
-                  <td>{p.is_active ? 'Active' : 'Inactive'}</td>
                   <td>
-                    <button className="btn ghost" onClick={() => toggleMerchStatus(p)}>
+                    <span className={`badge ${p.is_active ? 'ok' : 'off'}`}>
+                      {p.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    <button type="button" className="btn ghost" onClick={() => toggleMerchStatus(p)}>
                       {p.is_active ? 'Deactivate' : 'Activate'}
                     </button>
                     <button
+                      type="button"
                       className="btn ghost"
                       style={{ marginLeft: 8 }}
                       onClick={() => removeMerch(p)}
@@ -434,9 +517,13 @@ export default function App() {
               ))}
             </tbody>
           </table>
-        ))}
+          </div>
+            )}
+          </>
+        )}
 
         {activeTab === 'users' && (
+          <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
@@ -453,9 +540,13 @@ export default function App() {
                   <td>{u.full_name || '-'}</td>
                   <td>{u.email}</td>
                   <td>{u.role}</td>
-                  <td>{u.is_active ? 'Active' : 'Inactive'}</td>
                   <td>
-                    <button className="btn ghost" onClick={() => toggleUserStatus(u)}>
+                    <span className={`badge ${u.is_active ? 'ok' : 'off'}`}>
+                      {u.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    <button type="button" className="btn ghost" onClick={() => toggleUserStatus(u)}>
                       {u.is_active ? 'Disable' : 'Enable'}
                     </button>
                   </td>
@@ -463,9 +554,11 @@ export default function App() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
 
         {activeTab === 'campaigns' && (
+          <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
@@ -479,10 +572,12 @@ export default function App() {
               {campaigns.map((c) => (
                 <tr key={c.id}>
                   <td>{c.title}</td>
-                  <td>{c.status}</td>
                   <td>
-                    {Number(c.raised_amount || 0).toFixed(2)} /{' '}
-                    {Number(c.target_amount || 0).toFixed(2)}
+                    <span className="badge warn">{c.status}</span>
+                  </td>
+                  <td>
+                    LKR {Number(c.raised_amount || 0).toFixed(2)} /{' '}
+                    LKR {Number(c.target_amount || 0).toFixed(2)}
                   </td>
                   <td>
                     <select
@@ -497,6 +592,7 @@ export default function App() {
                       <option value="cancelled">cancelled</option>
                     </select>
                     <button
+                      type="button"
                       className="btn ghost"
                       style={{ marginLeft: 8 }}
                       onClick={() => removeCampaign(c)}
@@ -508,9 +604,11 @@ export default function App() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
 
         {activeTab === 'beneficiary' && (
+          <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
@@ -524,10 +622,12 @@ export default function App() {
               {beneficiaryCampaigns.map((c) => (
                 <tr key={c.id}>
                   <td>{c.title}</td>
-                  <td>{c.status}</td>
                   <td>
-                    {Number(c.raised_amount || 0).toFixed(2)} /{' '}
-                    {Number(c.target_amount || 0).toFixed(2)}
+                    <span className="badge warn">{c.status}</span>
+                  </td>
+                  <td>
+                    LKR {Number(c.raised_amount || 0).toFixed(2)} /{' '}
+                    LKR {Number(c.target_amount || 0).toFixed(2)}
                   </td>
                   <td>
                     <select
@@ -542,6 +642,7 @@ export default function App() {
                       <option value="cancelled">cancelled</option>
                     </select>
                     <button
+                      type="button"
                       className="btn ghost"
                       style={{ marginLeft: 8 }}
                       onClick={() => removeBeneficiaryCampaign(c)}
@@ -553,15 +654,18 @@ export default function App() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
 
         {activeTab === 'feed' && (
           <>
-            <div className="top-actions" style={{ marginBottom: 8 }}>
-              <button className="btn ghost" onClick={loadFeedPosts}>
-                Refresh Feed
+            <div className="inline-toolbar">
+              <button type="button" className="btn ghost" onClick={loadFeedPosts}>
+                <RefreshCw size={16} aria-hidden />
+                Refresh feed
               </button>
             </div>
+            <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
@@ -589,13 +693,7 @@ export default function App() {
                             <img
                               src={p.media_url}
                               alt="Post media"
-                              style={{
-                                width: 56,
-                                height: 56,
-                                objectFit: 'cover',
-                                borderRadius: 8,
-                                border: '1px solid #e5e7eb',
-                              }}
+                              className="media-thumb"
                             />
                           </a>
                         ) : (
@@ -610,7 +708,7 @@ export default function App() {
                     <td>{p.likes_count ?? 0}</td>
                     <td>{p.comments_count ?? 0}</td>
                     <td>
-                      <button className="btn ghost" onClick={() => deleteFeedPost(p.id)}>
+                      <button type="button" className="btn ghost" onClick={() => deleteFeedPost(p.id)}>
                         Remove
                       </button>
                     </td>
@@ -618,12 +716,18 @@ export default function App() {
                 ))}
               </tbody>
             </table>
+            </div>
           </>
         )}
       </main>
 
       {showModal && (
-        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowModal(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setShowModal(false)}
+          role="presentation"
+        >
           <form
             className="modal"
             onSubmit={onCreateProduct}

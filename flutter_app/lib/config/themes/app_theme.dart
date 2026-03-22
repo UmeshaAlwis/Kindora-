@@ -7,7 +7,7 @@ export 'app_colors.dart';
 class AppTheme {
   /// Light Theme
   static ThemeData get lightTheme {
-    final scheme = ColorScheme.light(
+    const scheme = ColorScheme.light(
       primary: AppColors.primaryBlue,
       onPrimary: Colors.white,
       secondary: AppColors.primaryOrange,
@@ -26,14 +26,14 @@ class AppTheme {
       primaryColor: AppColors.primaryBlue,
       scaffoldBackgroundColor: AppColors.scaffoldLight,
       colorScheme: scheme,
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
         backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -127,7 +127,7 @@ class AppTheme {
   /// Dark Theme
   static ThemeData get darkTheme {
     const surface = Color(0xFF1A1B26);
-    final scheme = ColorScheme.dark(
+    const scheme = ColorScheme.dark(
       primary: AppColors.primaryOrange,
       onPrimary: Colors.black,
       secondary: AppColors.primaryBlue,

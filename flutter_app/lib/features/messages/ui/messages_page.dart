@@ -158,7 +158,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
+                  const Text(
                     'Recently active',
                     style: TextStyle(
                       fontSize: 13,
@@ -241,7 +241,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               const SizedBox(height: 6),
                               Text(
                                 _formatRecent(c.lastMessageAt),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.textSecondary,
                                 ),
@@ -254,8 +254,8 @@ class _MessagesPageState extends State<MessagesPage> {
                   ),
                   const SizedBox(height: 12),
                   if (filtered.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(24),
+                    const Padding(
+                      padding: EdgeInsets.all(24),
                       child: Text(
                         'No conversations for selected filter.',
                         textAlign: TextAlign.center,
@@ -310,7 +310,7 @@ class _MessagesPageState extends State<MessagesPage> {
                             ),
                             Text(
                               _formatTime(c.lastMessageAt),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
@@ -326,7 +326,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                   c.lastMessage,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: AppColors.textSecondary,
                                   ),
                                 ),

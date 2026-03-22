@@ -142,7 +142,7 @@ class _ChatAssistantButtonState extends ConsumerState<ChatAssistantButton>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   colors: AppColors.accentGradient,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
