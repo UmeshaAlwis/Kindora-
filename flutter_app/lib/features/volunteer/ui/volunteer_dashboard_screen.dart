@@ -1,6 +1,7 @@
 import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:kindora/features/messages/ui/direct_chat_page.dart';
+import 'package:kindora/features/notifications/widgets/notification_bell_button.dart';
 import 'package:kindora/services/volunteer_campaign_service.dart';
 import 'package:kindora/l10n/app_localizations.dart';
 
@@ -47,6 +48,17 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
     final joinedCount = _campaigns.where((c) => c.isJoined).length;
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
+      appBar: AppBar(
+        title: Text(l10n.home),
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        actions: const [
+          NotificationBellButton(),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -101,18 +113,13 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  l10n.home,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
                                 const Text(
                                   'Find campaigns that need your help and join as a volunteer.',
-                                  style: TextStyle(color: Colors.white70),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 const SizedBox(height: 14),
                                 Row(

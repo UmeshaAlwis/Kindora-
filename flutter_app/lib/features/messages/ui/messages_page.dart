@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kindora/config/themes/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import 'direct_chat_page.dart';
@@ -37,10 +38,19 @@ class _MessagesPageState extends State<MessagesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.messages),
-        backgroundColor: AppColors.scaffoldLight,
-        foregroundColor: AppColors.primaryBlue,
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(

@@ -213,17 +213,6 @@ class _DashboardHomeState extends State<DashboardHome> {
                         },
                       ),
                       _HeaderAction(
-                        icon: Icons.swap_horiz,
-                        label: l10n.transfer,
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Transfer feature coming soon'),
-                            ),
-                          );
-                        },
-                      ),
-                      _HeaderAction(
                         icon: Icons.favorite_border,
                         label: l10n.donate,
                         onTap: () {

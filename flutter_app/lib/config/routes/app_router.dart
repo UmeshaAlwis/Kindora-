@@ -6,6 +6,10 @@ import '../../features/home/ui/home_screen.dart';
 import '../../features/dashboard/ui/dashboard_screen.dart';
 import '../../features/profile/ui/profile_page.dart';
 import '../../features/profile/ui/settings_page.dart';
+import '../../features/profile/ui/change_password_screen.dart';
+import '../../features/profile/ui/legal_document_screen.dart';
+import '../../features/profile/legal/kindora_legal_content.dart';
+import '../../l10n/app_localizations.dart';
 import '../../features/campaign/ui/campaign_home_page.dart';
 import '../../features/feed/ui/feed_page.dart';
 import '../../features/messages/ui/messages_page.dart';
@@ -124,6 +128,33 @@ class AppRouter {
             path: '/profile/settings',
             name: 'profile-settings',
             builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: '/profile/change-password',
+            name: 'profile-change-password',
+            builder: (context, state) => const ChangePasswordScreen(),
+          ),
+          GoRoute(
+            path: '/profile/legal/privacy',
+            name: 'profile-legal-privacy',
+            builder: (context, state) {
+              final l10n = AppLocalizations.of(context)!;
+              return LegalDocumentScreen(
+                title: l10n.privacyPolicy,
+                body: KindoraLegalContent.privacyPolicy,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/profile/legal/terms',
+            name: 'profile-legal-terms',
+            builder: (context, state) {
+              final l10n = AppLocalizations.of(context)!;
+              return LegalDocumentScreen(
+                title: l10n.termsConditions,
+                body: KindoraLegalContent.termsAndConditions,
+              );
+            },
           ),
 
           // Beneficiary dashboard routes

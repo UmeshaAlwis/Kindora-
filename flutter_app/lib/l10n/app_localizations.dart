@@ -163,6 +163,17 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get changePassword;
 
+  String get currentPasswordLabel;
+  String get newPasswordLabel;
+  String get confirmNewPasswordLabel;
+  String get updatePasswordButton;
+  String get passwordChangedSuccess;
+  String get passwordSignInNotLinked;
+  String get wrongCurrentPasswordError;
+  String get newPasswordsDoNotMatch;
+  String get newPasswordTooShort;
+  String get enterCurrentPassword;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:
