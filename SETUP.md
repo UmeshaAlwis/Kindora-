@@ -21,7 +21,7 @@ Before starting, ensure you have the following installed:
    - **Region**: Choose the closest to your users
 4. Wait for project initialisation (~2 minutes)
 
-### 🟢 2. Get Supabase Credentials
+### 🟢 2. Get Supabase Credentials 
 
 From your Supabase project dashboard:
 - **Project URL**: `https://xxxxx.supabase.co`
