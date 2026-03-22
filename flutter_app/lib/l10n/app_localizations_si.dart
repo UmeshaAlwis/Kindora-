@@ -42,6 +42,38 @@ class AppLocalizationsSi extends AppLocalizations {
   String get changePassword => 'මුරපදය වෙනස් කරන්න';
 
   @override
+  String get currentPasswordLabel => 'වත්මන් මුරපදය';
+
+  @override
+  String get newPasswordLabel => 'නව මුරපදය';
+
+  @override
+  String get confirmNewPasswordLabel => 'නව මුරපදය තහවුරු කරන්න';
+
+  @override
+  String get updatePasswordButton => 'මුරපදය යාවත්කාලීන කරන්න';
+
+  @override
+  String get passwordChangedSuccess => 'මුරපදය සාර්ථකව යාවත්කාලීන කරන ලදී.';
+
+  @override
+  String get passwordSignInNotLinked =>
+      'මෙම ගිණුම Google මගින් පිවිසෙයි. මුරපදය Google ගිණුමේ සැකසුම් වෙතින් කළ යුතුය.';
+
+  @override
+  String get wrongCurrentPasswordError => 'වත්මන් මුරපදය වැරදිය.';
+
+  @override
+  String get newPasswordsDoNotMatch => 'නව මුරපද නොගැලපේ.';
+
+  @override
+  String get newPasswordTooShort =>
+      'නව මුරපදය අවම වශයෙන් අක්ෂර 8 ක් විය යුතුය.';
+
+  @override
+  String get enterCurrentPassword => 'වත්මන් මුරපදය ඇතුළත් කරන්න.';
+
+  @override
   String get deleteAccount => 'ගිණුම මකා දමන්න';
 
   @override

@@ -159,12 +159,12 @@ class MainLayout extends ConsumerWidget {
                   ? Icons.account_balance_wallet_outlined
                   : (isVolunteer
                       ? Icons.group_add_outlined
-                      : Icons.volunteer_activism_outlined),
+                      : Icons.favorite_border),
             ),
             activeIcon: Icon(
               isBeneficiary
                   ? Icons.account_balance_wallet
-                  : (isVolunteer ? Icons.group_add : Icons.volunteer_activism),
+                  : (isVolunteer ? Icons.group_add : Icons.favorite),
               color: AppColors.primaryBlue,
             ),
             label: '',

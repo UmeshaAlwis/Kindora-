@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/supabase_models.dart';
 import '../../../providers/supabase_providers.dart';
+import 'package:kindora/features/notifications/widgets/notification_bell_button.dart';
 
 class BeneficiaryDashboardScreen extends ConsumerWidget {
   const BeneficiaryDashboardScreen({super.key});
@@ -24,6 +25,9 @@ class BeneficiaryDashboardScreen extends ConsumerWidget {
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
+        actions: const [
+          NotificationBellButton(),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

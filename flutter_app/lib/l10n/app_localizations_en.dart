@@ -42,6 +42,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePassword => 'Change Password';
 
   @override
+  String get currentPasswordLabel => 'Current password';
+
+  @override
+  String get newPasswordLabel => 'New password';
+
+  @override
+  String get confirmNewPasswordLabel => 'Confirm new password';
+
+  @override
+  String get updatePasswordButton => 'Update password';
+
+  @override
+  String get passwordChangedSuccess => 'Password updated successfully.';
+
+  @override
+  String get passwordSignInNotLinked =>
+      'This account uses Google sign-in. Add or change your password from your Google account settings.';
+
+  @override
+  String get wrongCurrentPasswordError => 'Current password is incorrect.';
+
+  @override
+  String get newPasswordsDoNotMatch => 'New passwords do not match.';
+
+  @override
+  String get newPasswordTooShort =>
+      'New password must be at least 8 characters.';
+
+  @override
+  String get enterCurrentPassword => 'Enter your current password.';
+
+  @override
   String get deleteAccount => 'Delete Account';
 
   @override

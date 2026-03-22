@@ -42,6 +42,38 @@ class AppLocalizationsTa extends AppLocalizations {
   String get changePassword => 'கடவுச்சொல்லை மாற்று';
 
   @override
+  String get currentPasswordLabel => 'தற்போதைய கடவுச்சொல்';
+
+  @override
+  String get newPasswordLabel => 'புதிய கடவுச்சொல்';
+
+  @override
+  String get confirmNewPasswordLabel => 'புதிய கடவுச்சொல்லை உறுதிப்படுத்து';
+
+  @override
+  String get updatePasswordButton => 'கடவுச்சொல்லை புதுப்பி';
+
+  @override
+  String get passwordChangedSuccess => 'கடவுச்சொல் வெற்றிகரமாக புதுப்பிக்கப்பட்டது.';
+
+  @override
+  String get passwordSignInNotLinked =>
+      'இந்தக் கணக்கு Google உள்நுழைவைப் பயன்படுத்துகிறது. கடவுச்சொல்லை Google கணக்கு அமைப்புகளில் மாற்றவும்.';
+
+  @override
+  String get wrongCurrentPasswordError => 'தற்போதைய கடவுச்சொல் தவறானது.';
+
+  @override
+  String get newPasswordsDoNotMatch => 'புதிய கடவுச்சொற்கள் பொருந்தவில்லை.';
+
+  @override
+  String get newPasswordTooShort =>
+      'புதிய கடவுச்சொல் குறைந்தது 8 எழுத்துகள் இருக்க வேண்டும்.';
+
+  @override
+  String get enterCurrentPassword => 'தற்போதைய கடவுச்சொல்லை உள்ளிடவும்.';
+
+  @override
   String get deleteAccount => 'கணக்கை நீக்கு';
 
   @override

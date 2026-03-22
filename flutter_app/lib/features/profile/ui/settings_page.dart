@@ -1,5 +1,6 @@
 import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -124,12 +125,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settings),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
       ),
@@ -204,12 +214,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 icon: Icons.lock,
                 title: l10n.changePassword,
                 subtitle: '',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Change Password - Coming Soon')),
-                  );
-                },
+                onTap: () => context.push('/profile/change-password'),
                 showArrow: true,
               ),
               _buildDivider(),
@@ -239,12 +244,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 icon: Icons.shield,
                 title: l10n.privacyPolicy,
                 subtitle: '',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Privacy Policy - Coming Soon')),
-                  );
-                },
+                onTap: () => context.push('/profile/legal/privacy'),
                 showArrow: true,
               ),
               _buildDivider(),
@@ -252,12 +252,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 icon: Icons.description,
                 title: l10n.termsConditions,
                 subtitle: '',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Terms & Conditions - Coming Soon')),
-                  );
-                },
+                onTap: () => context.push('/profile/legal/terms'),
                 showArrow: true,
               ),
               const SizedBox(height: 32),
