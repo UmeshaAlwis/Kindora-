@@ -326,6 +326,37 @@ abstract class AppLocalizations {
   String get achievements;
   String get loading;
   String get noBadgesYet;
+
+  /// Donor role label (assistant / UI).
+  String get roleDonor;
+
+  /// Beneficiary role label.
+  String get roleBeneficiary;
+
+  /// Volunteer role label.
+  String get roleVolunteer;
+
+  /// Chat assistant title.
+  String get kindoraAssistant;
+
+  /// Tagline under title (navigate or ask).
+  String get assistantNavigateOrAsk;
+
+  String get chatHowCanWeHelp;
+
+  String get chatTypeYourMessage;
+
+  /// Assistant confirmed dark theme.
+  String get chatThemeSetDark;
+
+  /// Assistant confirmed light theme.
+  String get chatThemeSetLight;
+
+  /// Assistant confirmed language; [languageName] is native display name.
+  String chatLanguageSet(String languageName);
+
+  /// Empty chat hint; [roleLabel] is localized role name.
+  String chatEmptyNavigationHint(String roleLabel);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

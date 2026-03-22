@@ -258,4 +258,42 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get noBadgesYet => 'இன்னும் பதக்கங்கள் இல்லை';
+
+  @override
+  String get roleDonor => 'நன்கொடையாளர்';
+
+  @override
+  String get roleBeneficiary => 'பயனாளி';
+
+  @override
+  String get roleVolunteer => 'தன்னார்வலர்';
+
+  @override
+  String get kindoraAssistant => 'Kindora உதவியாளர்';
+
+  @override
+  String get assistantNavigateOrAsk => 'வழிசெலுத்து அல்லது கேள்';
+
+  @override
+  String get chatHowCanWeHelp => 'எப்படி உதவலாம்?';
+
+  @override
+  String get chatTypeYourMessage => 'உங்கள் செய்தியை உள்ளிடவும்...';
+
+  @override
+  String get chatThemeSetDark => 'இருண்ட பயன்முறை இயக்கத்தில் உள்ளது.';
+
+  @override
+  String get chatThemeSetLight => 'வெளிச்ச பயன்முறை இயக்கத்தில் உள்ளது.';
+
+  @override
+  String chatLanguageSet(String languageName) =>
+      'மொழி $languageName என அமைக்கப்பட்டது.';
+
+  @override
+  String chatEmptyNavigationHint(String roleLabel) =>
+      'வழிசெலுத்த அல்லது அமைப்புகளை மாற்ற செய்தி அனுப்பவும் — உதா: '
+      '“ஃபீடைத் திற”, “இருண்ட பயன்முறை”, “மொழியை தமிழுக்கு மாற்று”, '
+      'அல்லது “பணப்பைக்குச் செல்”. இலக்குகள் உங்கள் $roleLabel '
+      'கணக்கிற்கு ஏற்பவை.';
 }
