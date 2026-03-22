@@ -1,3 +1,15 @@
+String? _sanitizeRemoteUrl(dynamic value) {
+  if (value == null) return null;
+  final s = value.toString().trim();
+  if (s.isEmpty) return null;
+  // Strip accidental line breaks / whitespace from API or DB
+  final cleaned = s.replaceAll(RegExp(r'[\r\n]+'), '');
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    return null;
+  }
+  return cleaned;
+}
+
 class FeedPost {
   final String id;
   final String userId;
@@ -30,9 +42,9 @@ class FeedPost {
       id: (json['id'] ?? '').toString(),
       userId: (json['user_id'] ?? '').toString(),
       userName: (json['user_name'] ?? 'User').toString(),
-      userAvatarUrl: json['user_avatar_url']?.toString(),
+      userAvatarUrl: _sanitizeRemoteUrl(json['user_avatar_url']),
       content: (json['content'] ?? '').toString(),
-      mediaUrl: json['media_url']?.toString(),
+      mediaUrl: _sanitizeRemoteUrl(json['media_url']),
       mediaType: (json['media_type'] ?? 'none').toString(),
       likesCount: (json['likes_count'] ?? 0) is int
           ? (json['likes_count'] ?? 0) as int

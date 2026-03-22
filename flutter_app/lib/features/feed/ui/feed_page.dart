@@ -261,6 +261,32 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
+  Widget _buildAvatar(String initial, String? url) {
+    const size = 40.0;
+    if (url == null || url.isEmpty) {
+      return CircleAvatar(
+        radius: 20,
+        backgroundColor: AppColors.primaryBlue,
+        child: Text(initial, style: const TextStyle(color: Colors.white)),
+      );
+    }
+    return ClipOval(
+      child: Image.network(
+        url,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.primaryBlue,
+            child: Text(initial, style: const TextStyle(color: Colors.white)),
+          );
+        },
+      ),
+    );
+  }
+
   String _timeAgo(DateTime time) {
     final diff = DateTime.now().difference(time);
     if (diff.inMinutes < 1) return 'just now';
@@ -336,14 +362,7 @@ class _FeedPageState extends State<FeedPage> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primaryBlue,
-                  backgroundImage:
-                      post.userAvatarUrl != null ? NetworkImage(post.userAvatarUrl!) : null,
-                  child: post.userAvatarUrl == null
-                      ? Text(first, style: const TextStyle(color: Colors.white))
-                      : null,
-                ),
+                _buildAvatar(first, post.userAvatarUrl),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -371,7 +390,42 @@ class _FeedPageState extends State<FeedPage> {
               if (post.mediaType == 'image')
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(post.mediaUrl!, fit: BoxFit.cover),
+                  child: Image.network(
+                    post.mediaUrl!,
+                    fit: BoxFit.cover,
+                    headers: const {'Accept': 'image/*'},
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: progress.expectedTotalBytes != null
+                                ? progress.cumulativeBytesLoaded /
+                                    progress.expectedTotalBytes!
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 160,
+                        alignment: Alignment.center,
+                        color: Colors.grey.shade200,
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          'Could not load image.\n'
+                          'If you use the Android emulator, check internet/DNS (open a site in the emulator browser).',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 )
               else
                 InkWell(
