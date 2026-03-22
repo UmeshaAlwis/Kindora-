@@ -417,7 +417,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     : FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          'Buy Now  Rs.${_total.toStringAsFixed(0)}',
+                          'Buy Now  LKR ${_total.toStringAsFixed(0)}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,

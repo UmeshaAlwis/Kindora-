@@ -294,7 +294,7 @@ export class DonationController {
 
       const paymentResult = await StripeService.createPaymentIntent({
         amount: amountInCents,
-        currency: 'USD', // Change to your currency
+        currency: 'lkr',
         description: `Donation to campaign: ${campaign_id}`,
         customerEmail: donor_email,
         customerName: donor_name || 'Anonymous',

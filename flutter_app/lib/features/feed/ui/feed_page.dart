@@ -52,7 +52,11 @@ class _FeedPageState extends State<FeedPage> {
     String selectedMediaType = 'none';
     bool posting = false;
 
-    await showModalBottomSheet<void>(
+    // Pop with `true` on success so this future completes *before* we reload the
+    // feed. Otherwise the sheet route finishes while submitPost is still inside
+    // `await _loadFeed()`, and textController.dispose() runs concurrently —
+    // that can trigger framework.dart `_dependents.isEmpty` during teardown.
+    final created = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -84,7 +88,7 @@ class _FeedPageState extends State<FeedPage> {
             Future<void> submitPost() async {
               if (posting) return;
               final text = textController.text.trim();
-              bool sheetClosed = false;
+              bool success = false;
               if (text.isEmpty && selectedMedia == null) {
                 ScaffoldMessenger.of(sheetContext).showSnackBar(
                   const SnackBar(content: Text('Write something or add media')),
@@ -105,17 +109,16 @@ class _FeedPageState extends State<FeedPage> {
                   mediaType: selectedMedia == null ? 'none' : selectedMediaType,
                 );
 
-                if (!mounted) return;
-                sheetClosed = true;
-                Navigator.pop(sheetContext);
-                await _loadFeed();
+                if (!sheetContext.mounted) return;
+                success = true;
+                Navigator.pop(sheetContext, true);
               } catch (e) {
-                if (!mounted) return;
+                if (!sheetContext.mounted) return;
                 ScaffoldMessenger.of(sheetContext).showSnackBar(
                   SnackBar(content: Text('Failed to create post: $e')),
                 );
               } finally {
-                if (mounted && !sheetClosed) {
+                if (sheetContext.mounted && !success) {
                   setSheetState(() => posting = false);
                 }
               }
@@ -241,6 +244,9 @@ class _FeedPageState extends State<FeedPage> {
       },
     );
     textController.dispose();
+    if (created == true && mounted) {
+      await _loadFeed();
+    }
   }
 
   Future<void> _toggleLike(FeedPost post) async {

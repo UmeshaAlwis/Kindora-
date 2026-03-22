@@ -168,7 +168,7 @@ class Donation extends Equatable {
     this.userId,
     this.charityId,
     required this.amount,
-    this.currency = 'USD',
+    this.currency = 'LKR',
     this.paymentMethod,
     this.status = 'pending',
     required this.createdAt,
@@ -183,7 +183,7 @@ class Donation extends Equatable {
       amount: json['amount'] != null
           ? double.tryParse(json['amount'].toString()) ?? 0
           : 0,
-      currency: json['currency'] ?? 'USD',
+      currency: json['currency'] ?? 'LKR',
       paymentMethod: json['payment_method'],
       status: json['status'] ?? 'pending',
       createdAt: json['created_at'] != null

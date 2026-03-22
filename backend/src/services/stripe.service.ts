@@ -4,7 +4,7 @@ import Logger from '../utils/logger';
 const logger = new Logger('StripeService');
 
 export interface StripePaymentRequest {
-  amount: number; // in smallest currency unit (cents for USD)
+  amount: number; // smallest currency unit (e.g. cents for LKR/USD)
   currency: string;
   description: string;
   customerEmail: string;
