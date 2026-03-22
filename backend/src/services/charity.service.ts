@@ -1,5 +1,14 @@
+import type { Knex } from 'knex';
 import { getDatabase } from './database.service';
 import { v4 as uuidv4 } from 'uuid';
+
+function requireDb(): Knex {
+  const db = getDatabase();
+  if (db === null) {
+    throw new Error('Database is not initialized');
+  }
+  return db;
+}
 
 export class CharityService {
   /**
@@ -14,7 +23,7 @@ export class CharityService {
       searchQuery?: string;
     } = {}
   ) {
-    const db = getDatabase();
+    const db = requireDb();
     let query = db('charities');
 
     if (filters.status) {
@@ -27,7 +36,8 @@ export class CharityService {
       query = query.where('name', 'ilike', `%${filters.searchQuery}%`);
     }
 
-    const total = await query.clone().count('* as count').first();
+    const totalRow = await query.clone().count('* as count').first();
+    const totalCount = Number(totalRow?.count ?? 0) || 0;
     const charities = await query
       .offset((page - 1) * limit)
       .limit(limit)
@@ -35,10 +45,10 @@ export class CharityService {
 
     return {
       charities,
-      total: total?.count || 0,
+      total: totalCount,
       page,
       limit,
-      pages: Math.ceil((total?.count || 0) / limit),
+      pages: limit > 0 ? Math.ceil(totalCount / limit) : 0,
     };
   }
 
@@ -46,7 +56,7 @@ export class CharityService {
    * Get charity by ID
    */
   static async getCharityById(charityId: string) {
-    const db = getDatabase();
+    const db = requireDb();
     const charity = await db('charities')
       .where('charity_id', charityId)
       .first();
@@ -84,7 +94,7 @@ export class CharityService {
    * Register charity
    */
   static async registerCharity(userId: string, data: any) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const charity = await db('charities')
       .insert({
@@ -110,7 +120,7 @@ export class CharityService {
    * Update charity profile
    */
   static async updateCharityProfile(charityId: string, data: any) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const charity = await db('charities')
       .where('charity_id', charityId)
@@ -127,7 +137,7 @@ export class CharityService {
    * Verify charity (admin action)
    */
   static async verifyCharity(charityId: string, adminId: string, notes?: string) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const charity = await db('charities')
       .where('charity_id', charityId)
@@ -148,7 +158,7 @@ export class CharityService {
    * Reject charity (admin action)
    */
   static async rejectCharity(charityId: string, adminId: string, reason: string) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const charity = await db('charities')
       .where('charity_id', charityId)
@@ -169,7 +179,7 @@ export class CharityService {
    * Get charity statistics
    */
   static async getCharityStats(charityId: string) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const donationStats = await db('donations')
       .join('campaigns', 'donations.campaign_id', 'campaigns.campaign_id')
@@ -203,7 +213,7 @@ export class CharityService {
    * Get top charities by donations
    */
   static async getTopCharities(limit: number = 20) {
-    const db = getDatabase();
+    const db = requireDb();
 
     return await db('charities')
       .where('verification_status', 'verified')
@@ -216,7 +226,7 @@ export class CharityService {
    * Add impact story
    */
   static async addImpactStory(charityId: string, story: string, imageUrl?: string) {
-    const db = getDatabase();
+    const db = requireDb();
 
     const charity = await db('charities')
       .where('charity_id', charityId)

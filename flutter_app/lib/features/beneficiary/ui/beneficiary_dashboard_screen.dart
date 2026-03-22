@@ -481,7 +481,7 @@ class _CampaignCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '\$${campaign.raisedAmount.toStringAsFixed(2)}',
+                            'LKR ${campaign.raisedAmount.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -501,7 +501,7 @@ class _CampaignCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '\$${campaign.targetAmount.toStringAsFixed(2)}',
+                            'LKR ${campaign.targetAmount.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,

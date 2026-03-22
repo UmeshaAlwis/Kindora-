@@ -450,7 +450,7 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
                     flex: 2,
                     child: DropdownButtonFormField<String>(
                       initialValue: "LKR",
-                      items: ["LKR", "USD"]
+                      items: ["LKR"]
                           .map((e) => DropdownMenuItem(
                                 value: e,
                                 child: Text(e),

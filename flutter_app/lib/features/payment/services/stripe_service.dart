@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:kindora/config/app_env.dart';
+import 'package:kindora/services/api_dio.dart';
 
 class StripeService {
   late final String _stripeCreateIntentUrl;
@@ -11,7 +12,7 @@ class StripeService {
     _stripeConfirmPaymentUrl = AppEnv.stripeConfirmPaymentUrl;
   }
 
-  final Dio _dio = Dio();
+  final Dio _dio = createApiDio();
 
   /// Creates a payment intent on the backend
   Future<Map<String, dynamic>> createPaymentIntent({

@@ -369,7 +369,7 @@ class _BeneficiaryCampaignDetailScreenState
                                             ),
                                           ),
                                           Text(
-                                            '\$${campaign.raisedAmount.toStringAsFixed(2)}',
+                                            'LKR ${campaign.raisedAmount.toStringAsFixed(2)}',
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -407,7 +407,7 @@ class _BeneficiaryCampaignDetailScreenState
                                             )
                                           else
                                             Text(
-                                              '\$${campaign.targetAmount.toStringAsFixed(2)}',
+                                              'LKR ${campaign.targetAmount.toStringAsFixed(2)}',
                                               style: const TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,

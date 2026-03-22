@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/supabase_models.dart';
 import '../services/supabase_service.dart';
+import '../services/api_dio.dart';
 import '../config/app_env.dart';
 
 class CampaignRepository {
@@ -15,7 +16,7 @@ class CampaignRepository {
   Future<List<Campaign>> getAllCampaigns() async {
     try {
       print('[CampaignRepository] Fetching campaigns from backend API...');
-      final dio = Dio();
+      final dio = createApiDio();
       final apiUrl = '${AppEnv.apiBaseUrl}/campaigns';
       print('[CampaignRepository] API URL: $apiUrl');
 
@@ -52,7 +53,7 @@ class CampaignRepository {
   /// Fetch urgent campaigns (closest end date first)
   Future<List<Campaign>> getUrgentCampaigns({int limit = 10}) async {
     try {
-      final dio = Dio();
+      final dio = createApiDio();
       final apiUrl = '${AppEnv.apiBaseUrl}/campaigns?limit=50&sortBy=ending_soon';
 
       final response = await dio.get(
@@ -128,7 +129,7 @@ class CampaignRepository {
     DateTime? endDate,
   }) async {
     try {
-      final dio = Dio();
+      final dio = createApiDio();
       final apiUrl = '${AppEnv.apiBaseUrl}/campaigns';
       print('[CampaignRepository] Creating campaign at: $apiUrl');
 
@@ -388,7 +389,7 @@ class DonationRepository {
     String? userId,
     String? charityId,
     required double amount,
-    String currency = 'USD',
+    String currency = 'LKR',
     String? paymentMethod,
     String status = 'pending',
   }) async {
@@ -639,7 +640,7 @@ class BeneficiaryCampaignRepository {
   Future<List<BeneficiaryCampaign>> getAllBeneficiaryCampaigns() async {
     try {
       // Use backend endpoint so admin deletions/status changes are respected consistently.
-      final dio = Dio();
+      final dio = createApiDio();
       final response = await dio.get(
         '${AppEnv.apiBaseUrl}/beneficiary/campaigns/all?status=active&limit=100',
         options: Options(
