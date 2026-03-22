@@ -1,3 +1,4 @@
+import 'package:kindora/config/app_env.dart';
 import 'package:kindora/config/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -87,9 +88,8 @@ class _StartCampaignPageState extends ConsumerState<StartCampaignPage> {
 
       final idToken = await firebaseUser.getIdToken();
 
-      // Create multipart request
-      const String apiBaseUrl = 'http://10.0.2.2:5001/api';
-      final uri = Uri.parse('$apiBaseUrl/storage/upload');
+      // Create multipart request (uses platform-correct host via [AppEnv])
+      final uri = Uri.parse('${AppEnv.apiBaseUrl}/storage/upload');
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $idToken'
