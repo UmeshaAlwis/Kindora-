@@ -247,31 +247,6 @@ class NavigationAgent {
     ),
   ];
 
-  /// Suggested quick actions for empty state (role-specific).
-  static List<({String label, String examplePhrase})> quickPhrases(
-      KindoraAppRole role) {
-    return switch (role) {
-      KindoraAppRole.donor => [
-        (label: 'Home', examplePhrase: 'Open home'),
-        (label: 'Feed', examplePhrase: 'Open feed'),
-        (label: 'Shop', examplePhrase: 'Open shop'),
-        (label: 'Campaigns', examplePhrase: 'Open campaigns'),
-      ],
-      KindoraAppRole.beneficiary => [
-        (label: 'Dashboard', examplePhrase: 'Open dashboard'),
-        (label: 'Wallet', examplePhrase: 'Open wallet'),
-        (label: 'Create campaign', examplePhrase: 'Create campaign'),
-        (label: 'Messages', examplePhrase: 'Open messages'),
-      ],
-      KindoraAppRole.volunteer => [
-        (label: 'Dashboard', examplePhrase: 'Open dashboard'),
-        (label: 'Joined', examplePhrase: 'Open joined campaigns'),
-        (label: 'Feed', examplePhrase: 'Open feed'),
-        (label: 'Profile', examplePhrase: 'Open profile'),
-      ],
-    };
-  }
-
   static NavigationResult resolve(String raw, KindoraAppRole role) {
     final text = raw.toLowerCase().trim();
     if (text.isEmpty) return const NavigationForwardToChat();

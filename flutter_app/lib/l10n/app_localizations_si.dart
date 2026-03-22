@@ -258,4 +258,41 @@ class AppLocalizationsSi extends AppLocalizations {
 
   @override
   String get noBadgesYet => 'තව බැජ් නැත';
+
+  @override
+  String get roleDonor => 'දායක';
+
+  @override
+  String get roleBeneficiary => 'ලාභ ලබන්නා';
+
+  @override
+  String get roleVolunteer => 'ස්වේච්ඡා සේවක';
+
+  @override
+  String get kindoraAssistant => 'Kindora සහායක';
+
+  @override
+  String get assistantNavigateOrAsk => 'සංචාලනය හෝ අසන්න';
+
+  @override
+  String get chatHowCanWeHelp => 'අපට උදව් කළ හැක්කේ කෙසේද?';
+
+  @override
+  String get chatTypeYourMessage => 'ඔබේ පණිවිඩය ටයිප් කරන්න...';
+
+  @override
+  String get chatThemeSetDark => 'අඳුරු මාදිලිය සක්‍රියයි.';
+
+  @override
+  String get chatThemeSetLight => 'ආලෝක මාදිලිය සක්‍රියයි.';
+
+  @override
+  String chatLanguageSet(String languageName) =>
+      'භාෂාව $languageName ලෙස සකසා ඇත.';
+
+  @override
+  String chatEmptyNavigationHint(String roleLabel) =>
+      'සංචාලනය හෝ සැකසුම් වෙනස් කිරීමට පණිවිඩයක් යවන්න — උදා: '
+      '“ෆීඩ් අරින්න”, “අඳුරු මාදිලිය”, “භාෂාව සිංහලට මාරු කරන්න”, '
+      'හෝ “පසුම්බියට යන්න”. ස්ථාන ඔබේ $roleLabel ගිණුමට ගැලපේ.';
 }

@@ -258,4 +258,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noBadgesYet => 'No badges yet';
+
+  @override
+  String get roleDonor => 'Donor';
+
+  @override
+  String get roleBeneficiary => 'Beneficiary';
+
+  @override
+  String get roleVolunteer => 'Volunteer';
+
+  @override
+  String get kindoraAssistant => 'Kindora assistant';
+
+  @override
+  String get assistantNavigateOrAsk => 'Navigate or ask';
+
+  @override
+  String get chatHowCanWeHelp => 'How can we help?';
+
+  @override
+  String get chatTypeYourMessage => 'Type your message...';
+
+  @override
+  String get chatThemeSetDark => 'Dark mode is on.';
+
+  @override
+  String get chatThemeSetLight => 'Light mode is on.';
+
+  @override
+  String chatLanguageSet(String languageName) =>
+      'Language set to $languageName.';
+
+  @override
+  String chatEmptyNavigationHint(String roleLabel) =>
+      'Send a message to navigate or change settings — for example '
+      '“Open feed”, “Dark mode”, “Switch language to Sinhala”, or '
+      '“Go to wallet”. Destinations match your $roleLabel account.';
 }
