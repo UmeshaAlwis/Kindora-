@@ -1,0 +1,216 @@
+[33mcommit ffb6673e7b116ac2cafc5c1cf50fed2a16034e37[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmerch[m[33m, [m[1;31morigin/merch[m[33m)[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Sat Mar 28 12:24:32 2026 +0530
+
+    Remove deprecated Supabase setup and chatbot integration documentation; delete unused chat routes and quick reference guides.
+
+[33mcommit 643999cf9c0921069af888462afe31ca171a3e68[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Fri Mar 20 15:34:02 2026 +0530
+
+    feat: Enhance product and review UI with dark mode support and improved image handling
+    
+    - Updated MerchPage to use a placeholder image when product image URL is invalid or empty.
+    - Improved loading and error states for product images with dark mode compatibility.
+    - Refactored ProductDetailPage to support dark mode, including background colors and text styles.
+    - Created a new ReviewSection widget to handle customer reviews, including a dialog for writing reviews.
+    - Implemented CartProvider to manage cart state, including adding, removing, and updating items.
+    - Added total price and item count providers for cart management.
+
+[33mcommit 6a4185b6bdc5eec8091e3efe42f2bc82ec5f8d93[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Fri Mar 20 14:19:04 2026 +0530
+
+    Fix stock field mapping in Merchandise model and update database queries to use 'products' table with active filter
+
+[33mcommit f0618fd5b333f8f1b14d4b41788a66acbcd2df34[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Fri Mar 20 10:22:30 2026 +0530
+
+    Add Stripe configuration and enhance dark mode support in MerchPage
+    
+    - Introduced Stripe API URLs and publishable key in app_env.dart.
+    - Updated MerchPage to support dark mode with dynamic color adjustments for backgrounds, text, and icons.
+    - Improved user experience by ensuring visibility and accessibility in both light and dark themes.
+
+[33mcommit f64641a85f44f78ec290ff4d5050c7ec19a550ee[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:26:44 2026 +0530
+
+    chore: Update package versions in package_graph.json
+
+[33mcommit c52a439a155c5876bd01e2f1926fd882aa3e46c1[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:26:26 2026 +0530
+
+    chore: Update package versions and language versions in package_config.json
+
+[33mcommit dbdb24fcab0700ae7dfbb128579f38f70ee0905b[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:25:56 2026 +0530
+
+    chore: Update package versions and SHA256 checksums in pubspec.lock
+
+[33mcommit 6691f6306867fda05a2f5777b9545cbc6f4a7235[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:25:07 2026 +0530
+
+    chore: Update .flutter-plugins-dependencies file to reflect plugin version changes and remove unused entries
+
+[33mcommit 5d058f37460a8a566c288e6bdd2f8f2ea3caa3dc[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:23:37 2026 +0530
+
+    refactor: Simplify AppEnv configuration by removing unused Stripe keys and updating validation logic
+
+[33mcommit ad1db5ae4396b5e3d13d88e7c9490f2f0bd1c550[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:23:26 2026 +0530
+
+    fix: Enhance error handling during app initialization and improve error display
+
+[33mcommit 0d33096fca594f41b612bce074bc6d486abcb31d[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:22:53 2026 +0530
+
+    chore: Remove example environment configuration file
+
+[33mcommit 22c8567b0f88193645f9f0be2de26ca5097ce674[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Thu Mar 19 15:22:40 2026 +0530
+
+    chore: Remove example environment configuration file
+
+[33mcommit 95b90794baf3a35a8bd8f02d747bc5f434c214f2[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Mon Mar 16 12:15:04 2026 +0530
+
+    fix: Update widget properties to use const constructors for performance optimization
+
+[33mcommit b0ae92fb24e95a5cca855dcef6879029fdc445c7[m
+Author: Gowreeshan223 <sivagowree@gmail.com>
+Date:   Sat Mar 14 10:28:11 2026 +0530
+
+    feat: Add Product Detail Page with Reviews and Quantity Selector
+    
+    - Implemented ProductDetailPage to display product information, including image, description, price, stock status, and reviews.
+    - Added quantity selector functionality for adding items to the cart.
+    - Integrated loading and error states for product and review fetching.
+    - Created Merchandise and ProductReview models with necessary fields and methods.
+    - Developed MerchandiseRepository and ProductReviewRepository for data fetching and manipulation.
+    - Added new providers for merchandise and product reviews in supabase_providers.dart.
+    - Updated pubspec.lock to reflect dependency changes.
+    - Created .gitignore for React dashboard project to exclude unnecessary files.
+
+[33mcommit 0fb3297ff5ebae7f059e453ca10289bea4d928f7[m
+Merge: caffe0b6 adbb63c1
+Author: UmeshaAlwis <124307513+UmeshaAlwis@users.noreply.github.com>
+Date:   Fri Mar 13 04:43:54 2026 +0530
+
+    Merge pull request #19 from UmeshaAlwis/wallet-machanism
+    
+    Wallet topup and database recreation
+
+[33mcommit adbb63c16504255d2f838d5660264b02b93f5444[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Fri Mar 13 01:03:48 2026 +0530
+
+    Wallet topup and database recreation
+
+[33mcommit caffe0b6b4fd711943a008f58add85a084c5be4d[m
+Merge: 5755da44 0eb66f67
+Author: UmeshaAlwis <124307513+UmeshaAlwis@users.noreply.github.com>
+Date:   Thu Mar 12 23:25:57 2026 +0530
+
+    Merge pull request #18 from UmeshaAlwis/UI/Nav-enhancements
+
+[33mcommit 0eb66f67548c9e5784ad4e07c69db330eba325a8[m[33m ([m[1;31morigin/UI/Nav-enhancements[m[33m)[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Thu Mar 12 23:23:39 2026 +0530
+
+    UI/UX enhancements
+
+[33mcommit 5755da44b3d682fdb7c5495cf837b5e044c48dd5[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Thu Mar 12 22:39:05 2026 +0530
+
+    Gateway integration (#17)
+    
+    * wallet updates
+    
+    * supabase connection
+    
+    * bugs fixes
+    
+    * removed: unwanted columns
+    
+    * campaign creation
+    
+    * support campaign page database connection
+    
+    * Bug Fixes
+    
+    * Update dashboard_home.dart
+
+[33mcommit 670e54434eb14f8ca36be1843da6de309bc2f690[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Thu Mar 12 22:31:44 2026 +0530
+
+    Gateway integration (#16)
+
+[33mcommit e2525abbb37b9a4d63ee33fdedca6f9a02415b30[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Tue Mar 10 23:37:26 2026 +0530
+
+    removed: unwanted columns
+
+[33mcommit 25c4465eb2fae26ee6570f0ee4ffeddd6ea737ca[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Tue Mar 10 23:29:07 2026 +0530
+
+    bugs fixes
+
+[33mcommit 07c9bb211f905abea3cbf32b95dbfc04b913a32e[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Tue Mar 10 23:04:04 2026 +0530
+
+    supabase connection
+
+[33mcommit d4bfb098352d309276d8ce9aa62a6bcb99949802[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Tue Mar 10 20:47:20 2026 +0530
+
+    wallet updates
+
+[33mcommit d63a1305cd9dc9f6b9b8a2f3a80456087df6fdbe[m[33m ([m[1;31morigin/ai-agent-integration[m[33m)[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Sun Mar 8 18:59:11 2026 +0530
+
+    chatbot integration
+
+[33mcommit b39797ebb9431dbaf54fa149c4bff78e0c737d70[m[33m ([m[1;32mmain[m[33m)[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Sat Mar 7 22:18:31 2026 +0530
+
+    Payment integration
+
+[33mcommit 2e5ccc71c0b302228f33286a92ec9d5b70097720[m
+Merge: b06ab071 ecddf82f
+Author: UmeshaAlwis <124307513+UmeshaAlwis@users.noreply.github.com>
+Date:   Sat Mar 7 21:20:45 2026 +0530
+
+    Merge pull request #10 from UmeshaAlwis/Full-payment-process(auth,cam,pay)+donation-dashboard
+
+[33mcommit ecddf82fa86d4efb2f1f5d51a795d1bf786d2a30[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Sat Mar 7 21:10:30 2026 +0530
+
+    Resolved: Merging conflicts
+
+[33mcommit 30019d95f02aa340ee30295d058d3d4f39115330[m
+Author: shemiyan2005 <nimethshemiyan59@gmail.com>
+Date:   Fri Mar 6 20:50:49 2026 +0530
+
+    Add profile feature with provider and UI
+
+[33mcommit 8
